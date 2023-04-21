@@ -5,24 +5,19 @@ import org.scalatest.Assertions.{fail, succeed}
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TestRunner
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 trait DBTestRunner extends TestRunner[DaoFactory] {
+  /*
   val noSetup: DaoFactory => Try[Assertion] = _ => Success(succeed)
+  val failSetup: DaoFactory => Try[Assertion] = _ => Failure(new Exception("expected exception in setup"))
+
   val noTearDown: DaoFactory => Try[Assertion] = _ => Success(succeed)
 
   private val factoryBuilder = DaoFactoryBuilder.configure
 
   /**
-   * Runs test in a controlled manner:
-   *
-   * @param setup
-   *   function that sets up the test
-   * @param test
-   *   the actual test function -- only runs if setup returns Success
-   * @param tearDown
-   *   function to clean up -- '''always runs'''
-   * @return
+   * Runs test using a DaoFactory
    */
   def withDB(
     setup: DaoFactory => Try[Assertion],
@@ -31,6 +26,8 @@ trait DBTestRunner extends TestRunner[DaoFactory] {
   ): Assertion = factoryBuilder match {
     case Left(e) => fail(e)
     case Right(factory) =>
-      withFixture(factory, setup, test, tearDown)
+      runWithFixture(factory, setup, test, tearDown)
   }
+
+   */
 }

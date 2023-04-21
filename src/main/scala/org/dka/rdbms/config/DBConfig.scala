@@ -45,6 +45,8 @@ import pureconfig.generic.ProductHint
  *    i. the downside of this is complicated user management, i.e. the same user/password credentials are used for all schemas
 *     i. one user has access to multiple schemas so tests run intended for local, ''could'' run against
  *      other schemas, if the wrong schema name is used at connection time.  (I thought I ran this test 'locally' but it actually ran on qa)
+ *
+ *      when working in psql, after logging into the database, execute 'set schema 'schemaName';
  */
 
 

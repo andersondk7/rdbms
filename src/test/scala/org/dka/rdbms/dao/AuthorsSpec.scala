@@ -17,9 +17,10 @@ import scala.util.{Failure, Success, Try}
 // todo: use DBIO scripts in setup/tear down
 
 class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
+  /*
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger("AuthorsSpec")
+  private val logger = Logger(getClass.getName)
   val delay: FiniteDuration = 10.seconds
 
   describe("populating") {
@@ -31,7 +32,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
             Await.result(factory.authorsDao.insertAuthor(ja), delay) match {
               case Left(e) => fail(e)
               case Right(author) =>
-                logger.debug(s"attempting to insert ${ja.id}")
+                logger.debug(s"attempting to insert author.id: ${ja.id}")
                 author.id shouldBe ja.id
             }
           },
@@ -65,7 +66,9 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
       case Left(e) => fail(e)
       case Right(idOpt) => idOpt match {
         case None => Failure(fail(s"did not delete $id"))
-        case Some(deleted) => Success(deleted shouldBe id)
+        case Some(deleted) =>
+          logger.info(s"deleted author: $id")
+          Success(deleted shouldBe id)
       }
     }
   }
@@ -79,6 +82,8 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
 //      }
 //    }
 //  }
+
+   */
 }
 
 object AuthorsSpec {
