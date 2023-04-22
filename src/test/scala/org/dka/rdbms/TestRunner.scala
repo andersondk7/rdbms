@@ -1,6 +1,8 @@
 package org.dka.rdbms
 
 import org.scalatest.Assertion
+import cats.data.State
+import org.scalatest.Assertions.{fail, succeed}
 
 import scala.util.Try
 
@@ -22,10 +24,15 @@ object SetupResult {
   def apply(tried: Try[Unit]): SetupResult = new SetupResult(Some(tried))
 }
 
+final case class SetupException(message: String, cause: Option[Throwable] = None)
+  extends Throwable(message, cause.orNull) {}
+
 //
 // test
 //
-final case class TestResult(result: Option[Try[Assertion]]) extends RunnerStepResult[Assertion] {}
+final case class TestResult(result: Option[Try[Assertion]]) extends RunnerStepResult[Assertion] {
+  val value: Object = failure.getOrElse(succeed)
+}
 
 object TestResult {
   def apply(tested: Try[Assertion]): TestResult = {
@@ -42,6 +49,8 @@ final case class TearDownResult(override val result: Option[Try[Unit]]) extends 
 object TearDownResult {
   def apply(tried: Try[Unit]): TearDownResult = new TearDownResult(Some(tried))
 }
+final case class TearDownException(message: String, cause: Option[Throwable] = None)
+  extends Throwable(message, cause.orNull) {}
 
 final case class TestRunnerResult(
   setupResult: SetupResult,
@@ -74,8 +83,6 @@ object TestRunnerResult {
     TearDownResult(None)
   )
 }
-
-import cats.data.State
 
 trait TestRunner[F] {
 

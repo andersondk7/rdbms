@@ -1,15 +1,15 @@
 package org.dka.rdbms.dao
 
 import com.typesafe.scalalogging.Logger
+import org.dka.rdbms.TearDownException
 import org.dka.rdbms.dao.AuthorsSpec._
 import org.dka.rdbms.model.Author
-import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 // todo:  how to seed data from scripts?
 // todo: setup adds data and starts a transaction, teardown simply does a rollback???
@@ -17,7 +17,6 @@ import scala.util.{Failure, Success, Try}
 // todo: use DBIO scripts in setup/tear down
 
 class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
-  /*
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
   private val logger = Logger(getClass.getName)
@@ -25,7 +24,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   describe("populating") {
     it("should add an author") {
-      withDB(
+      val result = withDB(
         setup = noSetup,
         test = factory =>
           Try {
@@ -36,54 +35,52 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
                 author.id shouldBe ja.id
             }
           },
-        tearDown = factory => deleteAuthor(ja.id)(factory, ec).get
+        tearDown = factory => deleteAuthor(ja.id)(factory, ec)
       )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.value
     }
+
     it("should find a specific author") {
-      val x: String = "42"
-      withDB(
+      val result = withDB(
         setup = factory => loadAuthor(jm)(factory, ec),
-        test = factory => Try {
-          Await.result(factory.authorsDao.getAuthor(jm.id), delay) match {
-            case Left(e) => fail(e)
-            case Right(opt) => opt.fold(fail(s"did not find $jm"))(author => author shouldBe jm)
-          }
-        },
-        tearDown = factory => deleteAuthor(jm.id)(factory, ec).get
+        test = factory =>
+          Try {
+            Await.result(factory.authorsDao.getAuthor(jm.id), delay) match {
+              case Left(e) => fail(e)
+              case Right(opt) => opt.fold(fail(s"did not find $jm"))(author => author shouldBe jm)
+            }
+          },
+        tearDown = factory => deleteAuthor(jm.id)(factory, ec)
       )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.value
     }
+
   }
 
-  private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Assertion] = Try {
+  private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.insertAuthor(author), delay) match {
       case Left(e) => fail(e)
-      case Right(_) => succeed
+      case Right(_) => ()
     }
   }
 
-  private def deleteAuthor(id: String)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Assertion] = {
+  private def deleteAuthor(id: String)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.deleteAuthor(id), delay) match {
-      case Left(e) => fail(e)
-      case Right(idOpt) => idOpt match {
-        case None => Failure(fail(s"did not delete $id"))
-        case Some(deleted) =>
-          logger.info(s"deleted author: $id")
-          Success(deleted shouldBe id)
-      }
+      case Left(e) => TearDownException(s"could not delete author $id", Some(e))
+      case Right(idOpt) =>
+        idOpt match {
+          case None => TearDownException(s"did not find author $id to delete")
+          case Some(deleted) =>
+            logger.info(s"deleted author: $id")
+            if (deleted == id) Success()
+            else TearDownException(s"deleted wrong author, actual: $deleted, expected: $id")
+        }
     }
   }
-
-//  private def deleteAuthors(ids: Seq[String])(implicit factory: DaoFactory, ec: ExecutionContext): Try[Assertion] = {
-//    Await.result(factory.authorsDao.deleteAuthor(ids.head), delay) match {
-//      case Left(e) => fail(e)
-//      case Right(idOpt) => idOpt match {
-//        case None => Failure(fail(s"did not delete $id"))
-//        case Some(deleted) => Success(deleted shouldBe id)
-//      }
-//    }
-//  }
-
-   */
 }
 
 object AuthorsSpec {

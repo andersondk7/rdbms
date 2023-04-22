@@ -2,7 +2,7 @@ package org.dka.rdbms
 
 import com.typesafe.scalalogging.Logger
 import org.scalatest.Assertion
-import org.scalatest.Assertions.succeed
+//import org.scalatest.Assertions.succeed
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -98,7 +98,7 @@ class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
     val test3 = "setup passes, test fails, tearDown fails"
     it(test3) {
       val runResult = runWithFixture(
-        fixture = test2,
+        fixture = test3,
         setup = setupSucceeds,
         test = testFails,
         tearDown = tearDownFails
@@ -115,53 +115,56 @@ class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
 
     val test4 = "setup passes, test fails, tearDown succeeds"
     it(test4) {
-      succeed
-      //      val result: Either[Throwable, Try[Assertion]] = {
-      //        runWithFixture(
-      //          fixture = test4,
-      //          setup = setupSucceeds,
-      //          test = testFails,
-      //          tearDown = tearDownSucceeds
-      //        )
-      //      }
-      //      result match {
-      //        case Left(exception) => fail(s"expected test failure but got $exception")
-      //        case Right(assertion) => assertion shouldBe fail(testFailException)
-      //      }
+      val runResult = runWithFixture(
+        fixture = test4,
+        setup = setupSucceeds,
+        test = testFails,
+        tearDown = tearDownSucceeds
+      )
+      runResult.setupResult.wasRun shouldBe true
+      runResult.setupResult.failure shouldBe None
+
+      runResult.testResult.wasRun shouldBe true
+      runResult.testResult.result shouldBe Some(testFailure)
+
+      runResult.tearDownResult.wasRun shouldBe true
+      runResult.tearDownResult.failure shouldBe None
     }
 
     val test5 = "setup passes, test succeeds, tearDown fails"
     it(test5) {
-      succeed
-      //      val result: Either[Throwable, Try[Assertion]] = {
-      //        runWithFixture(
-      //          fixture = test5,
-      //          setup = setupSucceeds,
-      //          test = testSucceeds,
-      //          tearDown = tearDownFails
-      //        )
-      //      }
-      //      result match {
-      //        case Left(exception) => exception shouldBe tearDownException
-      //        case Right(_) => fail(s"expected tearDown but was success")
-      //      }
+      val runResult = runWithFixture(
+        fixture = test5,
+        setup = setupSucceeds,
+        test = testSucceeds,
+        tearDown = tearDownFails
+      )
+      runResult.setupResult.wasRun shouldBe true
+      runResult.setupResult.failure shouldBe None
+
+      runResult.testResult.wasRun shouldBe true
+      runResult.testResult.result shouldBe Some(Success(succeed))
+
+      runResult.tearDownResult.wasRun shouldBe true
+      runResult.tearDownResult.failure shouldBe Some(tearDownException)
     }
 
     val test6 = "setup passes, test succeeds, tearDown succeeds"
     it(test6) {
-      succeed
-      //      val result: Either[Throwable, Try[Assertion]] = {
-      //        runWithFixture(
-      //          fixture = test6,
-      //          setup = setupSucceeds,
-      //          test = testSucceeds,
-      //          tearDown = tearDownSucceeds
-      //        )
-      //      }
-      //      result match {
-      //        case Left(exception) => fail(s"expected test failure but got $exception")
-      //        case Right(assertion) => assertion shouldBe succeed
-      //      }
+      val runResult = runWithFixture(
+        fixture = test6,
+        setup = setupSucceeds,
+        test = testSucceeds,
+        tearDown = tearDownSucceeds
+      )
+      runResult.setupResult.wasRun shouldBe true
+      runResult.setupResult.failure shouldBe None
+
+      runResult.testResult.wasRun shouldBe true
+      runResult.testResult.result shouldBe Some(Success(succeed))
+
+      runResult.tearDownResult.wasRun shouldBe true
+      runResult.tearDownResult.failure shouldBe None
     }
   }
 }
