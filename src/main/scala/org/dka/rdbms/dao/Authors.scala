@@ -13,27 +13,27 @@ class Authors(db: Database) extends AuthorDao {
 
   override def insertAuthor(author: Author)(implicit ec: ExecutionContext): Future[Either[DaoException, Author]] = {
     val insertQuery: DBIO[Int] = tableQuery += author
-    db.run(insertQuery).map(c => {
-      if (c == 1) Right(author)
-      else Left(InsertException(s"could not insert $author"))
-    })
+    db.run(insertQuery)
+      .map { c =>
+        if (c == 1) Right(author)
+        else Left(InsertException(s"could not insert $author"))
+      }
   }
 
   override def insertAuthor(authors: Seq[Author])(implicit ec: ExecutionContext): Future[Either[DaoException, Int]] = {
     val insertQuery: DBIO[Option[Int]] = tableQuery ++= authors
     db.run(insertQuery).map {
       case Some(count) => Right(count)
-      case None => Left(InsertException(s"coula.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=Ad not insert ${authors.size} into authors"))
+      case None =>
+        Left(InsertException(
+          s"coula.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=Ad not insert ${authors.size} into authors"))
     }
   }
 
   override def getAuthor(id: String)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[Author]]] = {
     val query: DBIO[Option[Author]] = tableQuery.filter(_.id === id).result.map(_.headOption)
     // note this only gets the first, assume that since id is the primary key, there will only be one!
-    db.run(query).map (r => {
-      Right(r)
-
-    })  // don't know how to capture when it fails...
+    db.run(query).map(r => Right(r)) // don't know how to capture when it fails...
   }
 
   override def deleteAuthor(id: String)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[String]]] = {
@@ -62,4 +62,3 @@ class Authors(db: Database) extends AuthorDao {
   }
 
 }
-
