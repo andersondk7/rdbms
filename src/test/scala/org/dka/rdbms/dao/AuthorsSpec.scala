@@ -11,10 +11,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Success, Try}
 
-// todo:  how to seed data from scripts?
-// todo: setup adds data and starts a transaction, teardown simply does a rollback???
-// todo: teardown simply truncates table???  (only when tests are run sequentially!!)
-// todo: use DBIO scripts in setup/tear down
 
 class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
