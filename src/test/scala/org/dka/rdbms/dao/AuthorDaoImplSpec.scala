@@ -2,7 +2,7 @@ package org.dka.rdbms.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.dao.AuthorsSpec._
+import org.dka.rdbms.dao.AuthorDaoImplSpec._
 import org.dka.rdbms.model.Author
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -12,7 +12,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 
-class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
+class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
   private val logger = Logger(getClass.getName)
@@ -113,7 +113,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
   }
 }
 
-object AuthorsSpec {
+object AuthorDaoImplSpec {
 
   val jm: Author = Author("1", "Milton", "John", "555-123-4567", "Bread Street", "London", "UK", "12345")
   val ja: Author = Author("2", "Austen", "Jane", "555-234-5678", "11 Common Way", "Steventon", "UK", "23456")
@@ -122,5 +122,5 @@ object AuthorsSpec {
   val eh: Author = Author("4", "Hemmingway", "Ernest", "555-789-0123", "Oak Park", "", "IL", "60302")
 
   val multipleAuthors: Seq[Author] = Seq(jm, cd, mt)
-  val authorIds: Seq[String] = AuthorsSpec.multipleAuthors.map(_.id)
+  val authorIds: Seq[String] = AuthorDaoImplSpec.multipleAuthors.map(_.id)
 }

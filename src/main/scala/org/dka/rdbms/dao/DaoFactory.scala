@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Try} // must be kept even though intellij thinks it is unused
 
 class DaoFactory(val database: Database) {
-  val authorsDao: Authors = new Authors(database)
+  val authorsDao: AuthorDaoImpl = new AuthorDaoImpl(database)
 }
 
 object DaoFactoryBuilder {
