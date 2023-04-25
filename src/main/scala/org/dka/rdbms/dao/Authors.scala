@@ -1,53 +1,22 @@
 package org.dka.rdbms.dao
 
 import com.typesafe.scalalogging.Logger
-import org.dka.rdbms.model.{Author, AuthorDao, DaoException, DeleteException, InsertException, QueryException}
+import org.dka.rdbms.model.Author
 import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcBackend.Database
 import slick.lifted.TableQuery
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-// todo: consider separating DBIO from the actual running ...
-class Authors(db: Database) extends AuthorDao {
-  private val logger = Logger(getClass.getName)
-  private val tableQuery = TableQuery[AuthorTable]
+class Authors(override val db: Database) extends AuthorDao {
+  override val tableQuery = TableQuery[Authors.AuthorTable]
+  override val singleInsertQuery: Author =>  DBIO[Int] = author => tableQuery += author
+  override val multipleInsertQuery: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
+  override val getQuery: (String, ExecutionContext) => DBIO[Option[Author]] = (id, ec) => tableQuery.filter(_.id === id).result.map(_.headOption)(ec)
+  override val deletedQuery: String => DBIO[Int] = id => tableQuery.filter(_.id === id).delete
+}
 
-  override def insertAuthor(author: Author)(implicit ec: ExecutionContext): Future[Either[DaoException, Author]] = {
-    val insertQuery: DBIO[Int] = tableQuery += author
-    db.run(insertQuery)
-      .map { c =>
-        if (c == 1) Right(author)
-        else Left(InsertException(s"could not insert $author"))
-      }
-  }
-
-  override def insertAuthor(authors: Seq[Author])(implicit ec: ExecutionContext): Future[Either[DaoException, Int]] = {
-    val insertQuery: DBIO[Option[Int]] = tableQuery ++= authors
-    db.run(insertQuery).map {
-      case Some(count) => Right(count)
-      case None =>
-        Left(InsertException(
-          s"could not insert ${authors.size} into authors"))
-    }
-  }
-
-  override def getAuthor(id: String)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[Author]]] = {
-    val query: DBIO[Option[Author]] = tableQuery.filter(_.id === id).result.map(_.headOption)
-    // note this only gets the first, assume that since id is the primary key, there will only be one!
-    db.run(query).map(r => Right(r)) // don't know how to capture when it fails...
-  }
-
-  override def deleteAuthor(id: String)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[String]]] = {
-    logger.info(s"deleting author $id")
-    val query: DBIO[Int] = tableQuery.filter(_.id === id).delete
-    logger.info(s"db: source:  ${db.source}")
-    db.run(query).map {
-      case 0 => Right(None)
-      case x =>
-        Right(Some(id)) // again assumes that since id is the primary key, there will only be one
-    }
-  }
+object Authors {
 
   class AuthorTable(tag: Tag)
     extends Table[Author](

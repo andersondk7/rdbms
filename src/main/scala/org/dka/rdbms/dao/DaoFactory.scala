@@ -2,14 +2,14 @@ package org.dka.rdbms.dao
 
 import com.typesafe.config.ConfigFactory
 import org.dka.rdbms.config.DBConfig
-import org.dka.rdbms.model.ConfigurationException
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 import slick.jdbc.JdbcBackend.Database
 import DBConfig._
 import com.typesafe.scalalogging.Logger
 
-import scala.util.{Try, Failure} // must be kept even though intellij thinks it is unused
+import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Try} // must be kept even though intellij thinks it is unused
 
 class DaoFactory(val database: Database) {
   val authorsDao: Authors = new Authors(database)

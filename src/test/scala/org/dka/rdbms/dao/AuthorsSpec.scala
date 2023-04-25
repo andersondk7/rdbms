@@ -3,7 +3,7 @@ package org.dka.rdbms.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.dao.AuthorsSpec._
-import org.dka.rdbms.model.{Author, DaoException}
+import org.dka.rdbms.model.Author
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -24,7 +24,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
         setup = noSetup,
         test = factory =>
           Try {
-            Await.result(factory.authorsDao.insertAuthor(ja), delay) match {
+            Await.result(factory.authorsDao.insert(ja), delay) match {
               case Left(e) => fail(e)
               case Right(author) =>
                 logger.debug(s"attempting to insert author.id: ${ja.id}")
@@ -44,7 +44,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             val added = Future
-              .sequence(multipleAuthors.map(id => factory.authorsDao.insertAuthor(id)))
+              .sequence(multipleAuthors.map(id => factory.authorsDao.insert(id)))
               .map(_.partitionMap(identity))
             val (errors, _) = Await.result(added, delay)
             if (errors.nonEmpty) throw errors.head
@@ -53,7 +53,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
           },
         tearDown = factory => {
           val deleted = Future
-            .sequence(multipleAuthors.map(author => factory.authorsDao.deleteAuthor(author.id)))
+            .sequence(multipleAuthors.map(author => factory.authorsDao.delete(author.id)))
             .map(_.partitionMap(identity))
           val (errors, _) = Await.result(deleted, delay)
           if (errors.nonEmpty) throw errors.head
@@ -75,7 +75,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
         setup = factory => loadAuthor(eh)(factory, ec),
         test = factory =>
           Try {
-            Await.result(factory.authorsDao.getAuthor(eh.id), delay) match {
+            Await.result(factory.authorsDao.get(eh.id), delay) match {
               case Left(e) => fail(e)
               case Right(opt) => opt.fold(fail(s"did not find $jm"))(author => author shouldBe jm)
             }
@@ -90,7 +90,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
   }
 
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
-    Await.result(factory.authorsDao.insertAuthor(author), delay) match {
+    Await.result(factory.authorsDao.insert(author), delay) match {
       case Left(e) => fail(e)
       case Right(_) => ()
     }
@@ -99,7 +99,7 @@ class AuthorsSpec extends AnyFunSpec with DBTestRunner with Matchers {
   private def deleteAuthor(id: String)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     logger.info(s"deleteAuthor: $id")
     logger.info(s"factory: $factory")
-    Await.result(factory.authorsDao.deleteAuthor(id), delay) match {
+    Await.result(factory.authorsDao.delete(id), delay) match {
       case Left(e) => TearDownException(s"could not delete author $id", Some(e))
       case Right(idOpt) =>
         idOpt match {
