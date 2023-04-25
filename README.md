@@ -16,7 +16,7 @@ The library exposes an api consisting of data types, actions and possible except
 ## Database
 This project uses a database hosted on a postgres server.  
 
-Instructions on how to setup a local docker instance of postgres are found [here](localPosgres.md)
+Instructions on how to setup a local docker instance of postgres are found [here](localPostgres.md)
 
 Since the purpose of the project is to investigate slick and general best practices rather than database design or SQL best practices, no effort was made in database design and the sample database was copied from the book *The Practical SQL Handbook* by by Judith S. Bowman, Marcy Darnovsky, Sandra L. Emerson, ISBN: 0201703092.
 The database is called book_biz and represents a fictitious publishing company.  
