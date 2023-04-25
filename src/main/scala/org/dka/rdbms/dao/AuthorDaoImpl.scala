@@ -8,15 +8,12 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext
 
 class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, String](db) with AuthorDao {
-  private val tableQuery = TableQuery[AuthorDaoImpl.AuthorTable]
+  private val tableQuery = TableQuery[AuthorTable]
   override val singleInsertQuery: Author => DBIO[Int] = author => tableQuery += author
   override val multipleInsertQuery: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
   override val getQuery: (String, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     tableQuery.filter(_.id === id).result.map(_.headOption)(ec)
   override val deletedQuery: String => DBIO[Int] = id => tableQuery.filter(_.id === id).delete
-}
-
-object AuthorDaoImpl {
 
   private class AuthorTable(tag: Tag)
     extends Table[Author](
@@ -31,8 +28,8 @@ object AuthorDaoImpl {
     private val city = column[String]("city")
     private val state = column[String]("state")
     private val zip = column[String]("zip")
+
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, au_lname, au_fname, phone, address, city, state, zip) <> (Author.tupled, Author.unapply)
   }
-
 }

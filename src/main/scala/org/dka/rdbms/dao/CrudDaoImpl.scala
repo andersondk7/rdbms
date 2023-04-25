@@ -7,7 +7,7 @@ import slick.jdbc.JdbcBackend.Database
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * Implimentation of a CrudDao using an instance of the database
+ * Implementation of a CrudDao using an instance of the database
  * @param db
  *   database on which actions are run
  * @tparam D
