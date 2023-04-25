@@ -16,15 +16,14 @@ The library exposes an api consisting of data types, actions and possible except
 ## Database
 This project uses a database hosted on a postgres server.  
 
-Instructions on how to setup a local docker instance of postgres are found [here](localPostgres.md)
+Instructions on how to set up a local docker instance of postgres are found [here](localPostgres.md)
 
-Since the purpose of the project is to investigate slick and general best practices rather than database design or SQL best practices, no effort was made in database design and the sample database was copied from the book *The Practical SQL Handbook* by by Judith S. Bowman, Marcy Darnovsky, Sandra L. Emerson, ISBN: 0201703092.
+Since the purpose of the project is to investigate slick and general best practices rather than database design or SQL best practices, no effort was made in database design and the sample database was copied from the book *The Practical SQL Handbook* by Judith S. Bowman, Marcy Darnovsky, Sandra L. Emerson, ISBN: 0201703092.
 The database is called book_biz and represents a fictitious publishing company.  
-
 
 ### Environment
 The following environment variables are required:
-- *BZ_USER* -- the user name for access to the book_biz database
+- *BZ_USER* -- the username for access to the book_biz database
 - *BZ_PASSWORD* -- the password for access to the book_biz database
 - *BZ_SCHEMA* -- the schema in the book_biz database
 
@@ -34,7 +33,14 @@ this schema is typically:
 - *qa* for separate qa testing
 - *prod* for production deployments
 
+## Usage
+The consumer of the library must:
+1. configure the library with an application.conf.  
+   2. see [example](src/test/resources/application.conf)
+3. on startup create an instance of DaoFactory by calling DaoFactoryBuilder.configure.  If the result is a Left[ConfigurationException] then there you can't continue.  If it is a Right[DaoFactory] then use this to access the different dao classes to interact with the database
+4. on shutdown call DaoFactoryBuilder.shutdown with the DaoFactory.database to clean up 
+
 ## Release Steps
-This project is based on the git-flow pattern described by [Atlassia](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
+This project is based on the git-flow pattern described by [Atlassian](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
 
 Specific steps are detailed [here](release.md)

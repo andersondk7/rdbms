@@ -7,7 +7,9 @@ import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 import slick.jdbc.JdbcBackend.Database
 import DBConfig._
-import com.typesafe.scalalogging.Logger // must be kept even though intellij thinks it is unused
+import com.typesafe.scalalogging.Logger
+
+import scala.util.{Try, Failure} // must be kept even though intellij thinks it is unused
 
 class DaoFactory(val database: Database) {
   val authorsDao: Authors = new Authors(database)
@@ -36,6 +38,12 @@ object DaoFactoryBuilder {
     } catch {
       case t: Throwable => Left(ConfigurationException(List(t.getMessage)))
     }
+  }
+
+  def shutdown(database: Database): Try[Unit] = Try {
+    database.close()
+  }.recoverWith {
+    case t: Throwable => Failure(ConfigurationException(List(t.getMessage), Some(t)))
   }
 
 }
