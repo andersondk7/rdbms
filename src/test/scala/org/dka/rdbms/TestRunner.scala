@@ -61,17 +61,14 @@ final case class TestRunnerResult(
   val shouldCheck: Boolean = setupGood && tearDownGood
 
   def +(setup: SetupResult): TestRunnerResult = {
-    println(s"**** dka: adding: ${setup.failure}")
     this.copy(setupResult = setup)
   }
 
   def +(test: TestResult): TestRunnerResult = {
-    println(s"**** dka: adding: ${test.wasRun}")
     this.copy(testResult = test)
   }
 
   def +(tearDown: TearDownResult): TestRunnerResult = {
-    println(s"**** dka: adding: ${tearDown.failure}")
     this.copy(tearDownResult = tearDown)
   }
 }
