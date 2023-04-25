@@ -22,8 +22,7 @@ trait DBTestRunner extends TestRunner[DaoFactory] {
     tearDown: DaoFactory => Try[Unit]
   ): TestRunnerResult = factoryBuilder match {
     case Left(e) => fail(e)
-    case Right(factory) =>
-      runWithFixture(factory, setup, test, tearDown)
+    case Right(factory) => runWithFixture(factory, setup, test, tearDown)
   }
 
 }

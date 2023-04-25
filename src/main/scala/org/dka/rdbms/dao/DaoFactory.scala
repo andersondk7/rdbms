@@ -9,16 +9,15 @@ import slick.jdbc.JdbcBackend.Database
 import DBConfig._
 import com.typesafe.scalalogging.Logger // must be kept even though intellij thinks it is unused
 
-class DaoFactory(private val database: Database) {
-
+class DaoFactory(val database: Database) {
   val authorsDao: Authors = new Authors(database)
-
 }
 
 object DaoFactoryBuilder {
   private val logger = Logger(getClass.getName)
   lazy val configure: Either[ConfigurationException, DaoFactory] = {
-    try
+    try {
+      logger.info(s"loading configure")
       ConfigSource
         .fromConfig(
           ConfigFactory.load().getConfig("DBConfig") // just want this piece of the config file
@@ -30,10 +29,13 @@ object DaoFactoryBuilder {
           logger.info(s"config: $config")
           logger.info(s"url: ${config.url}")
           // todo enable connection pool, compare this code with Database.forConfig()
-          new DaoFactory(Database.forURL(config.url))
+          val factory = new DaoFactory(Database.forURL(config.url))
+          logger.info(s"got factory")
+          factory
         }
-    catch {
+    } catch {
       case t: Throwable => Left(ConfigurationException(List(t.getMessage)))
     }
   }
+
 }

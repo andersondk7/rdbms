@@ -1,5 +1,6 @@
 package org.dka.rdbms.dao
 
+import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.model.{Author, AuthorDao, DaoException, DeleteException, InsertException, QueryException}
 import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcBackend.Database
@@ -9,6 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // todo: consider separating DBIO from the actual running ...
 class Authors(db: Database) extends AuthorDao {
+  private val logger = Logger(getClass.getName)
   private val tableQuery = TableQuery[AuthorTable]
 
   override def insertAuthor(author: Author)(implicit ec: ExecutionContext): Future[Either[DaoException, Author]] = {
@@ -26,7 +28,7 @@ class Authors(db: Database) extends AuthorDao {
       case Some(count) => Right(count)
       case None =>
         Left(InsertException(
-          s"coula.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=Ad not insert ${authors.size} into authors"))
+          s"could not insert ${authors.size} into authors"))
     }
   }
 
@@ -37,10 +39,13 @@ class Authors(db: Database) extends AuthorDao {
   }
 
   override def deleteAuthor(id: String)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[String]]] = {
+    logger.info(s"deleting author $id")
     val query: DBIO[Int] = tableQuery.filter(_.id === id).delete
+    logger.info(s"db: source:  ${db.source}")
     db.run(query).map {
       case 0 => Right(None)
-      case _ => Right(Some(id)) // again assumes that since id is the primary key, there will only be one
+      case x =>
+        Right(Some(id)) // again assumes that since id is the primary key, there will only be one
     }
   }
 
