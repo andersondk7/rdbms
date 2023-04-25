@@ -11,7 +11,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
-
 class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
@@ -31,8 +30,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
                 author.id shouldBe ja.id
             }
           },
-        tearDown = factory =>  deleteAuthor(ja.id)(factory, ec)
-
+        tearDown = factory => deleteAuthor(ja.id)(factory, ec)
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
@@ -48,7 +46,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
               .map(_.partitionMap(identity))
             val (errors, _) = Await.result(added, delay)
             if (errors.nonEmpty) throw errors.head
-              // todo, need to be able to combine errors...
+            // todo, need to be able to combine errors...
             else succeed
           },
         tearDown = factory => {

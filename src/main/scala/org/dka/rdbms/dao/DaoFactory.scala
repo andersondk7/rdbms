@@ -42,8 +42,8 @@ object DaoFactoryBuilder {
 
   def shutdown(database: Database): Try[Unit] = Try {
     database.close()
-  }.recoverWith {
-    case t: Throwable => Failure(ConfigurationException(List(t.getMessage), Some(t)))
+  }.recoverWith { case t: Throwable =>
+    Failure(ConfigurationException(List(t.getMessage), Some(t)))
   }
 
 }

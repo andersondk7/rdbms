@@ -7,11 +7,12 @@ import slick.lifted.TableQuery
 
 import scala.concurrent.ExecutionContext
 
-class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, String](db) with AuthorDao  {
+class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, String](db) with AuthorDao {
   private val tableQuery = TableQuery[AuthorDaoImpl.AuthorTable]
-  override val singleInsertQuery: Author =>  DBIO[Int] = author => tableQuery += author
+  override val singleInsertQuery: Author => DBIO[Int] = author => tableQuery += author
   override val multipleInsertQuery: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
-  override val getQuery: (String, ExecutionContext) => DBIO[Option[Author]] = (id, ec) => tableQuery.filter(_.id === id).result.map(_.headOption)(ec)
+  override val getQuery: (String, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
+    tableQuery.filter(_.id === id).result.map(_.headOption)(ec)
   override val deletedQuery: String => DBIO[Int] = id => tableQuery.filter(_.id === id).delete
 }
 
