@@ -13,13 +13,9 @@ lazy val root = project
     customSettings
   )
 
-//flywayLocations += "filesystem:./flyway/src/main/resources/db/migration"
 lazy val customSettings: Seq[Def.Setting[_]] = Seq(
   flywayUser := sys.env.getOrElse("BZ_USER", "defaultUser"),
   flywayPassword := sys.env.getOrElse("BZ_PASSWORD", "defaultPassword"),
   flywayUrl := s"jdbc:postgresql://localhost:5432/book_biz?&currentSchema=${sys.env.getOrElse("BZ_SCHEMA", "public")}"
 )
 
-//lazy val flyway = (project in file("."))
-//  .settings( customSettings )
-//  .enablePlugins(FlywayPlugin)
