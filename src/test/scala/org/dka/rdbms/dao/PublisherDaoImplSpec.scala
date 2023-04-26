@@ -113,10 +113,38 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object PublisherDaoImplSpec {
 
-  val rh: Publisher = Publisher(ID("1"), CompanyName("RandomHouse"), Address("1745 Broadway"), City("Manhattan"), State("NY"), Zip("10019"))
-  val hb: Publisher = Publisher(ID("2"), CompanyName("Hachette Book Group"), Address("1290 Sixth Ave."), City("New York"), State("NY"), Zip("10104"))
-  val hc: Publisher = Publisher(ID("3"), CompanyName("Harper Collins"), Address("195 Broadway"), City("New York"), State("NY"), Zip("10007"))
-  val ad: Publisher = Publisher(ID("4"), CompanyName("Addison-Wesley"), Address("1900 East Lake Avenue"), City("Glenview"), State("IL"), Zip("60025"))
+  val rh: Publisher = Publisher(
+    ID("1"),
+    CompanyName("RandomHouse"),
+    Some(Address("1745 Broadway")),
+    Some(City("Manhattan")),
+    Some(State("NY")),
+    Some(Zip("10019"))
+  )
+  val hb: Publisher = Publisher(
+    ID("2"),
+    CompanyName("Hachette Book Group"),
+    Some(Address("1290 Sixth Ave.")),
+    Some(City("New York")),
+    Some(State("NY")),
+    Some(Zip("10104"))
+  )
+  val hc: Publisher = Publisher(
+    ID("3"),
+    CompanyName("Harper Collins"),
+    Some(Address("195 Broadway")),
+    Some(City("New York")),
+    Some(State("NY")),
+    Some(Zip("10007"))
+  )
+  val ad: Publisher = Publisher(
+    ID("4"),
+    CompanyName("Addison-Wesley"),
+    Some(Address("1900 East Lake Avenue")),
+    Some(City("Glenview")),
+    Some(State("IL")),
+    Some(Zip("60025"))
+  )
 
   val multiplePublishers: Seq[Publisher] = Seq(hb, hc, ad)
   val publisherIds: Seq[ID] = PublisherDaoImplSpec.multiplePublishers.map(_.id)

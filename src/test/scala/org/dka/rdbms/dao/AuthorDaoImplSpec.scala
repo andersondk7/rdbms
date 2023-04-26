@@ -113,11 +113,56 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object AuthorDaoImplSpec {
 
-  val jm: Author = Author(ID("1"), LastName("Milton"), FirstName("John"), Phone("555-123-4567"), Address("Bread Street"), City("London"), State("UK"), Zip("12345"))
-  val ja: Author = Author(ID("2"), LastName("Austen"), FirstName("Jane"), Phone("555-234-5678"), Address("11 Common Way"), City("Steventon"), State("UK"), Zip("23456"))
-  val cd: Author = Author(ID("3"), LastName("Dickens"), FirstName("Charles"), Phone("555-345-6789"), Address("Landport"), City("Portsmouth"), State("UK"), Zip("34567"))
-  val mt: Author = Author(ID("4"), LastName("Twain"), FirstName("Mark"), Phone("555-456-7890"), Address(""), City("Hannibal"),  State("MO"), Zip("45678"))
-  val eh: Author = Author(ID("5"), LastName("Hemmingway"), FirstName("Ernest"), Phone("555-789-0123"), Address(""), City("Oak Park"), State("IL"), Zip("60302"))
+  val jm: Author = Author(
+    ID("1"),
+    LastName("Milton"),
+    FirstName("John"),
+    None,
+    Some(Address("Bread Street")),
+    Some(City("London")),
+    Some(State("UK")),
+    Some(Zip("12345"))
+  )
+  val ja: Author = Author(
+    ID("2"),
+    LastName("Austen"),
+    FirstName("Jane"),
+    None,
+    Some(Address("11 Common Way")),
+    Some(City("Steventon")),
+    None,
+    None
+  )
+  val cd: Author = Author(
+    ID("3"),
+    LastName("Dickens"),
+    FirstName("Charles"),
+    Some(Phone("555-345-6789")),
+    Some(Address("Landport")),
+    Some(City("Portsmouth")),
+    Some(State("UK")),
+    None
+  )
+  val mt: Author = Author(
+    ID("4"),
+    LastName("Twain"),
+    FirstName("Mark"),
+    None,
+    None,
+    Some(City("Hannibal")),
+    Some(State("MO")),
+    Some(Zip("45678"))
+  )
+  val eh: Author = Author(
+    ID("5"),
+    LastName("Hemmingway"),
+    FirstName("Ernest"),
+    Some(Phone("555-789-0123")),
+    None,
+    Some(City("Oak Park")),
+    Some(State("IL")),
+    Some(Zip("60302"))
+  )
 
   val multipleAuthors: Seq[Author] = Seq(jm, cd, mt)
   val authorIds: Seq[ID] = AuthorDaoImplSpec.multipleAuthors.map(_.id)

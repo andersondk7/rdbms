@@ -25,11 +25,11 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] w
     val id = column[String]("au_id", O.PrimaryKey) // This is the primary key column
     private val au_lname = column[String]("au_lname")
     private val au_fname = column[String]("au_fname")
-    private val phone = column[String]("phone")
-    private val address = column[String]("address")
-    private val city = column[String]("city")
-    private val state = column[String]("state")
-    private val zip = column[String]("zip")
+    private val phone = column[Option[String]]("phone")
+    private val address = column[Option[String]]("address")
+    private val city = column[Option[String]]("city")
+    private val state = column[Option[String]]("state")
+    private val zip = column[Option[String]]("zip")
 
     import AuthorDaoImpl._
     // Every table needs a * projection with the same type as the table's type parameter
@@ -43,7 +43,16 @@ object AuthorDaoImpl {
   // conversions between db and model
   // the model is type safe, the db is not
   //
-  private type AuthorTuple = (String, String, String, String, String, String, String, String)
+  private type AuthorTuple = (
+   String, // id
+   String,  // last name
+   String,  // first name
+   Option[String], // phone
+   Option[String], // address
+   Option[String], // city
+   Option[String], // state
+   Option[String] // zip
+    )
 
   def fromDB(tuple: AuthorTuple): Author = {
     val (id, lastName, firstName, phone, address, city, state, zip) = tuple
@@ -51,11 +60,11 @@ object AuthorDaoImpl {
       ID(id),
       lastName = LastName(lastName),
       firstName = FirstName(firstName),
-      phone = Phone(phone),
-      address = Address(address),
-      city = City(city),
-      state = State(state),
-      zip = Zip(zip)
+      phone = phone.map(Phone),
+      address = address.map(Address),
+      city = city.map(City),
+      state = state.map(State),
+      zip = zip.map(Zip)
     )
   }
 
@@ -63,11 +72,11 @@ object AuthorDaoImpl {
     author.id.value,
     author.lastName.value,
     author.firstName.value,
-    author.phone.value,
-    author.address.value,
-    author.city.value,
-    author.state.value,
-    author.zip.value
+    author.phone.map(_.value),
+    author.address.map(_.value),
+    author.city.map(_.value),
+    author.state.map(_.value),
+    author.zip.map(_.value)
   )
 
 

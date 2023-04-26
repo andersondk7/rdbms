@@ -24,10 +24,10 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher,
       "publishers") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
     private val name = column[String]("name")
-    private val address = column[String]("address")
-    private val city = column[String]("city")
-    private val state = column[String]("state")
-    private val zip = column[String]("zip")
+    private val address = column[Option[String]]("address")
+    private val city = column[Option[String]]("city")
+    private val state = column[Option[String]]("state")
+    private val zip = column[Option[String]]("zip")
 
     import PublisherDaoImpl._
     override def * = (id, name, address, city, state, zip) <> (fromDB, toDB)
@@ -40,19 +40,33 @@ object PublisherDaoImpl {
   // conversions between db and model
   // the model is type safe, the db is not
   //
-  private type PublisherTuple = (String, String, String, String, String, String)
+  private type PublisherTuple = (
+ String, // id
+ String,  // name
+ Option[String],  // address
+ Option[String], // city
+ Option[String],  // state
+ Option[String]  // zip
+    )
 
   def fromDB(tuple: PublisherTuple): Publisher = {
     val (id, name, address, city, state, zip) = tuple
-    Publisher(ID(id), CompanyName(name), Address(address), City(city), State(state), Zip(zip))
+    Publisher(
+      ID(id),
+      CompanyName(name),
+     address.map(Address),
+      city.map(City),
+      state.map(State),
+        zip.map(Zip)
+      )
   }
 
   def toDB(publisher: Publisher): Option[PublisherTuple] = Some(
     publisher.id.value,
     publisher.name.value,
-    publisher.address.value,
-    publisher.city.value,
-    publisher.state.value,
-    publisher.zip.value
+    publisher.address.map(_.value),
+    publisher.city.map(_.value),
+    publisher.state.map(_.value),
+    publisher.zip.map(_.value)
   )
 }

@@ -5,8 +5,8 @@ final case class Author(
                          id: ID,
                          lastName: LastName,
                          firstName: FirstName,
-                         phone: Phone,
-                         address: Address,
-                         city: City,
-                         state: State,
-                         zip: Zip) { }
+                         phone: Option[Phone],
+                         address: Option[Address],
+                         city: Option[City],
+                         state: Option[State],
+                         zip: Option[Zip]) { }
