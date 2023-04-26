@@ -1,4 +1,4 @@
-package org.dka.rdbms.model
+package org.dka.rdbms.dao
 
 sealed trait DaoException extends Throwable {
   val reason: String
