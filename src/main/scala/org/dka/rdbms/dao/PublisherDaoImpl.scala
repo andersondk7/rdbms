@@ -1,6 +1,6 @@
 package org.dka.rdbms.dao
 
-import org.dka.rdbms.model.{ID, Publisher, PublisherDao}
+import org.dka.rdbms.model._
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
@@ -44,15 +44,15 @@ object PublisherDaoImpl {
 
   def fromDB(tuple: PublisherTuple): Publisher = {
     val (id, name, address, city, state, zip) = tuple
-    Publisher(ID(id), name, address, city, state, zip)
+    Publisher(ID(id), CompanyName(name), Address(address), City(city), State(state), Zip(zip))
   }
 
   def toDB(publisher: Publisher): Option[PublisherTuple] = Some(
     publisher.id.value,
-    publisher.name,
-    publisher.address,
-    publisher.city,
-    publisher.state,
-    publisher.zip
+    publisher.name.value,
+    publisher.address.value,
+    publisher.city.value,
+    publisher.state.value,
+    publisher.zip.value
   )
 }
