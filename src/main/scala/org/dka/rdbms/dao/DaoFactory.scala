@@ -7,12 +7,14 @@ import pureconfig.generic.auto._
 import slick.jdbc.JdbcBackend.Database
 import DBConfig._
 import com.typesafe.scalalogging.Logger
+import org.dka.rdbms.model.{AuthorDao, PublisherDao}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Try} // must be kept even though intellij thinks it is unused
 
 class DaoFactory(val database: Database) {
-  val authorsDao: AuthorDaoImpl = new AuthorDaoImpl(database)
+  val authorsDao: AuthorDao = new AuthorDaoImpl(database)
+  val publisherDao: PublisherDao = new PublisherDaoImpl(database)
 }
 
 object DaoFactoryBuilder {

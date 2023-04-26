@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
  * @tparam D
  *   domain object stored
  * @tparam I
- *   id field of domain object
+ *   id type of domain object
  */
 abstract class CrudDaoImpl[D, I](val db: Database) extends CrudDao[D, I] {
   def singleInsertQuery: D => DBIO[Int]
@@ -21,21 +21,21 @@ abstract class CrudDaoImpl[D, I](val db: Database) extends CrudDao[D, I] {
   def getQuery: (I, ExecutionContext) => DBIO[Option[D]]
   def deletedQuery: I => DBIO[Int]
 
-  override def insert(item: D)(implicit ec: ExecutionContext): Future[Either[DaoException, D]] =
+  override def create(item: D)(implicit ec: ExecutionContext): Future[Either[DaoException, D]] =
     db.run(singleInsertQuery(item))
       .map { c: Int =>
         if (c == 1) Right(item)
-        else Left(InsertException(s"could not insert $item"))
+        else Left(InsertException(s"${item.getClass.getName}: could not insert $item"))
       }
 
-  override def insert(items: Seq[D])(implicit ec: ExecutionContext): Future[Either[DaoException, Int]] =
+  override def create(items: Seq[D])(implicit ec: ExecutionContext): Future[Either[DaoException, Int]] =
     db.run(multipleInsertQuery(items)).map {
       case Some(count) => Right(count)
       case None =>
-        Left(InsertException(s"could not insert ${items.size}"))
+        Left(InsertException(s"${items.getClass.getName} could not insert ${items.size}"))
     }
 
-  override def get(id: I)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[D]]] =
+  override def read(id: I)(implicit ec: ExecutionContext): Future[Either[DaoException, Option[D]]] =
     // note this only gets the first, assume that since id is the primary key, there will only be one!
     db.run(getQuery(id, ec)).map(r => Right(r)) // don't know how to capture when it fails...
 
