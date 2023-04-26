@@ -3,7 +3,7 @@ package org.dka.rdbms.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.dao.AuthorDaoImplSpec._
-import org.dka.rdbms.model.Author
+import org.dka.rdbms.model._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -94,7 +94,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
-  private def deleteAuthor(id: String)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
+  private def deleteAuthor(id: ID)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     logger.info(s"deleteAuthor: $id")
     logger.info(s"factory: $factory")
     Await.result(factory.authorsDao.delete(id), delay) match {
@@ -113,12 +113,12 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object AuthorDaoImplSpec {
 
-  val jm: Author = Author("1", "Milton", "John", "555-123-4567", "Bread Street", "London", "UK", "12345")
-  val ja: Author = Author("2", "Austen", "Jane", "555-234-5678", "11 Common Way", "Steventon", "UK", "23456")
-  val cd: Author = Author("3", "Dickens", "Charles", "555-345-6789", "Landport", "Portsmouth", "UK", "34567")
-  val mt: Author = Author("4", "Twain", "Mark", "555-456-7890", "Hannibal", "", "MO", "45678")
-  val eh: Author = Author("4", "Hemmingway", "Ernest", "555-789-0123", "Oak Park", "", "IL", "60302")
+  val jm: Author = Author(ID("1"), LastName("Milton"), FirstName("John"), Phone("555-123-4567"), Address("Bread Street"), City("London"), State("UK"), Zip("12345"))
+  val ja: Author = Author(ID("2"), LastName("Austen"), FirstName("Jane"), Phone("555-234-5678"), Address("11 Common Way"), City("Steventon"), State("UK"), Zip("23456"))
+  val cd: Author = Author(ID("3"), LastName("Dickens"), FirstName("Charles"), Phone("555-345-6789"), Address("Landport"), City("Portsmouth"), State("UK"), Zip("34567"))
+  val mt: Author = Author(ID("4"), LastName("Twain"), FirstName("Mark"), Phone("555-456-7890"), Address(""), City("Hannibal"),  State("MO"), Zip("45678"))
+  val eh: Author = Author(ID("5"), LastName("Hemmingway"), FirstName("Ernest"), Phone("555-789-0123"), Address(""), City("Oak Park"), State("IL"), Zip("60302"))
 
   val multipleAuthors: Seq[Author] = Seq(jm, cd, mt)
-  val authorIds: Seq[String] = AuthorDaoImplSpec.multipleAuthors.map(_.id)
+  val authorIds: Seq[ID] = AuthorDaoImplSpec.multipleAuthors.map(_.id)
 }

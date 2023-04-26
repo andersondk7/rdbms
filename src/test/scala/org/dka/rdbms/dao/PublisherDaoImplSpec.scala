@@ -3,7 +3,7 @@ package org.dka.rdbms.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.dao.PublisherDaoImplSpec._
-import org.dka.rdbms.model.Publisher
+import org.dka.rdbms.model.{ID, Publisher}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -94,7 +94,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
-  private def deletePublisher(id: String)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
+  private def deletePublisher(id: ID)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     logger.info(s"deletePublisher: $id")
     logger.info(s"factory: $factory")
     Await.result(factory.publisherDao.delete(id), delay) match {
@@ -113,11 +113,11 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object PublisherDaoImplSpec {
 
-  val rh: Publisher = Publisher("1", "RandomHouse", "1745 Broadway", "Manhattan", "NY", "10019")
-  val hb: Publisher = Publisher("2", "Hachette Book Group", "1290 Sixth Ave.", "New York", "NY", "10104")
-  val hc: Publisher = Publisher("3", "Harper Collins", "195 Broadway", "New York", "NY", "10007")
-  val ad: Publisher = Publisher("4", "Addison-Wesley", "1900 East Lake Avenue", "Glenview", "IL", "60025")
+  val rh: Publisher = Publisher(ID("1"), "RandomHouse", "1745 Broadway", "Manhattan", "NY", "10019")
+  val hb: Publisher = Publisher(ID("2"), "Hachette Book Group", "1290 Sixth Ave.", "New York", "NY", "10104")
+  val hc: Publisher = Publisher(ID("3"), "Harper Collins", "195 Broadway", "New York", "NY", "10007")
+  val ad: Publisher = Publisher(ID("4"), "Addison-Wesley", "1900 East Lake Avenue", "Glenview", "IL", "60025")
 
   val multiplePublishers: Seq[Publisher] = Seq(hb, hc, ad)
-  val publisherIds: Seq[String] = PublisherDaoImplSpec.multiplePublishers.map(_.id)
+  val publisherIds: Seq[ID] = PublisherDaoImplSpec.multiplePublishers.map(_.id)
 }

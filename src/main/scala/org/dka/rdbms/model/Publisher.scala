@@ -1,7 +1,7 @@
 package org.dka.rdbms.model
 
 final case class Publisher(
-  id: String,
+  id: ID,
   name: String,
   address: String,
   city: String,
