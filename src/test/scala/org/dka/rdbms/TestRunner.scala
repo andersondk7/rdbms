@@ -60,17 +60,14 @@ final case class TestRunnerResult(
   val tearDownGood: Boolean = tearDownResult.result.isEmpty
   val shouldCheck: Boolean = setupGood && tearDownGood
 
-  def +(setup: SetupResult): TestRunnerResult = {
+  def +(setup: SetupResult): TestRunnerResult =
     this.copy(setupResult = setup)
-  }
 
-  def +(test: TestResult): TestRunnerResult = {
+  def +(test: TestResult): TestRunnerResult =
     this.copy(testResult = test)
-  }
 
-  def +(tearDown: TearDownResult): TestRunnerResult = {
+  def +(tearDown: TearDownResult): TestRunnerResult =
     this.copy(tearDownResult = tearDown)
-  }
 }
 
 object TestRunnerResult {

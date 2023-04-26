@@ -11,16 +11,4 @@ final case class Author(
   address: String,
   city: String,
   state: String,
-  zip: String) {
-
-  def trim: Author = this.copy(
-    id.trim,
-    lastName.trim,
-    firstName.trim,
-    phone.trim,
-    address.trim,
-    city.trim,
-    state.trim,
-    zip.trim
-  )
-}
+  zip: String) { }

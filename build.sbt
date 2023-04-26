@@ -1,7 +1,7 @@
 import Dependencies._
 
 ThisBuild / organization := "org.dka"
-ThisBuild / version      := "0.1.4"
+ThisBuild / version      := "0.1.5-SNAPSHOT"
 ThisBuild / scalaVersion := "2.13.10"
 
 
