@@ -7,7 +7,7 @@ import slick.lifted.TableQuery
 
 import scala.concurrent.ExecutionContext
 
-class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher, ID](db) with PublisherDao {
+class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher, ID] with PublisherDao {
   private val tableQuery = TableQuery[PublisherTable]
   override val singleInsertQuery: Publisher => DBIO[Int] = publisher => tableQuery += publisher
   override val multipleInsertQuery: Seq[Publisher] => DBIO[Option[Int]] = publishers => tableQuery ++= publishers

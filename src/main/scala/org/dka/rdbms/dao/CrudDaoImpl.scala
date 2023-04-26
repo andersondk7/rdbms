@@ -15,7 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
  * @tparam I
  *   id type of domain object
  */
-abstract class CrudDaoImpl[D, I](val db: Database) extends CrudDao[D, I] {
+trait CrudDaoImpl[D, I] extends CrudDao[D, I] {
+  def db: Database
   def singleInsertQuery: D => DBIO[Int]
   def multipleInsertQuery: Seq[D] => DBIO[Option[Int]]
   def getQuery: (I, ExecutionContext) => DBIO[Option[D]]

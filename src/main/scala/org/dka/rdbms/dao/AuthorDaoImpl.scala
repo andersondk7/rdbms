@@ -8,7 +8,7 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
-class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID](db) with AuthorDao {
+class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] with AuthorDao {
   private val tableQuery = TableQuery[AuthorTable]
   override val singleInsertQuery: Author => DBIO[Int] = author => tableQuery += author
   override val multipleInsertQuery: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
