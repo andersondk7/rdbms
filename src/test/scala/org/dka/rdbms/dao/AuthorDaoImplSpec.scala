@@ -17,6 +17,37 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   private val logger = Logger(getClass.getName)
   val delay: FiniteDuration = 10.seconds
 
+  describe("conversion to/from db") {
+        it("should convert from domain to db") {
+          AuthorDaoImpl.toDB(mt) match {
+            case None => fail(s"could not convert $mt")
+            case Some((id, last, first, phone, address, city, state, zip)) =>
+              id shouldBe mt.id.value
+              last shouldBe mt.lastName.value
+              first shouldBe mt.firstName.value
+              phone shouldBe mt.phone.map(_.value)
+              address shouldBe mt.address.map(_.value)
+              city shouldBe mt.city.map(_.value)
+              state shouldBe mt.state.map(_.value)
+              zip shouldBe mt.zip.map(_.value)
+          }
+        }
+    it("should convert from db to domain") {
+            val db = (
+              mt.id.value,
+              mt.lastName.value,
+              mt.firstName.value,
+              mt.phone.map(_.value),
+              mt.address.map(_.value),
+              mt.city.map(_.value),
+              mt.state.map(_.value),
+              mt.zip.map(_.value)
+              )
+            val converted = AuthorDaoImpl.fromDB(db)
+            converted shouldBe mt
+    }
+  }
+
   describe("populating") {
     it("should add an author") {
       val result = withDB(
@@ -67,7 +98,6 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.tearDownResult.failure shouldBe None
       result.testResult.value
     }
-
     it("should find a specific author") {
       val result = withDB(
         setup = factory => loadAuthor(eh)(factory, ec),
@@ -84,7 +114,6 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.tearDownResult.failure shouldBe None
       result.testResult.value
     }
-
   }
 
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
@@ -164,6 +193,6 @@ object AuthorDaoImplSpec {
     Some(Zip("60302"))
   )
 
-  val multipleAuthors: Seq[Author] = Seq(jm, cd, mt)
+  val multipleAuthors: Seq[Author] = Seq(ja, jm, cd, mt)
   val authorIds: Seq[ID] = AuthorDaoImplSpec.multipleAuthors.map(_.id)
 }
