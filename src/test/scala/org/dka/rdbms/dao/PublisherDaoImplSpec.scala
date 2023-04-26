@@ -84,7 +84,33 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.tearDownResult.failure shouldBe None
       result.testResult.value
     }
+  }
 
+  describe("conversion to/from db") {
+    it("should convert from domain to db") {
+      PublisherDaoImpl.toDB(rh) match {
+        case None => fail(s"could not convert $rh")
+        case Some((id, name, address, city, state, zip)) =>
+          id shouldBe rh.id.value
+          name shouldBe rh.name.value
+          address shouldBe rh.address.map(_.value)
+          city shouldBe rh.city.map(_.value)
+          state shouldBe rh.state.map(_.value)
+          zip shouldBe rh.zip.map(_.value)
+      }
+    }
+    it("should convert from db to domain") {
+      val db = (
+        rh.id.value,
+        rh.name.value,
+        rh.address.map(_.value),
+        rh.city.map(_.value),
+        rh.state.map(_.value),
+        rh.zip.map(_.value)
+      )
+      val converted = PublisherDaoImpl.fromDB(db)
+      converted shouldBe rh
+    }
   }
 
   private def loadPublisher(publisher: Publisher)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
@@ -117,7 +143,7 @@ object PublisherDaoImplSpec {
     ID("1"),
     CompanyName("RandomHouse"),
     Some(Address("1745 Broadway")),
-    Some(City("Manhattan")),
+    None,
     Some(State("NY")),
     Some(Zip("10019"))
   )
