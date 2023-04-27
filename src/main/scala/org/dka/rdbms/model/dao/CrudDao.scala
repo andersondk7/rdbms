@@ -1,4 +1,4 @@
-package org.dka.rdbms.model
+package org.dka.rdbms.model.dao
 
 import org.dka.rdbms.dao.DaoException
 
