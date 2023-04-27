@@ -1,6 +1,7 @@
 package org.dka.rdbms.dao
 
 import org.dka.rdbms.model._
+import org.dka.rdbms.model.dao.AuthorDao
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
@@ -15,7 +16,7 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] w
   override val getQuery: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
     // the id is the model object, which is a final case class Id(...)
-    tableQuery.filter(_.id  === id.value).result.map(_.headOption)(ec)
+    tableQuery.filter(_.id === id.value).result.map(_.headOption)(ec)
   override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value).delete
   private class AuthorTable(tag: Tag)
     extends Table[Author](
@@ -44,15 +45,15 @@ object AuthorDaoImpl {
   // the model is type safe, the db is not
   //
   private type AuthorTuple = (
-   String, // id
-   String,  // last name
-   String,  // first name
-   Option[String], // phone
-   Option[String], // address
-   Option[String], // city
-   Option[String], // state
-   Option[String] // zip
-    )
+    String, // id
+    String, // last name
+    String, // first name
+    Option[String], // phone
+    Option[String], // address
+    Option[String], // city
+    Option[String], // state
+    Option[String] // zip
+  )
 
   def fromDB(tuple: AuthorTuple): Author = {
     val (id, lastName, firstName, phone, address, city, state, zip) = tuple
@@ -60,11 +61,11 @@ object AuthorDaoImpl {
       ID(id),
       lastName = LastName(lastName),
       firstName = FirstName(firstName),
-      phone = phone.map(Phone),
-      address = address.map(Address),
-      city = city.map(City),
-      state = state.map(State),
-      zip = zip.map(Zip)
+      phone = Phone(phone),
+      address = Address(address),
+      city = City(city),
+      state = State(state),
+      zip = Zip(zip)
     )
   }
 
@@ -78,6 +79,5 @@ object AuthorDaoImpl {
     author.state.map(_.value),
     author.zip.map(_.value)
   )
-
 
 }

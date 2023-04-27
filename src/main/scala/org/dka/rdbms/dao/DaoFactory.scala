@@ -7,7 +7,7 @@ import pureconfig.generic.auto._
 import slick.jdbc.JdbcBackend.Database
 import DBConfig._
 import com.typesafe.scalalogging.Logger
-import org.dka.rdbms.model.{AuthorDao, PublisherDao}
+import org.dka.rdbms.model.dao.{AuthorDao, PublisherDao}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Try} // must be kept even though intellij thinks it is unused
