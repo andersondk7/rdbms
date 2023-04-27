@@ -1,8 +1,9 @@
 package org.dka.rdbms.model
 
-final case class RoyaltySchedule (
+import io.circe._
+
+final case class RoyaltySchedule(
   titleId: String,
   lowRange: Int,
   highRange: Int,
-  royalty: BigDecimal
-                                   )
+  royalty: BigDecimal)

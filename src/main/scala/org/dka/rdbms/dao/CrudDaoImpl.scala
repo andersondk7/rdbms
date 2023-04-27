@@ -1,6 +1,6 @@
 package org.dka.rdbms.dao
 
-import org.dka.rdbms.model.CrudDao
+import org.dka.rdbms.model.dao.CrudDao
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
 

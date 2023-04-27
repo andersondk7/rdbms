@@ -8,6 +8,7 @@ object Dependencies {
   private val hikaricp_version = "2.8.0"
   private val slick_version = "3.4.1"
   private val pureConfig_version = "0.17.2"
+  private val circe_version = "0.14.1"
 
 
   private val catsCore = "org.typelevel" %% "cats-core" % cats_version
@@ -19,16 +20,22 @@ object Dependencies {
   private val logBack = "ch.qos.logback" % "logback-classic" % "1.3.6"
   private val scalatic = "org.scalactic" %% "scalactic" % "3.2.13"
   private val scalaTest = "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+  private val circeCore = "io.circe" %% "circe-core" % circe_version
+  private val circeGeneric = "io.circe" %% "circe-generic" % circe_version
+  private val circeParser = "io.circe" %% "circe-parser" % circe_version
 
   val rdbmsDeps = Seq(
-  catsCore,
-  slick,
-  connectionPool,
-  postgresDriver,
-  pureConfig,
-  logging,
-  logBack,
-  scalatic,
-  scalaTest
+    catsCore,
+    slick,
+    connectionPool,
+    postgresDriver,
+    pureConfig,
+    logging,
+    logBack,
+    scalatic,
+    circeCore,
+    circeGeneric,
+    circeParser,
+    scalaTest
   )
 }
