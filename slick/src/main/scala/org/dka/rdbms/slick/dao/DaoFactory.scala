@@ -40,7 +40,7 @@ object DaoFactoryBuilder {
             config.queueSize,
             config.maxConnections,
             config.registerMBeans
-            )
+          )
           val db = Database.forURL(executor = executor, url = config.url)
           val factory = new DaoFactory(db)
           logger.info(s"got factory")

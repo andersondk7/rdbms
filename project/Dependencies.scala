@@ -11,6 +11,7 @@ object Dependencies {
   private val circe_version = "0.14.1"
 
 
+
   private val catsCore = "org.typelevel" %% "cats-core" % cats_version
   private val slick = "com.typesafe.slick" %% "slick" % slick_version
   private val connectionPool = "com.typesafe.slick" %% "slick-hikaricp" % slick_version
