@@ -49,7 +49,10 @@ final case class DBConfig(
   connectionPool: String,
   dataSourceClass: String,
   properties: Properties,
-  numThreads: Int) {
+  numThreads: Int = 10,
+  maxConnections: Int = 10,
+  queueSize: Int = 1000,
+  registerMBeans: Boolean = false) {
 
   val url: String =
     s"jdbc:postgresql://${properties.host}:${properties.port}/${properties.database}?user=${properties.user}&password=${properties.password}&currentSchema=${properties.schema}"
