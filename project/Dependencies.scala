@@ -24,7 +24,7 @@ object Dependencies {
   private val circeGeneric = "io.circe" %% "circe-generic" % circe_version
   private val circeParser = "io.circe" %% "circe-parser" % circe_version
 
-  val rdbmsDeps = Seq(
+  val slickDeps = Seq(
     catsCore,
     slick,
     connectionPool,
@@ -33,6 +33,16 @@ object Dependencies {
     logging,
     logBack,
     scalatic,
+    circeCore,
+    circeGeneric,
+    circeParser,
+    scalaTest
+  )
+
+  val commonDeps = Seq(
+    catsCore,
+    logging,
+    logBack,
     circeCore,
     circeGeneric,
     circeParser,

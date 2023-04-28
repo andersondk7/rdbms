@@ -64,7 +64,7 @@ object DBConfig {
 final case class Properties(
   host: String,
   port: Int,
-  database: String, // change to database when no longer read directly from slick
+  database: String,
   schema: String,
   user: String,
   password: String) {}
