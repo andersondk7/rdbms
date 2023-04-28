@@ -1,7 +1,7 @@
 import Dependencies._
 
-ThisBuild / organization := "org.dka"
-ThisBuild / version      := "0.2.1"
+ThisBuild / organization := "org.dka.rdbms"
+ThisBuild / version      := "0.3.1"
 ThisBuild / scalaVersion := "2.13.10"
 
 
@@ -29,7 +29,7 @@ lazy val flywaySettings: Seq[Def.Setting[_]] = Seq(
 )
 
 
-lazy val root = project
+lazy val rdbms = project
   .in(file("."))
   .aggregate(
     common,
