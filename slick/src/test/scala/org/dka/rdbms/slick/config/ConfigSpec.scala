@@ -22,6 +22,8 @@ class ConfigSpec extends AnyFunSpec with Matchers {
           config.properties.host shouldBe "localhost"
           config.properties.port shouldBe 5432
           config.numThreads shouldBe 10
+          config.maxConnections shouldBe 20
+          config.queueSize shouldBe 1000
           // skip the user and password part since they will be different depending on who runs the test
           config.url.split("user").head shouldBe  "jdbc:postgresql://localhost:5432/book_biz?"
       }
