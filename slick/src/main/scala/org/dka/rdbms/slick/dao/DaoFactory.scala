@@ -7,7 +7,8 @@ import slick.jdbc.JdbcBackend.Database
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.common.dao.{AuthorDao, ConfigurationException, PublisherDao}
 import org.dka.rdbms.slick.config.DBConfig
-import org.dka.rdbms.slick.config.DBConfig._  // must be kept even though intellij complains
+import org.dka.rdbms.slick.config.DBConfig._ // must be here even when intellij complains
+import slick.util.AsyncExecutor
 
 import scala.util.{Failure, Try} // must be kept even though intellij thinks it is unused
 
@@ -31,8 +32,17 @@ object DaoFactoryBuilder {
         .map { config =>
           logger.info(s"config: $config")
           logger.info(s"url: ${config.url}")
-          // todo enable connection pool, compare this code with Database.forConfig()
-          val factory = new DaoFactory(Database.forURL(config.url))
+          // executor construction lifted from Database.forConfig()
+          val executor = AsyncExecutor(
+            config.connectionPool,
+            config.numThreads,
+            config.numThreads,
+            config.queueSize,
+            config.maxConnections,
+            config.registerMBeans
+            )
+          val db = Database.forURL(executor = executor, url = config.url)
+          val factory = new DaoFactory(db)
           logger.info(s"got factory")
           factory
         }
