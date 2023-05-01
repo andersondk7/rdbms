@@ -143,54 +143,54 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 object AuthorDaoImplSpec {
 
   val jm: Author = Author(
-    ID("1"),
-    LastName("Milton"),
-    FirstName("John"),
+    ID.build("1"),
+    LastName.build("Milton"),
+    FirstName.build("John"),
     None,
-    Some(Address("Bread Street")),
-    Some(City("London")),
-    Some(State("UK")),
-    Some(Zip("12345"))
+    Some(Address.build("Bread Street")),
+    Some(City.build("London")),
+    Some(State.build("UK")),
+    Some(Zip.build("12345"))
   )
   val ja: Author = Author(
-    ID("2"),
-    LastName("Austen"),
-    FirstName("Jane"),
+    ID.build("2"),
+    LastName.build("Austen"),
+    FirstName.build("Jane"),
     None,
-    Some(Address("11 Common Way")),
-    Some(City("Steventon")),
+    Some(Address.build("11 Common Way")),
+    Some(City.build("Steventon")),
     None,
     None
   )
   val cd: Author = Author(
-    ID("3"),
-    LastName("Dickens"),
-    FirstName("Charles"),
-    Some(Phone("555-345-6789")),
-    Some(Address("Landport")),
-    Some(City("Portsmouth")),
-    Some(State("UK")),
+    ID.build("3"),
+    LastName.build("Dickens"),
+    FirstName.build("Charles"),
+    Some(Phone.build("555-345-6789")),
+    Some(Address.build("Landport")),
+    Some(City.build("Portsmouth")),
+    Some(State.build("UK")),
     None
   )
   val mt: Author = Author(
-    ID("4"),
-    LastName("Twain"),
-    FirstName("Mark"),
+    ID.build("4"),
+    LastName.build("Twain"),
+    FirstName.build("Mark"),
     None,
     None,
-    Some(City("Hannibal")),
-    Some(State("MO")),
-    Some(Zip("45678"))
+    Some(City.build("Hannibal")),
+    Some(State.build("MO")),
+    Some(Zip.build("45678"))
   )
   val eh: Author = Author(
-    ID("5"),
-    LastName("Hemmingway"),
-    FirstName("Ernest"),
-    Some(Phone("555-789-0123")),
+    ID.build("5"),
+    LastName.build("Hemmingway"),
+    FirstName.build("Ernest"),
+    Some(Phone.build("555-789-0123")),
     None,
-    Some(City("Oak Park")),
-    Some(State("IL")),
-    Some(Zip("60302"))
+    Some(City.build("Oak Park")),
+    Some(State.build("IL")),
+    Some(Zip.build("60302"))
   )
 
   val multipleAuthors: Seq[Author] = Seq(ja, jm, cd, mt)

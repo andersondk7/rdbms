@@ -50,15 +50,16 @@ object PublisherDaoImpl {
     Option[String] // zip
   )
 
+  //we trust data in the db
   def fromDB(tuple: PublisherTuple): Publisher = {
     val (id, name, address, city, state, zip) = tuple
     Publisher(
-      ID(id),
-      CompanyName(name),
-      Address(address),
-      City(city),
-      State(state),
-      Zip(zip)
+      ID.build(id),
+      CompanyName.build(name),
+      Address.build(address),
+      City.build(city),
+      State.build(state),
+      Zip.build(zip)
     )
   }
 

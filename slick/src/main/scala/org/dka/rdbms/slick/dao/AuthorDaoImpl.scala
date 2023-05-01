@@ -55,20 +55,22 @@ object AuthorDaoImpl {
     Option[String] // zip
   )
 
+  // we trust that the db has valid data
   def fromDB(tuple: AuthorTuple): Author = {
     val (id, lastName, firstName, phone, address, city, state, zip) = tuple
     Author(
-      ID(id),
-      lastName = LastName(lastName),
-      firstName = FirstName(firstName),
-      phone = Phone(phone),
-      address = Address(address),
-      city = City(city),
-      state = State(state),
-      zip = Zip(zip)
+      ID.build(id),
+      lastName = LastName.build(lastName),
+      firstName = FirstName.build(firstName),
+      phone = phone.map(Phone.build),
+      address = address.map(Address.build),
+      city = city.map(City.build),
+      state = state.map(State.build),
+      zip = zip.map(Zip.build)
     )
   }
 
+  // we trust that the db has valid data
   def toDB(author: Author): Option[AuthorTuple] = Some(
     author.id.value,
     author.lastName.value,

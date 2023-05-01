@@ -1,19 +1,15 @@
 package org.dka.rdbms.common.model
 
-import io.circe._
+/**
+ * phone requirements:
+ *   - must be 12 characters
+ */
+final case class Phone private (override val value: String) extends Item[String]
 
-final case class Phone(override val value: String) extends StringItem {
-  override val fieldName: String = Phone.fieldName
-}
+object Phone extends StringValidated[Phone] {
+  override val maxLength = 12
+  override val minLength = 12
+  override val fieldName: String = "phone"
 
-object Phone {
-  val fieldName: String = "phone"
-  def apply(o: Option[String]): Option[Phone] = o.map(Phone(_))
-
-  def toJsonLine(item: Phone): (String, Json) = (fieldName, Json.fromString(item.value))
-
-  def toJsonLine(item: Option[Phone]): Option[(String, Json)] = item.map(toJsonLine)
-  def fromJsonLine(c: HCursor): Either[DecodingFailure, Phone] = StringItem.fromJsonLine(c, fieldName)(apply)
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[Phone]] =
-    StringItem.fromOptionalJsonLine(c, fieldName)(apply)
+  override def build(s: String): Phone = new Phone(s)
 }

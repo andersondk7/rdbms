@@ -140,36 +140,36 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 object PublisherDaoImplSpec {
 
   val rh: Publisher = Publisher(
-    ID("1"),
-    CompanyName("RandomHouse"),
-    Some(Address("1745 Broadway")),
+    ID.build("1"),
+    CompanyName.build("RandomHouse"),
+    Some(Address.build("1745 Broadway")),
     None,
-    Some(State("NY")),
-    Some(Zip("10019"))
+    Some(State.build("NY")),
+    Some(Zip.build("10019"))
   )
   val hb: Publisher = Publisher(
-    ID("2"),
-    CompanyName("Hachette Book Group"),
-    Some(Address("1290 Sixth Ave.")),
-    Some(City("New York")),
-    Some(State("NY")),
-    Some(Zip("10104"))
+    ID.build("2"),
+    CompanyName.build("Hachette Book Group"),
+    Some(Address.build("1290 Sixth Ave.")),
+    Some(City.build("New York")),
+    Some(State.build("NY")),
+    Some(Zip.build("10104"))
   )
   val hc: Publisher = Publisher(
-    ID("3"),
-    CompanyName("Harper Collins"),
-    Some(Address("195 Broadway")),
-    Some(City("New York")),
-    Some(State("NY")),
-    Some(Zip("10007"))
+    ID.build("3"),
+    CompanyName.build("Harper Collins"),
+    Some(Address.build("195 Broadway")),
+    Some(City.build("New York")),
+    Some(State.build("NY")),
+    Some(Zip.build("10007"))
   )
   val ad: Publisher = Publisher(
-    ID("4"),
-    CompanyName("Addison-Wesley"),
-    Some(Address("1900 East Lake Avenue")),
-    Some(City("Glenview")),
-    Some(State("IL")),
-    Some(Zip("60025"))
+    ID.build("4"),
+    CompanyName.build("Addison-Wesley"),
+    Some(Address.build("1900 East Lake Avenue")),
+    Some(City.build("Glenview")),
+    Some(State.build("IL")),
+    Some(Zip.build("60025"))
   )
 
   val multiplePublishers: Seq[Publisher] = Seq(hb, hc, ad)

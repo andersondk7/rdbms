@@ -1,17 +1,17 @@
 package org.dka.rdbms.common.model
 
-import io.circe._
+/**
+ * company name requirements:
+ *   - can't be empty
+ *   - can not be more than 40
+ */
 
-final case class CompanyName(value: String) extends StringItem {
-  override val fieldName: String = CompanyName.fieldName
-}
-object CompanyName {
-  val fieldName: String = "companyName"
+final case class CompanyName private (override val value: String) extends Item[String]
 
-  def apply(o: Option[String]): Option[CompanyName] = o.map(CompanyName(_))
-  def toJsonLine(item: CompanyName): (String, Json) = (fieldName, Json.fromString(item.value))
-  def toJsonLine(item: Option[CompanyName]): Option[(String, Json)] = item.map(toJsonLine)
-  def fromJsonLine(c: HCursor): Either[DecodingFailure, CompanyName] = StringItem.fromJsonLine(c, fieldName)(apply)
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[CompanyName]] =
-    StringItem.fromOptionalJsonLine(c, fieldName)(apply)
+object CompanyName extends StringValidated[CompanyName] {
+  override val minLength: Int = 1
+  override val maxLength: Int = 40
+  override val fieldName: String = "companyName"
+
+  override def build(cn: String): CompanyName = new CompanyName(cn)
 }

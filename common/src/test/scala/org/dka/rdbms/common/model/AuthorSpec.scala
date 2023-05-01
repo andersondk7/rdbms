@@ -11,14 +11,14 @@ class AuthorSpec extends AnyFunSpec with Matchers {
   describe("read and write from json") {
     it("with all fields") {
       val author = Author(
-        ID("1234"),
-        LastName("Doe"),
+        ID.build("1234"),
+        LastName.build("Doe"),
         FirstName.build("John"),
-        Some(Phone("123-555-1234")),
+        Some(Phone.build("123-555-1234")),
         Some(Address.build("451 Main Street")),
-        Some(City("Any Town")),
-        Some(State("CA")),
-        Some(Zip("12345-1234"))
+        Some(City.build("Any Town")),
+        Some(State.build("CA")),
+        Some(Zip.build("12345-1234"))
       )
       val json = author.asJson.noSpaces
       println(s"with all args: json: $json")
@@ -29,8 +29,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
     }
     it("with optional fields") {
       val author = Author(
-        ID("1234"),
-        LastName("Doe"),
+        ID.build("1234"),
+        LastName.build("Doe"),
         FirstName.build("John"),
         None,
         None,
