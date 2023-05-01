@@ -39,7 +39,8 @@ object PublisherDaoImpl {
 
   //
   // conversions between db and model
-  // the model is type safe, the db is not
+  // the model is guaranteed valid,
+  // the db is assumed valid because the data only come from the model
   //
   private type PublisherTuple = (
     String, // id
@@ -50,7 +51,6 @@ object PublisherDaoImpl {
     Option[String] // zip
   )
 
-  //we trust data in the db
   def fromDB(tuple: PublisherTuple): Publisher = {
     val (id, name, address, city, state, zip) = tuple
     Publisher(

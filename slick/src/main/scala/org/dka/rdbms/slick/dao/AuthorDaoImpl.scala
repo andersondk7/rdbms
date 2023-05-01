@@ -42,8 +42,10 @@ object AuthorDaoImpl {
 
   //
   // conversions between db and model
-  // the model is type safe, the db is not
+  // the model is guaranteed valid,
+  // the db is assumed valid because the data only come from the model
   //
+
   private type AuthorTuple = (
     String, // id
     String, // last name
@@ -55,7 +57,6 @@ object AuthorDaoImpl {
     Option[String] // zip
   )
 
-  // we trust that the db has valid data
   def fromDB(tuple: AuthorTuple): Author = {
     val (id, lastName, firstName, phone, address, city, state, zip) = tuple
     Author(
@@ -70,7 +71,6 @@ object AuthorDaoImpl {
     )
   }
 
-  // we trust that the db has valid data
   def toDB(author: Author): Option[AuthorTuple] = Some(
     author.id.value,
     author.lastName.value,
