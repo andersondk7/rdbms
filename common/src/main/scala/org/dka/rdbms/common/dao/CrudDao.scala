@@ -1,6 +1,5 @@
 package org.dka.rdbms.common.dao
 
-
 import scala.concurrent.{ExecutionContext, Future}
 
 /**

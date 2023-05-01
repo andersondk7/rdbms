@@ -1,18 +1,16 @@
 package org.dka.rdbms.common.model
 
-import io.circe._
+/**
+ * city requirements:
+ *   - can't be empty
+ *   - can not be more than 40
+ */
+final case class City private (override val value: String) extends Item[String]
 
-final case class City(value: String) extends StringItem {
-  override val fieldName: String = City.fieldName
-}
+object City extends StringValidated[City] {
+  override val maxLength = 40
+  override val minLength = 1
+  override val fieldName: String = "city"
 
-object City {
-  val fieldName: String = "city"
-  def apply(o: Option[String]): Option[City] = o.map(City(_))
-  def toJsonLine(item: City): (String, Json) = (fieldName, Json.fromString(item.value))
-  def toJsonLine(item: Option[City]): Option[(String, Json)] = item.map(toJsonLine)
-
-  def fromJsonLine(c: HCursor): Either[DecodingFailure, City] = StringItem.fromJsonLine(c, fieldName)(City.apply)
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[City]] =
-    StringItem.fromOptionalJsonLine(c, fieldName)(apply)
+  override def build(c: String): City = new City(c)
 }

@@ -1,21 +1,16 @@
 package org.dka.rdbms.common.model
 
-import io.circe._
+/**
+ * first name requirements:
+ *   - can't be empty
+ *   - can not be more than 20
+ */
+final case class FirstName private (override val value: String) extends Item[String]
 
-final case class FirstName(value: String) extends StringItem {
-  override val fieldName: String = FirstName.fieldName
-}
+object FirstName extends StringValidated[FirstName] {
+  override val maxLength = 20
+  override val minLength = 1
+  override val fieldName: String = "firstName"
 
-object FirstName {
-  val fieldName: String = "firstName"
-
-  def apply(o: Option[String]): Option[FirstName] = o.map(FirstName(_))
-  def toJsonLine(item: FirstName): (String, Json) = (fieldName, Json.fromString(item.value))
-
-  def toJsonLine(item: Option[FirstName]): Option[(String, Json)] = item.map(toJsonLine)
-
-  def fromJsonLine(c: HCursor): Either[DecodingFailure, FirstName] = StringItem.fromJsonLine(c, fieldName)(apply)
-
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[FirstName]] =
-    StringItem.fromOptionalJsonLine(c, fieldName)(apply)
+  override def build(fn: String): FirstName = new FirstName(fn)
 }

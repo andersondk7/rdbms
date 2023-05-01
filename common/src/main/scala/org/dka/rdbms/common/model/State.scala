@@ -1,21 +1,16 @@
 package org.dka.rdbms.common.model
 
-import io.circe._
+/**
+ * state requirements:
+ *   - must be 2 characters
+ */
 
-final case class State(value: String) extends StringItem {
-  override val fieldName: String = State.fieldName
-}
+final case class State private (override val value: String) extends Item[String]
 
-object State {
+object State extends StringValidated[State] {
+  val maxLength = 2
+  val minLength = 2
   val fieldName: String = "state"
 
-  def apply(o: Option[String]): Option[State] = o.map(State(_))
-
-  def toJsonLine(item: State): (String, Json) = (fieldName, Json.fromString(item.value))
-  def toJsonLine(item: Option[State]): Option[(String, Json)] = item.map(toJsonLine)
-
-  def fromJsonLine(c: HCursor): Either[DecodingFailure, State] = StringItem.fromJsonLine(c, fieldName)(apply)
-
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[State]] =
-    StringItem.fromOptionalJsonLine(c, fieldName)(apply)
+  def build(s: String): State = new State(s)
 }

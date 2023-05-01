@@ -1,21 +1,17 @@
 package org.dka.rdbms.common.model
 
-import io.circe._
+/**
+ * address requirements:
+ *   - can't be empty
+ *   - can not be more than 40
+ */
+final case class Address private (override val value: String) extends Item[String]
 
-final case class Address(value: String) extends StringItem {
-  override val fieldName: String = Address.fieldName
-}
+object Address extends StringValidated[Address] {
+  override val maxLength = 40
+  override val minLength = 1
+  override val fieldName: String = "address"
 
-object Address {
-  val fieldName: String = "address"
+  override def build(a: String): Address = new Address(a)
 
-  def apply(o: Option[String]): Option[Address] = o.map(Address(_))
-  def toJsonLine(item: Address): (String, Json) = (fieldName, Json.fromString(item.value))
-
-  def toJsonLine(item: Option[Address]): Option[(String, Json)] = item.map(toJsonLine)
-
-  def fromJsonLine(c: HCursor): Either[DecodingFailure, Address] = StringItem.fromJsonLine(c, fieldName)(apply)
-
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[Address]] =
-    StringItem.fromOptionalJsonLine(c, fieldName)(apply)
 }

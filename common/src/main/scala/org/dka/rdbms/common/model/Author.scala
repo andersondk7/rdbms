@@ -27,7 +27,8 @@ object Author {
     Json.obj(objects: _*)
   }
 
-  implicit val decodeID: Decoder[Author] = (c: HCursor) =>
+  implicit val decodeAuthor: Decoder[Author] = (c: HCursor) =>
+    // todo: this will fail on the first error...
     for {
       id <- ID.fromJsonLine(c)
       lastName <- LastName.fromJsonLine(c)

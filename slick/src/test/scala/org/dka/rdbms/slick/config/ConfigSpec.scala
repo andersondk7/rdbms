@@ -25,7 +25,7 @@ class ConfigSpec extends AnyFunSpec with Matchers {
           config.maxConnections shouldBe 20
           config.queueSize shouldBe 1000
           // skip the user and password part since they will be different depending on who runs the test
-          config.url.split("user").head shouldBe  "jdbc:postgresql://localhost:5432/book_biz?"
+          config.url.split("user").head shouldBe "jdbc:postgresql://localhost:5432/book_biz?"
       }
     }
   }
