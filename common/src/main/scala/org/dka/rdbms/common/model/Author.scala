@@ -1,6 +1,9 @@
 package org.dka.rdbms.common.model
 
+import cats.implicits._
+import cats.data.Validated._
 import io.circe._
+import Validation._
 
 final case class Author(
   id: ID,
@@ -27,25 +30,21 @@ object Author {
     Json.obj(objects: _*)
   }
 
-  implicit val decodeAuthor: Decoder[Author] = (c: HCursor) =>
-    // todo: this will fail on the first error...
-    for {
-      id <- ID.fromJsonLine(c)
-      lastName <- LastName.fromJsonLine(c)
-      firstName <- FirstName.fromJsonLine(c)
-      phone <- Phone.fromOptionalJsonLine(c)
-      address <- Address.fromOptionalJsonLine(c)
-      city <- City.fromOptionalJsonLine(c)
-      state <- State.fromOptionalJsonLine(c)
-      zip <- Zip.fromOptionalJsonLine(c)
-    } yield Author(
-      id,
-      lastName,
-      firstName,
-      phone,
-      address,
-      city,
-      state,
-      zip
-    )
+  implicit val decodeAuthor: Decoder[Author] = (c: HCursor) => {
+    val id = ID.fromJsonLine(c)
+    val lastName = LastName.fromJsonLine(c)
+    val firstName = FirstName.fromJsonLine(c)
+    val phone = Phone.fromOptionalJsonLine(c)
+    val address = Address.fromOptionalJsonLine(c)
+    val city = City.fromOptionalJsonLine(c)
+    val state = State.fromOptionalJsonLine(c)
+    val zip = Zip.fromOptionalJsonLine(c)
+    val result: ValidationErrorsOr[Author] =
+      (id, lastName, firstName, phone, address, city, state, zip).mapN(Author.apply)
+    result match {
+      case Invalid(errors) =>
+        Left(DecodingFailure(asString(errors), Nil))
+      case Valid(author) => Right(author)
+    }
+  }
 }

@@ -1,8 +1,11 @@
 package org.dka.rdbms.common.model
 
+import cats.data.Validated._
+import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
 
 trait StringValidated[T <: Item[String]] {
+  import Validation._
   val maxLength: Int
   val minLength: Int
   val fieldName: String
@@ -10,22 +13,22 @@ trait StringValidated[T <: Item[String]] {
   def build(c: String): T
   def build(o: Option[String]): Option[T] = o.map(build)
 
-  def apply(s: String): Either[ValidationException, T] = validate(s)
+  def apply(s: String): ValidationErrorsOr[T] = validate(s)
 
-  def apply(o: Option[String]): Either[ValidationException, Option[T]] = validateOption(o)
+  def apply(o: Option[String]): ValidationErrorsOr[Option[T]] = validateOption(o)
 
   def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(item.value))
   def toJsonLine(item: Option[T]): Option[(String, Json)] = item.map(toJsonLine)
 
-  protected def validate(string: String): Either[ValidationException, T] =
+  protected def validate(string: String): ValidationErrorsOr[T] =
     string match {
-      case _ if string.length < minLength => Left(TooShortException(fieldName, minLength))
-      case _ if string.length > maxLength => Left(TooLongException(fieldName, maxLength))
-      case s => Right(build(s))
+      case _ if string.length < minLength => TooShortException(fieldName, minLength).invalidNec
+      case _ if string.length > maxLength => TooLongException(fieldName, maxLength).invalidNec
+      case s => Valid(build(s))
     }
 
-  protected def validateOption(o: Option[String]): Either[ValidationException, Option[T]] = o match {
-    case None => Right(None)
+  protected def validateOption(o: Option[String]): ValidationErrorsOr[Option[T]] = o match {
+    case None => Valid(None)
     case Some(s) =>
       val validated = validate(s)
       validated.map(Some(_))
@@ -33,32 +36,32 @@ trait StringValidated[T <: Item[String]] {
 
   def fromJsonLine(
     c: HCursor
-  ): Either[DecodingFailure, T] = {
+  ): ValidationErrorsOr[T] = {
     val value: Either[DecodingFailure, String] = for {
       string <- c.downField(fieldName).as[String]
     } yield string
     value.fold(
-      df => Left(df), // keep DecodingFailure
+      df => JsonParseException(df).invalidNec,
       string => // convert string to Item, converting ValidationException to DecodingFailure
         validate(string) match {
-          case Left(ve) => Left(DecodingFailure(ve.reason, Nil))
-          case Right(value) => Right(value)
+          case Invalid(ve) => Invalid(ve)
+          case Valid(value) => Valid(value)
         }
     )
   }
 
-  def fromOptionalJsonLine(c: HCursor): Either[DecodingFailure, Option[T]] = {
+  def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]] = {
     val result = for {
       value <- c.downField(fieldName).as[Option[String]]
     } yield value
     result.fold(
-      df => Left(df),
+      df => JsonParseException(df).invalidNec,
       {
-        case None => Right(None)
+        case None => Valid(None)
         case Some(value) =>
           validate(value) match {
-            case Left(ve) => Left(DecodingFailure(ve.reason, Nil))
-            case Right(decoded) => Right(Some(decoded))
+            case Invalid(ve) => Invalid(ve)
+            case Valid(decoded) => Valid(Some(decoded))
           }
       }
     )
