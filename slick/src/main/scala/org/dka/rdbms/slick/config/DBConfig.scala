@@ -49,6 +49,7 @@ final case class DBConfig(
   connectionPool: String,
   dataSourceClass: String,
   properties: Properties,
+  // when using a queue size, minThreads and maxThreads must be the same, so we only specify one thread count
   numThreads: Int = 10,
   maxConnections: Int = 10,
   queueSize: Int = 1000,
