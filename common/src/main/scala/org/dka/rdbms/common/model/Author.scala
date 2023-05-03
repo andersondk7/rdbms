@@ -26,24 +26,25 @@ object Author {
       City.toJsonLine(a.city),
       State.toJsonLine(a.state),
       Zip.toJsonLine(a.zip)
-    ).flatten
+    ).flatten // filter out the None, i.e. only needed lines
     Json.obj(objects: _*)
   }
 
   implicit val decodeAuthor: Decoder[Author] = (c: HCursor) => {
-    val id = ID.fromJsonLine(c)
-    val lastName = LastName.fromJsonLine(c)
-    val firstName = FirstName.fromJsonLine(c)
-    val phone = Phone.fromOptionalJsonLine(c)
-    val address = Address.fromOptionalJsonLine(c)
-    val city = City.fromOptionalJsonLine(c)
-    val state = State.fromOptionalJsonLine(c)
-    val zip = Zip.fromOptionalJsonLine(c)
     val result: ValidationErrorsOr[Author] =
-      (id, lastName, firstName, phone, address, city, state, zip).mapN(Author.apply)
+      (
+        ID.fromJsonLine(c),
+        LastName.fromJsonLine(c),
+        FirstName.fromJsonLine(c),
+        Phone.fromOptionalJsonLine(c),
+        Address.fromOptionalJsonLine(c),
+        City.fromOptionalJsonLine(c),
+        State.fromOptionalJsonLine(c),
+        Zip.fromOptionalJsonLine(c)
+      ).mapN(Author.apply)
     result match {
       case Invalid(errors) =>
-        Left(DecodingFailure(asString(errors), Nil))
+        Left(DecodingFailure(errors, Nil))
       case Valid(author) => Right(author)
     }
   }

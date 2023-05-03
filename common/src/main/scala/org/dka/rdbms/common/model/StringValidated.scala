@@ -18,14 +18,14 @@ trait StringValidated[T <: Item[String]] {
   def apply(o: Option[String]): ValidationErrorsOr[Option[T]] = validateOption(o)
 
   def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(item.value))
-  def toJsonLine(item: Option[T]): Option[(String, Json)] = item.map(toJsonLine)
-
   protected def validate(string: String): ValidationErrorsOr[T] =
     string match {
       case _ if string.length < minLength => TooShortException(fieldName, minLength).invalidNec
       case _ if string.length > maxLength => TooLongException(fieldName, maxLength).invalidNec
       case s => Valid(build(s))
     }
+
+  def toJsonLine(item: Option[T]): Option[(String, Json)] = item.map(toJsonLine)
 
   protected def validateOption(o: Option[String]): ValidationErrorsOr[Option[T]] = o match {
     case None => Valid(None)
