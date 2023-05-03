@@ -11,7 +11,7 @@ object Validation {
   type DecodeErrorsOr[T] = Either[DecodingFailure, T]
   def asList(errors: NonEmptyChain[ValidationException]): List[String] =
     errors.tail.foldLeft(List(errors.head.reason))((acc, ve) => ve.reason :: acc)
-  def asString(errors: NonEmptyChain[ValidationException]): String = asList(errors).mkString(" : ")
+  implicit def asString(errors: NonEmptyChain[ValidationException]): String = asList(errors).mkString(" : ")
 }
 sealed trait ValidationException extends Throwable {
   val reason: String

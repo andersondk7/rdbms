@@ -27,17 +27,16 @@ object Publisher {
     Json.obj(objects: _*)
   }
 
-  implicit val decodePubisherD: Decoder[Publisher] = (c: HCursor) => {
-    val id = ID.fromJsonLine(c)
-    val name = CompanyName.fromJsonLine(c)
-    val address = Address.fromOptionalJsonLine(c)
-    val city = City.fromOptionalJsonLine(c)
-    val state = State.fromOptionalJsonLine(c)
-    val zip = Zip.fromOptionalJsonLine(c)
-    val result = (id, name, address, city, state, zip).mapN(Publisher.apply)
-    result match {
-      case Invalid(errors) => Left(DecodingFailure(asString(errors), Nil))
+  implicit val decodePublisher: Decoder[Publisher] = (c: HCursor) =>
+    (
+      ID.fromJsonLine(c),
+      CompanyName.fromJsonLine(c),
+      Address.fromOptionalJsonLine(c),
+      City.fromOptionalJsonLine(c),
+      State.fromOptionalJsonLine(c),
+      Zip.fromOptionalJsonLine(c)
+    ).mapN(Publisher.apply) match {
+      case Invalid(errors) => Left(DecodingFailure(errors, Nil))
       case Valid(publisher) => Right(publisher)
     }
-  }
 }
