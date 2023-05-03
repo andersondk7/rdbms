@@ -1,6 +1,9 @@
 package org.dka.rdbms.common.model
 
+import cats.implicits._
+import cats.data.Validated._
 import io.circe._
+import Validation._
 
 final case class Publisher(
   id: ID,
@@ -24,20 +27,16 @@ object Publisher {
     Json.obj(objects: _*)
   }
 
-  implicit val decodeID: Decoder[Publisher] = (c: HCursor) =>
-    for {
-      id <- ID.fromJsonLine(c)
-      name <- CompanyName.fromJsonLine(c)
-      address <- Address.fromOptionalJsonLine(c)
-      city <- City.fromOptionalJsonLine(c)
-      state <- State.fromOptionalJsonLine(c)
-      zip <- Zip.fromOptionalJsonLine(c)
-    } yield Publisher(
-      id,
-      name,
-      address,
-      city,
-      state,
-      zip
-    )
+  implicit val decodePublisher: Decoder[Publisher] = (c: HCursor) =>
+    (
+      ID.fromJsonLine(c),
+      CompanyName.fromJsonLine(c),
+      Address.fromOptionalJsonLine(c),
+      City.fromOptionalJsonLine(c),
+      State.fromOptionalJsonLine(c),
+      Zip.fromOptionalJsonLine(c)
+    ).mapN(Publisher.apply) match {
+      case Invalid(errors) => Left(DecodingFailure(errors, Nil))
+      case Valid(publisher) => Right(publisher)
+    }
 }
