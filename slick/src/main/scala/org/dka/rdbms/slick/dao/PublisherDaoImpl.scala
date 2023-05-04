@@ -8,20 +8,34 @@ import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import PublisherDaoImpl._
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 
-class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher, ID] with PublisherDao {
-  private val tableQuery = TableQuery[PublisherTable]
-  override val singleInsertQuery: Publisher => DBIO[Int] = publisher => tableQuery += publisher
-  override val multipleInsertQuery: Seq[Publisher] => DBIO[Option[Int]] = publishers => tableQuery ++= publishers
-  override val getQuery: (ID, ExecutionContext) => DBIO[Option[Publisher]] = (id, ec) =>
+class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher] with PublisherDao {
+
+  //
+  // crud IO operations
+  //
+  override val singleInsertIO: Publisher => DBIO[Int] = publisher => tableQuery += publisher
+  override val multipleInsertIO: Seq[Publisher] => DBIO[Option[Int]] = publishers => tableQuery ++= publishers
+  override val getIO: (ID, ExecutionContext) => DBIO[Option[Publisher]] = (id, ec) =>
     // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
     // the id is the model object, which is a final case class Id(...)
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
-  override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
+  override val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
-  private class PublisherTable(tag: Tag)
+  //
+  // additional IO operations
+  // needed to support PublisherDao
+  //
+
+}
+
+object PublisherDaoImpl {
+  val tableQuery = TableQuery[PublisherTable]
+
+  class PublisherTable(tag: Tag)
     extends Table[Publisher](
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
@@ -33,12 +47,8 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher,
     private val state = column[Option[String]]("state")
     private val zip = column[Option[String]]("zip")
 
-    import PublisherDaoImpl._
     override def * = (id, name, address, city, state, zip) <> (fromDB, toDB)
   }
-}
-
-object PublisherDaoImpl {
 
   //
   // conversions between db and model

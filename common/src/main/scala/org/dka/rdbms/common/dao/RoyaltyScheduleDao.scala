@@ -7,4 +7,4 @@ import org.dka.rdbms.common.model.RoyaltySchedule
  *
  * this interface is db agnostic and allows for easy unit testing since an database is not required
  */
-trait RoyaltyScheduleDao extends CrudDao[RoyaltySchedule, String] {}
+trait RoyaltyScheduleDao extends CrudDao[RoyaltySchedule] {}

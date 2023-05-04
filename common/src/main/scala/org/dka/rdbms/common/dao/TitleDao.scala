@@ -8,4 +8,4 @@ import org.dka.rdbms.common.model.item.Title
  *
  * this interface is db agnostic and allows for easy unit testing since an database is not required
  */
-trait TitleDao extends CrudDao[Title, ID] {}
+trait TitleDao extends CrudDao[Title] {}

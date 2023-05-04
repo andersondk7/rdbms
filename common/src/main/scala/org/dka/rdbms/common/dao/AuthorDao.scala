@@ -8,4 +8,4 @@ import org.dka.rdbms.common.model.item.Author
  *
  * this interface is db agnostic and allows for easy unit testing since an database is not required
  */
-trait AuthorDao extends CrudDao[Author, ID] {}
+trait AuthorDao extends CrudDao[Author] {}

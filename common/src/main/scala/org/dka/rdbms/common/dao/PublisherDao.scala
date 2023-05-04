@@ -8,4 +8,4 @@ import org.dka.rdbms.common.model.item.Publisher
  *
  * this interface is db agnostic and allows for easy unit testing since an database is not required
  */
-trait PublisherDao extends CrudDao[Publisher, ID] {}
+trait PublisherDao extends CrudDao[Publisher] {}

@@ -11,17 +11,31 @@ import slick.lifted.TableQuery
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
+import AuthorDaoImpl._
 
-class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] with AuthorDao {
-  private val tableQuery = TableQuery[AuthorTable]
-  override val singleInsertQuery: Author => DBIO[Int] = author => tableQuery += author
-  override val multipleInsertQuery: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
-  override val getQuery: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
+class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with AuthorDao {
+
+  //
+  // crud IO operations
+  //
+  override val singleInsertIO: Author => DBIO[Int] = author => tableQuery += author
+  override val multipleInsertIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
+  override val getIO: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
     // the id is the model object, which is a final case class Id(...)
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
-  override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
-  private class AuthorTable(tag: Tag)
+  override val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
+
+  //
+  // additional IO operations
+  // needed to support AuthorDao
+  //
+}
+
+object AuthorDaoImpl {
+  val tableQuery = TableQuery[AuthorTable]
+
+  class AuthorTable(tag: Tag)
     extends Table[Author](
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
@@ -35,13 +49,9 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] w
     private val state = column[Option[String]]("state")
     private val zip = column[Option[String]]("zip")
 
-    import AuthorDaoImpl._
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, lastName, firstName, phone, address, city, state, zip) <> (fromDB, toDB)
   }
-}
-
-object AuthorDaoImpl {
 
   //
   // conversions between db and model
