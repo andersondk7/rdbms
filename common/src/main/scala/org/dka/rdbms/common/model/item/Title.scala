@@ -3,16 +3,15 @@ package org.dka.rdbms.common.model.item
 import cats.data.Validated._
 import cats.implicits._
 import io.circe._
-import org.dka.rdbms.common.model.Validation._
-import org.dka.rdbms.common.model.{ID, Price, PublishDate, TitleName}
+import org.dka.rdbms.common.model.components.{ID, Price, PublishDate, TitleName}
+import org.dka.rdbms.common.model.validation.Validation._
 
 final case class Title(
   id: ID,
   name: TitleName,
   price: Price,
   publisher: Option[ID],
-  publishedDate: Option[PublishDate]
-)
+  publishedDate: Option[PublishDate])
 
 object Title {
   implicit val encodeTitle: Encoder[Title] = (t: Title) => {

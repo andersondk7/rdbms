@@ -2,8 +2,9 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.{Address, City, CompanyName, ID, State, Zip, item}
+import org.dka.rdbms.common.model.item
 import PublisherDaoImplSpec._
+import org.dka.rdbms.common.model.components.{Address, City, CompanyName, ID, State, Zip}
 import org.dka.rdbms.common.model.item.Publisher
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

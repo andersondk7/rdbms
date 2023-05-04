@@ -3,8 +3,9 @@ package org.dka.rdbms.common.model.item
 import cats.data.Validated._
 import cats.implicits._
 import io.circe._
-import org.dka.rdbms.common.model.Validation._
+import org.dka.rdbms.common.model.validation.Validation._
 import org.dka.rdbms.common.model._
+import org.dka.rdbms.common.model.components.{Address, City, FirstName, ID, LastName, Phone, State, Zip}
 
 final case class Author(
   id: ID,

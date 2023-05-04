@@ -1,7 +1,5 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.validation
 
-import cats.data.{NonEmptyChain, Validated, ValidatedNec}
-import cats.data.Validated._
 import io.circe.DecodingFailure
 
 import scala.language.implicitConversions

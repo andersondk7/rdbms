@@ -1,26 +1,23 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.validation
 
 import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
-import org.dka.rdbms.common.model.DateValidation.formatter
+import org.dka.rdbms.common.model.item.Item
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import scala.util.{Try, Success, Failure}
+import java.util.UUID
+import scala.util.{Failure, Success, Try}
 
-trait DateValidation[T <: Item[LocalDate]] extends Validation[String, LocalDate, T] {
+trait UUIDValidation[T <: Item[UUID]] extends Validation[String, UUID, T] {
   import Validation._
 
-  def validate(string: String): ValidationErrorsOr[T] = {
-    Try { LocalDate.parse(string) }
-    match {
-      case Failure(t) => InvalidDateException(fieldName, t).invalidNec
-      case Success(date) => Valid(build(date))
+  def validate(string: String): ValidationErrorsOr[T] =
+    Try(UUID.fromString(string)) match {
+      case Failure(t) => InvalidIDException(fieldName, string, t).invalidNec
+      case Success(uuid) => Valid(build(uuid))
     }
-  }
 
-  def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(formatter.format(item.value)))
+  def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(item.value.toString))
 
   def fromJsonLine(
     c: HCursor
@@ -50,8 +47,4 @@ trait DateValidation[T <: Item[LocalDate]] extends Validation[String, LocalDate,
       }
     )
   }
-}
-
-object DateValidation {
-  val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
 }

@@ -2,6 +2,7 @@ package org.dka.rdbms.common.model
 
 import io.circe.parser.decode
 import io.circe.syntax._
+import org.dka.rdbms.common.model.components.{Address, City, CompanyName, ID, State, Zip}
 import org.dka.rdbms.common.model.item.Publisher
 import org.dka.rdbms.common.model.item.Publisher._
 import org.scalatest.funspec.AnyFunSpec

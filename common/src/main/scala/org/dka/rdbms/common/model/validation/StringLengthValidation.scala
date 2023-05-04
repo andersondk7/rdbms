@@ -1,15 +1,15 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.validation
 
 import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
-
-import Validation._
+import Validation.ValidationErrorsOr
+import org.dka.rdbms.common.model._
+import org.dka.rdbms.common.model.item.Item
 
 trait StringLengthValidation[T <: Item[String]] extends Validation[String, String, T] {
   val maxLength: Int
   val minLength: Int
-
 
   def validate(string: String): ValidationErrorsOr[T] =
     string match {

@@ -1,4 +1,7 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.components
+
+import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
  * company name requirements:

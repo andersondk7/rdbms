@@ -1,8 +1,9 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.PublisherDao
+import org.dka.rdbms.common.model.components.{Address, City, CompanyName, ID, State, Zip}
 import org.dka.rdbms.common.model.item.Publisher
-import org.dka.rdbms.common.model.{Address, City, CompanyName, ID, State, Zip, item}
+import org.dka.rdbms.common.model.item
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery

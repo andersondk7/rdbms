@@ -1,19 +1,22 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.validation
 
-import cats.data.{NonEmptyChain, ValidatedNec}
 import cats.data.Validated._
+import cats.data.{NonEmptyChain, ValidatedNec}
 import io.circe._
+import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.validation.Validation._
 
-import Validation._
 import scala.language.implicitConversions
 
 /**
- *
- * @tparam I source type of data
- * @tparam S type of data held in the item
- * @tparam T  item from source type
+ * @tparam I
+ *   source type of data
+ * @tparam S
+ *   type of data held in the item
+ * @tparam T
+ *   item from source type
  */
-trait Validation[I, S, T <: Item[S] ]{
+trait Validation[I, S, T <: Item[S]] {
   val fieldName: String
 
   def build(c: S): T
@@ -34,7 +37,7 @@ trait Validation[I, S, T <: Item[S] ]{
   def toJsonLine(item: T): (String, Json)
   def toJsonLine(item: Option[T]): Option[(String, Json)] = item.map(toJsonLine)
 
-  def fromJsonLine( c: HCursor ): ValidationErrorsOr[T]
+  def fromJsonLine(c: HCursor): ValidationErrorsOr[T]
 
   def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]]
 }

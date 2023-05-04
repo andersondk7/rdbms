@@ -1,6 +1,6 @@
 package org.dka.rdbms.common.dao
 
-import org.dka.rdbms.common.model.ID
+import org.dka.rdbms.common.model.components.ID
 import org.dka.rdbms.common.model.item.Author
 
 /**
