@@ -1,12 +1,12 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.item
 
-import io.circe.syntax._
 import io.circe.parser.decode
-import org.dka.rdbms.common.model.components.{Address, City, FirstName, ID, LastName, Phone, State, Zip}
-import org.dka.rdbms.common.model.item.Author
+import io.circe.syntax._
+import org.dka.rdbms.common.model.components._
+import org.dka.rdbms.common.model.item
+import org.dka.rdbms.common.model.item.Author._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.dka.rdbms.common.model.item.Author._
 
 import java.util.UUID
 

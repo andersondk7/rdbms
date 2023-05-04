@@ -1,12 +1,14 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.item
 
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.dka.rdbms.common.model.components.{Address, City, CompanyName, ID, State, Zip}
-import org.dka.rdbms.common.model.item.Publisher
+import org.dka.rdbms.common.model.components._
+import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Publisher._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import java.util.UUID
 
 class PublisherSpec extends AnyFunSpec with Matchers {
   describe("read and write from json") {
