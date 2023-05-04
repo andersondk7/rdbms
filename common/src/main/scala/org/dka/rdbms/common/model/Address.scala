@@ -7,7 +7,7 @@ package org.dka.rdbms.common.model
  */
 final case class Address private (override val value: String) extends Item[String]
 
-object Address extends StringValidated[Address] {
+object Address extends StringLengthValidation[Address] {
   override val maxLength = 40
   override val minLength = 1
   override val fieldName: String = "address"

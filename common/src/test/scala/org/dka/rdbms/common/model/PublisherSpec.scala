@@ -2,7 +2,8 @@ package org.dka.rdbms.common.model
 
 import io.circe.parser.decode
 import io.circe.syntax._
-import Publisher._
+import org.dka.rdbms.common.model.item.Publisher
+import org.dka.rdbms.common.model.item.Publisher._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -10,7 +11,7 @@ class PublisherSpec extends AnyFunSpec with Matchers {
   describe("read and write from json") {
     it("with all fields") {
       val publisher = Publisher(
-        ID.build("1234"),
+        ID.build,
         CompanyName.build("Harper"),
         Some(Address.build("451 Main Street")),
         Some(City.build("Any Town")),
@@ -25,8 +26,8 @@ class PublisherSpec extends AnyFunSpec with Matchers {
       }
     }
     it("with optional fields") {
-      val publisher = Publisher(
-        ID.build("1234"),
+      val publisher = item.Publisher(
+        ID.build,
         CompanyName.build("Harper"),
         None,
         None,

@@ -7,7 +7,7 @@ package org.dka.rdbms.common.model
 
 final case class State private (override val value: String) extends Item[String]
 
-object State extends StringValidated[State] {
+object State extends StringLengthValidation[State] {
   val maxLength = 2
   val minLength = 2
   val fieldName: String = "state"

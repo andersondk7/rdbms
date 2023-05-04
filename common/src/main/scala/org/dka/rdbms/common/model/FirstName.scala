@@ -7,7 +7,7 @@ package org.dka.rdbms.common.model
  */
 final case class FirstName private (override val value: String) extends Item[String]
 
-object FirstName extends StringValidated[FirstName] {
+object FirstName extends StringLengthValidation[FirstName] {
   override val maxLength = 20
   override val minLength = 1
   override val fieldName: String = "firstName"

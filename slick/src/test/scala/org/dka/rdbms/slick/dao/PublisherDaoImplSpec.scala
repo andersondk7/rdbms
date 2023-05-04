@@ -2,11 +2,13 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.{Address, City, CompanyName, ID, Publisher, State, Zip}
+import org.dka.rdbms.common.model.{Address, City, CompanyName, ID, State, Zip, item}
 import PublisherDaoImplSpec._
+import org.dka.rdbms.common.model.item.Publisher
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -91,7 +93,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       PublisherDaoImpl.toDB(rh) match {
         case None => fail(s"could not convert $rh")
         case Some((id, name, address, city, state, zip)) =>
-          id shouldBe rh.id.value
+          id shouldBe rh.id.value.toString
           name shouldBe rh.name.value
           address shouldBe rh.address.map(_.value)
           city shouldBe rh.city.map(_.value)
@@ -101,7 +103,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
     it("should convert from db to domain") {
       val db = (
-        rh.id.value,
+        rh.id.value.toString,
         rh.name.value,
         rh.address.map(_.value),
         rh.city.map(_.value),
@@ -139,32 +141,32 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object PublisherDaoImplSpec {
 
-  val rh: Publisher = Publisher(
-    ID.build("1"),
+  val rh: Publisher = item.Publisher(
+    ID.build,
     CompanyName.build("RandomHouse"),
     Some(Address.build("1745 Broadway")),
     None,
     Some(State.build("NY")),
     Some(Zip.build("10019"))
   )
-  val hb: Publisher = Publisher(
-    ID.build("2"),
+  val hb: Publisher = item.Publisher(
+    ID.build,
     CompanyName.build("Hachette Book Group"),
     Some(Address.build("1290 Sixth Ave.")),
     Some(City.build("New York")),
     Some(State.build("NY")),
     Some(Zip.build("10104"))
   )
-  val hc: Publisher = Publisher(
-    ID.build("3"),
+  val hc: Publisher = item.Publisher(
+    ID.build,
     CompanyName.build("Harper Collins"),
     Some(Address.build("195 Broadway")),
     Some(City.build("New York")),
     Some(State.build("NY")),
     Some(Zip.build("10007"))
   )
-  val ad: Publisher = Publisher(
-    ID.build("4"),
+  val ad: Publisher = item.Publisher(
+    ID.build,
     CompanyName.build("Addison-Wesley"),
     Some(Address.build("1900 East Lake Avenue")),
     Some(City.build("Glenview")),

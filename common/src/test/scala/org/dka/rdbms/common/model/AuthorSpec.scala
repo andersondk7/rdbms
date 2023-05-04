@@ -2,16 +2,18 @@ package org.dka.rdbms.common.model
 
 import io.circe.syntax._
 import io.circe.parser.decode
+import org.dka.rdbms.common.model.item.Author
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.dka.rdbms.common.model.item.Author._
 
-import Author._
+import java.util.UUID
 
 class AuthorSpec extends AnyFunSpec with Matchers {
   describe("read and write from json") {
     it("with all fields") {
       val author = Author(
-        ID.build("1234"),
+        ID.build,
         LastName.build("Doe"),
         FirstName.build("John"),
         Some(Phone.build("123-555-1234")),
@@ -27,8 +29,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       }
     }
     it("with optional fields") {
-      val author = Author(
-        ID.build("1234"),
+      val author = item.Author(
+        ID.build,
         LastName.build("Doe"),
         FirstName.build("John"),
         None,

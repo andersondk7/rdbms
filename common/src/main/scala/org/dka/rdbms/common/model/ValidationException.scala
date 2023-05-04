@@ -6,13 +6,6 @@ import io.circe.DecodingFailure
 
 import scala.language.implicitConversions
 
-object Validation {
-  type ValidationErrorsOr[T] = ValidatedNec[ValidationException, T]
-  type DecodeErrorsOr[T] = Either[DecodingFailure, T]
-  def asList(errors: NonEmptyChain[ValidationException]): List[String] =
-    errors.tail.foldLeft(List(errors.head.reason))((acc, ve) => ve.reason :: acc)
-  implicit def asString(errors: NonEmptyChain[ValidationException]): String = asList(errors).mkString(" : ")
-}
 sealed trait ValidationException extends Throwable {
   val reason: String
   override def getMessage: String = reason
@@ -31,4 +24,27 @@ case class TooShortException(itemName: String, minLength: Int) extends Validatio
 
 case class TooLongException(itemName: String, maxLength: Int) extends ValidationException {
   override val reason = s"$itemName can't be longer than $maxLength"
+}
+
+case class InvalidIDException(itemName: String, input: String, cause: Throwable) extends ValidationException {
+  override val reason = s"$itemName was $input, which is not a valid UUID because $cause"
+  override def getCause: Throwable = cause
+}
+
+case class InvalidDateException(itemName: String, cause: Throwable) extends ValidationException {
+  override val reason = s"$itemName was not in format YYYY-MM-DD"
+  override def getCause: Throwable = cause
+}
+
+case class InvalidNumberException(itemName: String, input: String, cause: Throwable) extends ValidationException {
+  override val reason = s"$itemName was $input which is not a valid number"
+  override def getCause: Throwable = cause
+}
+
+case class NumberTooLargeException(itemName: String, max: BigDecimal) extends ValidationException {
+  override val reason = s"$itemName was greater than $max"
+}
+
+case class NumberTooSmallException(itemName: String, min: BigDecimal) extends ValidationException {
+  override val reason = s"$itemName was less than $min"
 }

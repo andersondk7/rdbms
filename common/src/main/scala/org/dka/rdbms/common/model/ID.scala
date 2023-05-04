@@ -1,11 +1,12 @@
 package org.dka.rdbms.common.model
 
-final case class ID private (override val value: String) extends Item[String]
+import java.util.UUID
 
-object ID extends StringValidated[ID] {
+final case class ID private (override val value: UUID) extends Item[UUID]
+
+object ID extends UUIDValidation[ID] {
   override val fieldName: String = "ID"
-  override val minLength: Int = 1
-  override val maxLength: Int = 11
 
-  override def build(id: String): ID = new ID(id)
+  override def build(id: UUID): ID = new ID(id)
+  def build: ID = new ID(UUID.randomUUID())
 }

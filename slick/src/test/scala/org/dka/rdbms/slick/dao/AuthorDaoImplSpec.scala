@@ -2,11 +2,13 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.{Address, Author, City, FirstName, ID, LastName, Phone, State, Zip}
+import org.dka.rdbms.common.model.{Address, City, FirstName, ID, LastName, Phone, State, Zip, item}
 import AuthorDaoImplSpec._
+import org.dka.rdbms.common.model.item.Author
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -22,7 +24,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       AuthorDaoImpl.toDB(mt) match {
         case None => fail(s"could not convert $mt")
         case Some((id, last, first, phone, address, city, state, zip)) =>
-          id shouldBe mt.id.value
+          id shouldBe mt.id.value.toString
           last shouldBe mt.lastName.value
           first shouldBe mt.firstName.value
           phone shouldBe mt.phone.map(_.value)
@@ -34,7 +36,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
     it("should convert from db to domain") {
       val db = (
-        mt.id.value,
+        mt.id.value.toString,
         mt.lastName.value,
         mt.firstName.value,
         mt.phone.map(_.value),
@@ -142,8 +144,8 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object AuthorDaoImplSpec {
 
-  val jm: Author = Author(
-    ID.build("1"),
+  val jm: Author = item.Author(
+    ID.build,
     LastName.build("Milton"),
     FirstName.build("John"),
     None,
@@ -152,8 +154,8 @@ object AuthorDaoImplSpec {
     Some(State.build("UK")),
     Some(Zip.build("12345"))
   )
-  val ja: Author = Author(
-    ID.build("2"),
+  val ja: Author = item.Author(
+    ID.build,
     LastName.build("Austen"),
     FirstName.build("Jane"),
     None,
@@ -162,8 +164,8 @@ object AuthorDaoImplSpec {
     None,
     None
   )
-  val cd: Author = Author(
-    ID.build("3"),
+  val cd: Author = item.Author(
+    ID.build,
     LastName.build("Dickens"),
     FirstName.build("Charles"),
     Some(Phone.build("555-345-6789")),
@@ -172,8 +174,8 @@ object AuthorDaoImplSpec {
     Some(State.build("UK")),
     None
   )
-  val mt: Author = Author(
-    ID.build("4"),
+  val mt: Author = item.Author(
+    ID.build,
     LastName.build("Twain"),
     FirstName.build("Mark"),
     None,
@@ -182,8 +184,8 @@ object AuthorDaoImplSpec {
     Some(State.build("MO")),
     Some(Zip.build("45678"))
   )
-  val eh: Author = Author(
-    ID.build("5"),
+  val eh: Author = item.Author(
+    ID.build,
     LastName.build("Hemmingway"),
     FirstName.build("Ernest"),
     Some(Phone.build("555-789-0123")),

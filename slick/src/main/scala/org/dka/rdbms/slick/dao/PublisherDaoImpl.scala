@@ -1,11 +1,13 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.PublisherDao
-import org.dka.rdbms.common.model.{Address, City, CompanyName, ID, Publisher, State, Zip}
+import org.dka.rdbms.common.model.item.Publisher
+import org.dka.rdbms.common.model.{Address, City, CompanyName, ID, State, Zip, item}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher, ID] with PublisherDao {
@@ -15,8 +17,8 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher,
   override val getQuery: (ID, ExecutionContext) => DBIO[Option[Publisher]] = (id, ec) =>
     // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
     // the id is the model object, which is a final case class Id(...)
-    tableQuery.filter(_.id === id.value).result.map(_.headOption)(ec)
-  override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value).delete
+    tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
+  override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   private class PublisherTable(tag: Tag)
     extends Table[Publisher](
@@ -53,8 +55,8 @@ object PublisherDaoImpl {
 
   def fromDB(tuple: PublisherTuple): Publisher = {
     val (id, name, address, city, state, zip) = tuple
-    Publisher(
-      ID.build(id),
+    item.Publisher(
+      ID.build(UUID.fromString(id)),
       CompanyName.build(name),
       Address.build(address),
       City.build(city),
@@ -64,7 +66,7 @@ object PublisherDaoImpl {
   }
 
   def toDB(publisher: Publisher): Option[PublisherTuple] = Some(
-    publisher.id.value,
+    publisher.id.value.toString,
     publisher.name.value,
     publisher.address.map(_.value),
     publisher.city.map(_.value),

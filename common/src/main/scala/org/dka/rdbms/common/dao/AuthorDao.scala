@@ -1,6 +1,7 @@
 package org.dka.rdbms.common.dao
 
-import org.dka.rdbms.common.model.{Author, ID}
+import org.dka.rdbms.common.model.ID
+import org.dka.rdbms.common.model.item.Author
 
 /**
  * adds methods beyond simple crud stuff anticipated to be mostly specific queries

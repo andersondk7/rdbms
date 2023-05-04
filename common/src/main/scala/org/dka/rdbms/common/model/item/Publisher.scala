@@ -1,9 +1,10 @@
-package org.dka.rdbms.common.model
+package org.dka.rdbms.common.model.item
 
-import cats.implicits._
 import cats.data.Validated._
+import cats.implicits._
 import io.circe._
-import Validation._
+import org.dka.rdbms.common.model._
+import org.dka.rdbms.common.model.Validation._
 
 final case class Publisher(
   id: ID,

@@ -1,11 +1,13 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
-import org.dka.rdbms.common.model.{Address, Author, City, FirstName, ID, LastName, Phone, State, Zip}
+import org.dka.rdbms.common.model.item.Author
+import org.dka.rdbms.common.model.{Address, City, FirstName, ID, LastName, Phone, State, Zip, item}
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
@@ -16,16 +18,16 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] w
   override val getQuery: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
     // the id is the model object, which is a final case class Id(...)
-    tableQuery.filter(_.id === id.value).result.map(_.headOption)(ec)
-  override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value).delete
+    tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
+  override val deletedQuery: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
   private class AuthorTable(tag: Tag)
     extends Table[Author](
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors") {
-    val id = column[String]("au_id", O.PrimaryKey) // This is the primary key column
-    private val au_lname = column[String]("au_lname")
-    private val au_fname = column[String]("au_fname")
+    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
+    private val lastName = column[String]("last_name")
+    private val firstName = column[String]("first_name")
     private val phone = column[Option[String]]("phone")
     private val address = column[Option[String]]("address")
     private val city = column[Option[String]]("city")
@@ -34,7 +36,7 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author, ID] w
 
     import AuthorDaoImpl._
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, au_lname, au_fname, phone, address, city, state, zip) <> (fromDB, toDB)
+    override def * = (id, lastName, firstName, phone, address, city, state, zip) <> (fromDB, toDB)
   }
 }
 
@@ -59,8 +61,8 @@ object AuthorDaoImpl {
 
   def fromDB(tuple: AuthorTuple): Author = {
     val (id, lastName, firstName, phone, address, city, state, zip) = tuple
-    Author(
-      ID.build(id),
+    item.Author(
+      ID.build(UUID.fromString(id)),
       lastName = LastName.build(lastName),
       firstName = FirstName.build(firstName),
       phone = phone.map(Phone.build),
@@ -72,7 +74,7 @@ object AuthorDaoImpl {
   }
 
   def toDB(author: Author): Option[AuthorTuple] = Some(
-    author.id.value,
+    author.id.value.toString,
     author.lastName.value,
     author.firstName.value,
     author.phone.map(_.value),

@@ -1,6 +1,6 @@
 drop table if exists local.publishers;
 create table local.publishers (
-  id varchar(11) not null PRIMARY KEY,
+  id char(36) not null PRIMARY KEY,
   name varchar(40) not null,
   address varchar (40) null,
   city varchar(20) null,
