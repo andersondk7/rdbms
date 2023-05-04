@@ -19,12 +19,22 @@ import scala.language.implicitConversions
 trait Validation[I, S, T <: Item[S]] {
   val fieldName: String
 
-  def build(c: S): T
+  /**
+   * @param data
+   *   data held in the item
+   * @return
+   *   Item holding the data
+   */
+  def build(data: S): T
+
   def build(o: Option[S]): Option[T] = o.map(build)
 
   def apply(s: I): ValidationErrorsOr[T] = validate(s)
   def apply(o: Option[I]): ValidationErrorsOr[Option[T]] = validateOption(o)
 
+  /**
+   * validate the input intended to be overridden to add specific validations
+   */
   def validate(input: I): ValidationErrorsOr[T]
 
   private def validateOption(o: Option[I]): ValidationErrorsOr[Option[T]] = o match {
@@ -34,12 +44,17 @@ trait Validation[I, S, T <: Item[S]] {
       validated.map(Some(_))
   }
 
-  def toJsonLine(item: T): (String, Json)
-  def toJsonLine(item: Option[T]): Option[(String, Json)] = item.map(toJsonLine)
+  /**
+   * write the Item as json
+   */
+  def toJson(item: T): (String, Json)
+  def toJson(item: Option[T]): Option[(String, Json)] = item.map(toJson)
 
-  def fromJsonLine(c: HCursor): ValidationErrorsOr[T]
-
-  def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]]
+  /**
+   * read the item from json
+   */
+  def fromJson(c: HCursor): ValidationErrorsOr[T]
+  def fromOptionalJson(c: HCursor): ValidationErrorsOr[Option[T]]
 }
 
 object Validation {

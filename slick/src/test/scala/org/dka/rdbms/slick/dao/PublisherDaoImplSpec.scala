@@ -2,14 +2,13 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
+import org.dka.rdbms.common.model.components.{ID, LocationID, PublisherName, WebSite}
 import org.dka.rdbms.common.model.item
-import PublisherDaoImplSpec._
-import org.dka.rdbms.common.model.components.{Address, City, CompanyName, ID, State, Zip}
 import org.dka.rdbms.common.model.item.Publisher
+import org.dka.rdbms.slick.dao.PublisherDaoImplSpec._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -93,23 +92,19 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       PublisherDaoImpl.toDB(rh) match {
         case None => fail(s"could not convert $rh")
-        case Some((id, name, address, city, state, zip)) =>
+        case Some((id, publisherName, locationId, webSite)) =>
           id shouldBe rh.id.value.toString
-          name shouldBe rh.name.value
-          address shouldBe rh.address.map(_.value)
-          city shouldBe rh.city.map(_.value)
-          state shouldBe rh.state.map(_.value)
-          zip shouldBe rh.zip.map(_.value)
+          publisherName shouldBe rh.name.value
+          locationId shouldBe rh.locationId.map(_.value.toString)
+          webSite shouldBe rh.webSite.map(_.value)
       }
     }
     it("should convert from db to domain") {
       val db = (
         rh.id.value.toString,
         rh.name.value,
-        rh.address.map(_.value),
-        rh.city.map(_.value),
-        rh.state.map(_.value),
-        rh.zip.map(_.value)
+        rh.locationId.map(_.value.toString),
+        rh.webSite.map(_.value)
       )
       val converted = PublisherDaoImpl.fromDB(db)
       converted shouldBe rh
@@ -144,35 +139,27 @@ object PublisherDaoImplSpec {
 
   val rh: Publisher = item.Publisher(
     ID.build,
-    CompanyName.build("RandomHouse"),
-    Some(Address.build("1745 Broadway")),
-    None,
-    Some(State.build("NY")),
-    Some(Zip.build("10019"))
+    PublisherName.build("RandomHouse"),
+    Some(LocationID.build),
+    Some(WebSite.build("www.random.com"))
   )
   val hb: Publisher = item.Publisher(
     ID.build,
-    CompanyName.build("Hachette Book Group"),
-    Some(Address.build("1290 Sixth Ave.")),
-    Some(City.build("New York")),
-    Some(State.build("NY")),
-    Some(Zip.build("10104"))
+    PublisherName.build("Hachette Book Group"),
+    Some(LocationID.build),
+    None
   )
   val hc: Publisher = item.Publisher(
     ID.build,
-    CompanyName.build("Harper Collins"),
-    Some(Address.build("195 Broadway")),
-    Some(City.build("New York")),
-    Some(State.build("NY")),
-    Some(Zip.build("10007"))
+    PublisherName.build("Harper Collins"),
+    Some(LocationID.build),
+    Some(WebSite.build("www.harperCollins.com"))
   )
   val ad: Publisher = item.Publisher(
     ID.build,
-    CompanyName.build("Addison-Wesley"),
-    Some(Address.build("1900 East Lake Avenue")),
-    Some(City.build("Glenview")),
-    Some(State.build("IL")),
-    Some(Zip.build("60025"))
+    PublisherName.build("Addison-Wesley"),
+    Some(LocationID.build),
+    None
   )
 
   val multiplePublishers: Seq[Publisher] = Seq(hb, hc, ad)

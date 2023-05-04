@@ -1,9 +1,9 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
-import org.dka.rdbms.common.model.components.{Address, City, FirstName, ID, LastName, Phone, State, Zip}
-import org.dka.rdbms.common.model.item.Author
+import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID}
 import org.dka.rdbms.common.model.item
+import org.dka.rdbms.common.model.item.Author
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
@@ -11,20 +11,20 @@ import slick.lifted.TableQuery
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
-import AuthorDaoImpl._
 
 class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with AuthorDao {
+  import AuthorDaoImpl._
 
   //
   // crud IO operations
   //
-  override val singleInsertIO: Author => DBIO[Int] = author => tableQuery += author
-  override val multipleInsertIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
-  override val getIO: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
+  override protected val singleInsertIO: Author => DBIO[Int] = author => tableQuery += author
+  override protected val multipleInsertIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
+  override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
     // the id is the model object, which is a final case class Id(...)
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
-  override val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
+  override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   //
   // additional IO operations
@@ -42,15 +42,11 @@ object AuthorDaoImpl {
       "authors") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
     private val lastName = column[String]("last_name")
-    private val firstName = column[String]("first_name")
-    private val phone = column[Option[String]]("phone")
-    private val address = column[Option[String]]("address")
-    private val city = column[Option[String]]("city")
-    private val state = column[Option[String]]("state")
-    private val zip = column[Option[String]]("zip")
+    private val firstName = column[Option[String]]("first_name")
+    private val locationId = column[Option[String]]("location_id")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, lastName, firstName, phone, address, city, state, zip) <> (fromDB, toDB)
+    override def * = (id, lastName, firstName, locationId) <> (fromDB, toDB)
   }
 
   //
@@ -62,37 +58,29 @@ object AuthorDaoImpl {
   private type AuthorTuple = (
     String, // id
     String, // last name
-    String, // first name
-    Option[String], // phone
-    Option[String], // address
-    Option[String], // city
-    Option[String], // state
-    Option[String] // zip
+    Option[String], // first name
+    Option[String] // location id
   )
 
   def fromDB(tuple: AuthorTuple): Author = {
-    val (id, lastName, firstName, phone, address, city, state, zip) = tuple
+    val (id, lastName, firstName, locationId) = tuple
     item.Author(
       ID.build(UUID.fromString(id)),
       lastName = LastName.build(lastName),
-      firstName = FirstName.build(firstName),
-      phone = phone.map(Phone.build),
-      address = address.map(Address.build),
-      city = city.map(City.build),
-      state = state.map(State.build),
-      zip = zip.map(Zip.build)
+      firstName = firstName.map(FirstName.build),
+      locationId = locationId.map { s =>
+        println(s"building locationId from $s")
+        LocationID.build(UUID.fromString(s))
+      }
     )
+
   }
 
   def toDB(author: Author): Option[AuthorTuple] = Some(
     author.id.value.toString,
     author.lastName.value,
-    author.firstName.value,
-    author.phone.map(_.value),
-    author.address.map(_.value),
-    author.city.map(_.value),
-    author.state.map(_.value),
-    author.zip.map(_.value)
+    author.firstName.map(_.value),
+    author.locationId.map(_.value.toString)
   )
 
 }

@@ -9,12 +9,12 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
  *   - can not be more than 40
  */
 
-final case class CompanyName private (override val value: String) extends Item[String]
+final case class PublisherName private (override val value: String) extends Item[String]
 
-object CompanyName extends StringLengthValidation[CompanyName] {
+object PublisherName extends StringLengthValidation[PublisherName] {
   override val minLength: Int = 1
   override val maxLength: Int = 40
   override val fieldName: String = "companyName"
 
-  override def build(cn: String): CompanyName = new CompanyName(cn)
+  override def build(cn: String): PublisherName = new PublisherName(cn)
 }

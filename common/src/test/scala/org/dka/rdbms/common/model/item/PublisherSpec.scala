@@ -15,11 +15,9 @@ class PublisherSpec extends AnyFunSpec with Matchers {
     it("with all fields") {
       val publisher = Publisher(
         ID.build,
-        CompanyName.build("Harper"),
-        Some(Address.build("451 Main Street")),
-        Some(City.build("Any Town")),
-        Some(State.build("CA")),
-        Some(Zip.build("12345-1234"))
+        PublisherName.build("Harper"),
+        Some(LocationID.build),
+        Some(WebSite.build("http://somehere.com"))
       )
       val json = publisher.asJson.noSpaces
       println(s"with all args: json: $json")
@@ -31,9 +29,7 @@ class PublisherSpec extends AnyFunSpec with Matchers {
     it("with optional fields") {
       val publisher = item.Publisher(
         ID.build,
-        CompanyName.build("Harper"),
-        None,
-        None,
+        PublisherName.build("Harper"),
         None,
         None
       )

@@ -18,9 +18,9 @@ trait StringLengthValidation[T <: Item[String]] extends Validation[String, Strin
       case s => Valid(build(s))
     }
 
-  def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(item.value))
+  def toJson(item: T): (String, Json) = (fieldName, Json.fromString(item.value))
 
-  def fromJsonLine(
+  def fromJson(
     c: HCursor
   ): ValidationErrorsOr[T] = {
     val value: Either[DecodingFailure, String] = for {
@@ -32,7 +32,7 @@ trait StringLengthValidation[T <: Item[String]] extends Validation[String, Strin
     )
   }
 
-  def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]] = {
+  def fromOptionalJson(c: HCursor): ValidationErrorsOr[Option[T]] = {
     val result = for {
       value <- c.downField(fieldName).as[Option[String]]
     } yield value

@@ -2,14 +2,13 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
+import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID}
 import org.dka.rdbms.common.model.item
-import AuthorDaoImplSpec._
-import org.dka.rdbms.common.model.components.{Address, City, FirstName, ID, LastName, Phone, State, Zip}
 import org.dka.rdbms.common.model.item.Author
+import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -24,27 +23,19 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       AuthorDaoImpl.toDB(mt) match {
         case None => fail(s"could not convert $mt")
-        case Some((id, last, first, phone, address, city, state, zip)) =>
+        case Some((id, last, first, locationId)) =>
           id shouldBe mt.id.value.toString
           last shouldBe mt.lastName.value
-          first shouldBe mt.firstName.value
-          phone shouldBe mt.phone.map(_.value)
-          address shouldBe mt.address.map(_.value)
-          city shouldBe mt.city.map(_.value)
-          state shouldBe mt.state.map(_.value)
-          zip shouldBe mt.zip.map(_.value)
+          first shouldBe mt.firstName.map(_.value)
+          locationId shouldBe mt.locationId.map(_.value.toString)
       }
     }
     it("should convert from db to domain") {
       val db = (
         mt.id.value.toString,
         mt.lastName.value,
-        mt.firstName.value,
-        mt.phone.map(_.value),
-        mt.address.map(_.value),
-        mt.city.map(_.value),
-        mt.state.map(_.value),
-        mt.zip.map(_.value)
+        mt.firstName.map(_.value),
+        mt.locationId.map(_.value.toString)
       )
       val converted = AuthorDaoImpl.fromDB(db)
       converted shouldBe mt
@@ -148,52 +139,32 @@ object AuthorDaoImplSpec {
   val jm: Author = item.Author(
     ID.build,
     LastName.build("Milton"),
-    FirstName.build("John"),
-    None,
-    Some(Address.build("Bread Street")),
-    Some(City.build("London")),
-    Some(State.build("UK")),
-    Some(Zip.build("12345"))
+    Some(FirstName.build("John")),
+    Some(LocationID.build)
   )
   val ja: Author = item.Author(
     ID.build,
     LastName.build("Austen"),
-    FirstName.build("Jane"),
-    None,
-    Some(Address.build("11 Common Way")),
-    Some(City.build("Steventon")),
-    None,
-    None
+    Some(FirstName.build("Jane")),
+    Some(LocationID.build)
   )
   val cd: Author = item.Author(
     ID.build,
     LastName.build("Dickens"),
-    FirstName.build("Charles"),
-    Some(Phone.build("555-345-6789")),
-    Some(Address.build("Landport")),
-    Some(City.build("Portsmouth")),
-    Some(State.build("UK")),
+    Some(FirstName.build("Charles")),
     None
   )
   val mt: Author = item.Author(
     ID.build,
     LastName.build("Twain"),
-    FirstName.build("Mark"),
-    None,
-    None,
-    Some(City.build("Hannibal")),
-    Some(State.build("MO")),
-    Some(Zip.build("45678"))
+    Some(FirstName.build("Mark")),
+    Some(LocationID.build)
   )
   val eh: Author = item.Author(
     ID.build,
     LastName.build("Hemmingway"),
-    FirstName.build("Ernest"),
-    Some(Phone.build("555-789-0123")),
     None,
-    Some(City.build("Oak Park")),
-    Some(State.build("IL")),
-    Some(Zip.build("60302"))
+    None
   )
 
   val multipleAuthors: Seq[Author] = Seq(ja, jm, cd, mt)

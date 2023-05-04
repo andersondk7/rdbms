@@ -17,9 +17,9 @@ trait UUIDValidation[T <: Item[UUID]] extends Validation[String, UUID, T] {
       case Success(uuid) => Valid(build(uuid))
     }
 
-  def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(item.value.toString))
+  def toJson(item: T): (String, Json) = (fieldName, Json.fromString(item.value.toString))
 
-  def fromJsonLine(
+  def fromJson(
     c: HCursor
   ): ValidationErrorsOr[T] = {
     val result: Either[DecodingFailure, String] = for {
@@ -31,7 +31,7 @@ trait UUIDValidation[T <: Item[UUID]] extends Validation[String, UUID, T] {
     )
   }
 
-  def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]] = {
+  def fromOptionalJson(c: HCursor): ValidationErrorsOr[Option[T]] = {
     val result = for {
       value <- c.downField(fieldName).as[Option[String]]
     } yield value

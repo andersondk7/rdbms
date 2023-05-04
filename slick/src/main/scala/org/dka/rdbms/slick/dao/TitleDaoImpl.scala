@@ -12,18 +12,18 @@ import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
-import TitleDaoImpl._
 
 class TitleDaoImpl(override val db: Database) extends CrudDaoImpl[Title] with TitleDao {
 
+  import TitleDaoImpl._
   //
   // crud IO operations
   //
-  override val singleInsertIO: Title => DBIO[Int] = title => tableQuery += title
-  override val multipleInsertIO: Seq[Title] => DBIO[Option[Int]] = titles => tableQuery ++= titles
-  override val getIO: (ID, ExecutionContext) => DBIO[Option[Title]] = (id, ec) =>
+  override protected val singleInsertIO: Title => DBIO[Int] = title => tableQuery += title
+  override protected val multipleInsertIO: Seq[Title] => DBIO[Option[Int]] = titles => tableQuery ++= titles
+  override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Title]] = (id, ec) =>
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
-  override val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
+  override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   //
   // additional IO operations
@@ -64,13 +64,13 @@ object TitleDaoImpl {
   )
 
   def fromDB(tuple: TitleTuple): Title = {
-    val (id, name, price, publisher, publishedDate) = tuple
+    val (id, name, price, publisherId, publishedDate) = tuple
     item.Title(
       ID.build(UUID.fromString(id)),
       name = TitleName.build(name),
       price = Price.build(price),
-      publisher = publisher.map(s => PublisherID.build(UUID.fromString(s))),
-      publishedDate = publishedDate.map(PublishDate.build)
+      publisher = publisherId.map(s => PublisherID.build(UUID.fromString(s))),
+      publishedDate = publishedDate.map(d => PublishDate.build(d))
     )
   }
 

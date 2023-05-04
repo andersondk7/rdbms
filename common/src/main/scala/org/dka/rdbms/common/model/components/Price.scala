@@ -18,17 +18,22 @@ object Price extends BigDecimalValidation[Price] {
   override val fieldName: String = "price"
 
   override def build(amount: BigDecimal): Price = new Price(amount)
-  override def validate(string: String): ValidationErrorsOr[Price] = {
-    val x: ValidationErrorsOr[Price] = super.validate(string)
-    x match {
+
+  /**
+   * also checks that the value is greater than 0.00
+   */
+  override def validate(string: String): ValidationErrorsOr[Price] =
+    // first make sure it is a valid BigDecimal
+    super.validate(string)
+    // then check for range (i.e. greater than 0
+    match {
       case Invalid(ve) => Invalid(ve)
       case Valid(p) =>
         if (p.value <= 0) NumberTooSmallException(fieldName, 0).invalidNec
         else Valid(p)
     }
-  }
 
-  def fromJsonLine(
+  def fromJson(
     c: HCursor
   ): ValidationErrorsOr[Price] = {
     val value: Either[DecodingFailure, String] = for {

@@ -16,12 +16,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       val author = Author(
         ID.build,
         LastName.build("Doe"),
-        FirstName.build("John"),
-        Some(Phone.build("123-555-1234")),
-        Some(Address.build("451 Main Street")),
-        Some(City.build("Any Town")),
-        Some(State.build("CA")),
-        Some(Zip.build("12345-1234"))
+        Some(FirstName.build("John")),
+        Some(LocationID.build)
       )
       val json = author.asJson.noSpaces
       decode[Author](json) match {
@@ -33,10 +29,6 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       val author = item.Author(
         ID.build,
         LastName.build("Doe"),
-        FirstName.build("John"),
-        None,
-        None,
-        None,
         None,
         None
       )
@@ -50,7 +42,7 @@ class AuthorSpec extends AnyFunSpec with Matchers {
   describe("with valid json. but holding invalid model") {
     it("should fail when too short") {
       // first name is too short
-      val json = s""" {"ID":"1234","lastName":"Doe","firstName":""} """
+      val json = s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","lastName":"Doe","firstName":""} """
       decode[Author](json) match {
         case Left(error) => error.getMessage contains "firstName must be at least 1"
         case Right(_) => fail(s"should not have parsed")
@@ -58,7 +50,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
     }
     it("should fail when too long") {
       // first name can't be more that 20 chars
-      val json = s""" {"ID":"1234","lastName":"Doe","firstName":"123456789 123456789 12345"} """
+      val json =
+        s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","lastName":"Doe","firstName":"123456789 123456789 12345"} """
       decode[Author](json) match {
         case Left(error) => error.getMessage contains "firstName can't be longer than 20"
         case Right(_) => fail(s"should not have parsed")
@@ -67,7 +60,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
     it("should fail when multiple domain errors") {
       // first name can't be more that 20 chars
       // lastName can't be empty
-      val json = s""" {"ID":"1234","firstName":"123456789 123456789 12345", "lastName": ""} """
+      val json =
+        s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","firstName":"123456789 123456789 12345", "lastName": ""} """
       decode[Author](json) match {
         case Left(error) =>
           error.getMessage contains "firstName can't be longer than 20"
@@ -78,7 +72,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
     it("should fail when both json and domain errors") {
       // first name can't be more that 20 chars
       // lastName is missing from json
-      val json = s""" {"ID":"1234","firstName":"123456789 123456789 12345", "last_name": ""} """
+      val json =
+        s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","firstName":"123456789 123456789 12345", "last_name": ""} """
       decode[Author](json) match {
         case Left(error) =>
           error.getMessage contains "firstName can't be longer than 20"
@@ -89,7 +84,8 @@ class AuthorSpec extends AnyFunSpec with Matchers {
     it("should fail with invalid json and domain errors") {
       // first name can't be more that 20 chars
       // lastName is missing from json
-      val json = s""" {"ID":"1234","firstName":"123456789 123456789 12345", "last_name: ""} """
+      val json =
+        s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","firstName":"123456789 123456789 12345", "last_name: ""} """
       decode[Author](json) match {
         case Left(error) => succeed
         case Right(_) => fail(s"should not have parsed")

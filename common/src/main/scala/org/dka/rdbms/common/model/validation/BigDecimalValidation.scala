@@ -16,9 +16,9 @@ trait BigDecimalValidation[T <: Item[BigDecimal]] extends Validation[String, Big
       case Success(date) => Valid(build(date))
     }
 
-  def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(item.value.toString))
+  def toJson(item: T): (String, Json) = (fieldName, Json.fromString(item.value.toString))
 
-  def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]] = {
+  def fromOptionalJson(c: HCursor): ValidationErrorsOr[Option[T]] = {
     val result = for {
       value <- c.downField(fieldName).as[Option[String]]
     } yield value

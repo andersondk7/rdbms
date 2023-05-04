@@ -19,9 +19,9 @@ trait DateValidation[T <: Item[LocalDate]] extends Validation[String, LocalDate,
       case Success(date) => Valid(build(date))
     }
 
-  def toJsonLine(item: T): (String, Json) = (fieldName, Json.fromString(formatter.format(item.value)))
+  def toJson(item: T): (String, Json) = (fieldName, Json.fromString(formatter.format(item.value)))
 
-  def fromJsonLine(
+  def fromJson(
     c: HCursor
   ): ValidationErrorsOr[T] = {
     val result: Either[DecodingFailure, String] = for {
@@ -33,7 +33,7 @@ trait DateValidation[T <: Item[LocalDate]] extends Validation[String, LocalDate,
     )
   }
 
-  def fromOptionalJsonLine(c: HCursor): ValidationErrorsOr[Option[T]] = {
+  def fromOptionalJson(c: HCursor): ValidationErrorsOr[Option[T]] = {
     val result = for {
       value <- c.downField(fieldName).as[Option[String]]
     } yield value
