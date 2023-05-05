@@ -45,6 +45,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   describe("populating") {
     it("should add an author") {
       val result = withDB(
+        // todo: create country, location that author references
         setup = noSetup,
         test = factory =>
           Try {
@@ -110,6 +111,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
+  // todo: change loadAuthor to also create a country and location that the author references
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.create(author), delay) match {
       case Left(e) => fail(e)
@@ -117,6 +119,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
+  // todo: update deleteAuthor to also delete referenced location and country
   private def deleteAuthor(id: ID)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     logger.info(s"deleteAuthor: $id")
     logger.info(s"factory: $factory")
@@ -140,13 +143,13 @@ object AuthorDaoImplSpec {
     ID.build,
     LastName.build("Milton"),
     Some(FirstName.build("John")),
-    Some(LocationID.build)
+    None
   )
   val ja: Author = item.Author(
     ID.build,
     LastName.build("Austen"),
     Some(FirstName.build("Jane")),
-    Some(LocationID.build)
+    None
   )
   val cd: Author = item.Author(
     ID.build,
