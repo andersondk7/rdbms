@@ -11,7 +11,7 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
 final case class TitleName private (override val value: String) extends Item[String]
 
 object TitleName extends StringLengthValidation[TitleName] {
-  override val maxLength = 30
+  override val maxLength = 200
   override val minLength = 1
   override val fieldName: String = "titleName"
 
