@@ -1,7 +1,7 @@
 import Dependencies._
 
 ThisBuild / organization := "org.dka.rdbms"
-ThisBuild / version      := "0.3.4"
+ThisBuild / version      := "0.4.1-SNAPSHOT"
 ThisBuild / scalaVersion := "2.13.10"
 
 
@@ -13,12 +13,17 @@ lazy val common = project
   )
 
 
-lazy val slick = project
-  .in(file("slick"))
+lazy val db = project
+  .in(file("db"))
   .enablePlugins(FlywayPlugin)
   .settings(
+      flywaySettings
+  )
+
+lazy val slick = project
+  .in(file("slick"))
+  .settings(
     libraryDependencies ++= slickDeps,
-    flywaySettings
   )
   .dependsOn(common)
 
@@ -33,6 +38,7 @@ lazy val rdbms = project
   .in(file("."))
   .aggregate(
     common,
+    db,
     slick
   )
 

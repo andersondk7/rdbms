@@ -1,23 +1,40 @@
 package org.dka.rdbms.slick.dao
 
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.Logger
+import org.dka.rdbms.common.dao.ConfigurationException
+import org.dka.rdbms.slick.config.DBConfig
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 import slick.jdbc.JdbcBackend.Database
-import com.typesafe.scalalogging.Logger
-import org.dka.rdbms.common.dao.{AuthorDao, ConfigurationException, PublisherDao}
-import org.dka.rdbms.slick.config.DBConfig
-import org.dka.rdbms.slick.config.DBConfig._ // must be here even when intellij complains
 import slick.util.AsyncExecutor
 
 import scala.util.{Failure, Try} // must be kept even though intellij thinks it is unused
 
+/**
+ * Factory to create all the dao implementations for the project
+ * @param database
+ *   database that the dao's will use
+ */
 class DaoFactory(val database: Database) {
-  val authorsDao: AuthorDao = new AuthorDaoImpl(database)
-  val publisherDao: PublisherDao = new PublisherDaoImpl(database)
+  import org.dka.rdbms.slick.config.DBConfig._ // keep inspite of intellij
+  val countryDao: CountryDaoImpl = new CountryDaoImpl(database)
+  val locationDao: LocationDaoImpl = new LocationDaoImpl(database)
+  val authorsDao: AuthorDaoImpl = new AuthorDaoImpl(database)
+  val publisherDao: PublisherDaoImpl = new PublisherDaoImpl(database)
+  val titleDao: TitleDaoImpl = new TitleDaoImpl(database)
+  val authorsTitlesDao: AuthorsTitlesDao = new AuthorsTitlesDao(database)
 }
 
+/**
+ * builds a DaoFactory there will be only one DaoFactory created (via a lazy val)
+ *
+ * reads the config to create a database and uses that database to construct the DaoFactory
+ *
+ * This builder is expected to be called by the client of the library (which could be tests or an application)
+ */
 object DaoFactoryBuilder {
+  import org.dka.rdbms.slick.config.DBConfig._
   private val logger = Logger(getClass.getName)
   lazy val configure: Either[ConfigurationException, DaoFactory] = {
     try {

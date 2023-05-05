@@ -2,7 +2,7 @@ package org.dka.rdbms
 
 import org.scalatest.Assertion
 import cats.data.State
-import org.scalatest.Assertions.{fail, succeed}
+import org.scalatest.Assertions.succeed
 
 import scala.util.Try
 
