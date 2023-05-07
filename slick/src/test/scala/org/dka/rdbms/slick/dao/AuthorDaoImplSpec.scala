@@ -9,6 +9,7 @@ import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -45,7 +46,6 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   describe("populating") {
     it("should add an author") {
       val result = withDB(
-        // todo: create country, location that author references
         setup = noSetup,
         test = factory =>
           Try {
@@ -111,7 +111,30 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
-  // todo: change loadAuthor to also create a country and location that the author references
+  describe("queries") {
+    it("should find authors for a given work") {
+      val titleId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
+      val result = withDB(
+        noSetup,
+        test = factory => Try {
+          val response = Await.result(factory.authorsDao.getAuthorsForTitle(ID.build(titleId)), delay)
+          response match {
+            case Left(e) =>
+              fail(e)
+            case Right(summaries) =>
+              println(s"summaries:  $summaries")
+
+              summaries.length shouldBe 1
+              fail("failed!!!")
+          }
+        }.recoverWith {
+          case t: Throwable => println(s"caught $t")
+            throw t
+        },
+        noSetup
+      )
+    }
+  }
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.create(author), delay) match {
       case Left(e) => fail(e)
@@ -119,7 +142,6 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
-  // todo: update deleteAuthor to also delete referenced location and country
   private def deleteAuthor(id: ID)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     logger.info(s"deleteAuthor: $id")
     logger.info(s"factory: $factory")

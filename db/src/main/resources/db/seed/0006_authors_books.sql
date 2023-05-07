@@ -1,4 +1,4 @@
-insert into local.authors_titles (title_id, author_id, author_order)
+insert into local.authors_books (book_id, author_id, author_order)
 values
 ('341f3c84-adf8-4b12-bfd7-3765dc9493a5', 'd3d1a0df-52f9-4713-a766-b003cceee0a4', 1),
 ('a30172a1-e767-42cc-a404-b88256c1b7d0', 'b6d98dba-852f-4ec8-af80-b66753f653ed', 1),
