@@ -21,9 +21,9 @@ object AuthorsTitlesDao {
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors_titles") {
-    private val authorId = column[String]("author_id")
-    private val titleId = column[String]("title_id")
-    private val authorOrder = column[Int]("author_order")
+    val authorId = column[String]("author_id")
+    val titleId = column[String]("title_id")
+    val authorOrder = column[Int]("author_order")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (authorId, titleId, authorOrder) <> (fromDB, toDB)

@@ -38,7 +38,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.tearDownResult.failure shouldBe None
       result.testResult.value
     }
-    it("should add multiple authors") {
+    it("should add multiple publishers") {
       val result = withDB(
         setup = noSetup,
         test = factory =>
@@ -70,7 +70,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.testResult.value
     }
 
-    it("should find a specific author") {
+    it("should find a specific publisher") {
       val result = withDB(
         setup = factory => loadPublisher(ad)(factory, ec),
         test = factory =>
@@ -140,25 +140,25 @@ object PublisherDaoImplSpec {
   val rh: Publisher = item.Publisher(
     ID.build,
     PublisherName.build("RandomHouse"),
-    Some(LocationID.build),
+    None,
     Some(WebSite.build("www.random.com"))
   )
   val hb: Publisher = item.Publisher(
     ID.build,
     PublisherName.build("Hachette Book Group"),
-    Some(LocationID.build),
+    None,
     None
   )
   val hc: Publisher = item.Publisher(
     ID.build,
     PublisherName.build("Harper Collins"),
-    Some(LocationID.build),
+    None,
     Some(WebSite.build("www.harperCollins.com"))
   )
   val ad: Publisher = item.Publisher(
     ID.build,
     PublisherName.build("Addison-Wesley"),
-    Some(LocationID.build),
+    None,
     None
   )
 
