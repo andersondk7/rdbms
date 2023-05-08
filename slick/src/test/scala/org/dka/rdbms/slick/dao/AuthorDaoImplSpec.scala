@@ -1,18 +1,17 @@
 package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
-import org.dka.rdbms.{TearDownException, TestResult}
-import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID}
+import org.dka.rdbms.TearDownException
+import org.dka.rdbms.common.model.components.{FirstName, ID, LastName}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
 import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
@@ -120,7 +119,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             val response = Await.result(factory.authorsDao.getAuthorsForTitle(ID.build(bookId)), delay)
-            val x = response match {
+            response match {
               case Left(e) =>
                 fail(e)
               case Right(summaries) =>
@@ -132,8 +131,6 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
                 wilhelm.titleName.value shouldBe titleName
                 jacob.titleName.value shouldBe titleName
             }
-            x
-//        },
           }.recoverWith { case t: Throwable =>
             println(s"caught $t")
             t.printStackTrace()
