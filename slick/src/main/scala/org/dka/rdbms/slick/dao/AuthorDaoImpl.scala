@@ -4,9 +4,10 @@ import org.dka.rdbms.common.dao.AuthorDao
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
 import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID, Title}
 import org.dka.rdbms.common.model.item
-import org.dka.rdbms.common.model.item.Author
-import org.dka.rdbms.common.model.query.TitleAuthorSummary
+import org.dka.rdbms.common.model.item.{Author, AuthorBookRelationship}
+import org.dka.rdbms.common.model.query.BookAuthorSummary
 import org.dka.rdbms.slick.dao
+import org.dka.rdbms.slick.dao.AuthorsBooksDao.AuthorsBooksTable
 import shapeless.tupled
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
@@ -34,29 +35,34 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
   // needed to support AuthorDao
   //
 
-  private val titleAuthorSummaryIO: (ID, ExecutionContext) => DBIO[Seq[TitleAuthorSummary]] = (bookId, ec) => {
-    // the first join:  join author_books table and books table on bookId  -> (abT, bootT)
-    // second join:  join the first with authors table on abT.authorID == authorsT.id
+  private val bookAuthorSummary: (ID, ExecutionContext) => DBIO[Seq[BookAuthorSummary]] = (bookId, ec) => {
+    // the first join:  join author_books table and books table on bookId  -> (authorBookTable, bookTable)
+    // second join:  join the first with authors table on authorBookTable.authorID == authorTable.id
 
     val innerJoin = for {
-      ((abT, bookT), authorT) <-
+      ((authorBookTable, bookTable), authorTable) <-
         AuthorsBooksDao.tableQuery join
           BookDaoImpl.tableQuery on (_.bookId === _.id) join
           AuthorDaoImpl.tableQuery on (_._1.authorId === _.id)
-    } yield ((abT, bookT), authorT)
+    } yield ((authorBookTable, bookTable), authorTable)
     innerJoin
+      // authorBookTable.bookId == bookTable.bookId
       .filter(_._1._1.bookId === bookId.value.toString)
       .result
       .map(seq =>
-        seq.map(result =>
-          TitleAuthorSummary(result._1._2.title.value, result._2.lastName.value, result._2.firstName.map(_.value))))(ec)
+        seq.map { result =>
+          val relationship: AuthorBookRelationship = result._1._1
+          val book = result._1._2 // from bookTable
+          val author = result._2 // from authorTable
+          BookAuthorSummary(relationship, book, author)
+        })(ec)
   }
 
   //
   // implementation of AuthorDao methods
   //
-  def getAuthorsForTitle(titleId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[TitleAuthorSummary]]] =
-    db.run(titleAuthorSummaryIO(titleId, ec)).map(r => Right(r))
+  def getAuthorsForBook(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
+    db.run(bookAuthorSummary(bookId, ec)).map(r => Right(r))
 
 }
 
