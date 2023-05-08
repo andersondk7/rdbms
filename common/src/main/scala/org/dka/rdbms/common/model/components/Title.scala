@@ -8,12 +8,12 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
  *   - can't be empty
  *   - can not be more than 30
  */
-final case class TitleName private (override val value: String) extends Item[String]
+final case class Title private (override val value: String) extends Item[String]
 
-object TitleName extends StringLengthValidation[TitleName] {
+object Title extends StringLengthValidation[Title] {
   override val maxLength = 200
   override val minLength = 1
-  override val fieldName: String = "titleName"
+  override val fieldName: String = "title"
 
-  override def build(tn: String): TitleName = new TitleName(tn)
+  override def build(tn: String): Title = new Title(tn)
 }

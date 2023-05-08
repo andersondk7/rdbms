@@ -1,7 +1,7 @@
 package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
-import org.dka.rdbms.TearDownException
+import org.dka.rdbms.{TearDownException, TestResult}
 import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
@@ -12,7 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
@@ -60,7 +60,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
     it("should add multiple authors") {
       val result = withDB(
@@ -91,7 +91,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         case None => println(s"no failures here")
       }
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
     it("should find a specific author") {
       val result = withDB(
@@ -100,39 +100,51 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
           Try {
             Await.result(factory.authorsDao.read(eh.id), delay) match {
               case Left(e) => fail(e)
-              case Right(opt) => opt.fold(fail(s"did not find $jm"))(author => author shouldBe jm)
+              case Right(opt) => opt.fold(fail(s"did not find $eh"))(author => author shouldBe eh)
             }
           },
         tearDown = factory => deleteAuthor(eh.id)(factory, ec)
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
   }
 
   describe("queries") {
-    it("should find authors for a given work") {
-      val titleId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
+    it("should find authors for a given book") {
+      val bookId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
+      val titleName = "Grimms Fairy Tales"
       val result = withDB(
         noSetup,
-        test = factory => Try {
-          val response = Await.result(factory.authorsDao.getAuthorsForTitle(ID.build(titleId)), delay)
-          response match {
-            case Left(e) =>
-              fail(e)
-            case Right(summaries) =>
-              println(s"summaries:  $summaries")
+        test = factory =>
+          Try {
+            val response = Await.result(factory.authorsDao.getAuthorsForTitle(ID.build(bookId)), delay)
+            val x = response match {
+              case Left(e) =>
+                fail(e)
+              case Right(summaries) =>
+                println(s"summaries: \n${summaries.mkString("\n")}")
 
-              summaries.length shouldBe 1
-              fail("failed!!!")
-          }
-        }.recoverWith {
-          case t: Throwable => println(s"caught $t")
-            throw t
-        },
+                summaries.length shouldBe 2 // jacob and wilhelm
+                val wilhelm = summaries.head
+                val jacob = summaries.tail.head
+                wilhelm.titleName.value shouldBe titleName
+                jacob.titleName.value shouldBe titleName
+            }
+            x
+//        },
+          }.recoverWith { case t: Throwable =>
+            println(s"caught $t")
+            t.printStackTrace()
+            fail(t)
+          },
         noSetup
       )
+      println(s"setup:  ${result.setupResult}")
+      result.setupGood shouldBe true
+      result.tearDownGood shouldBe true
+      result.testResult.evaluate
     }
   }
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
@@ -183,7 +195,7 @@ object AuthorDaoImplSpec {
     ID.build,
     LastName.build("Twain"),
     Some(FirstName.build("Mark")),
-    Some(LocationID.build)
+    None
   )
   val eh: Author = item.Author(
     ID.build,

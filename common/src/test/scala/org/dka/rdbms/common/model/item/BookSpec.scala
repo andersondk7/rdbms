@@ -14,7 +14,7 @@ class BookSpec extends AnyFunSpec with Matchers {
     it("with all fields") {
       val title = Book(
         ID.build,
-        TitleName.build("Some Epic Book"),
+        Title.build("Some Epic Book"),
         Price.build(BigDecimal(98.34)),
         Some(PublisherID.build(UUID.randomUUID())),
         Some(PublishDate.build(LocalDate.now()))
@@ -30,7 +30,7 @@ class BookSpec extends AnyFunSpec with Matchers {
     it("with optional fields") {
       val title = Book(
         ID.build,
-        TitleName.build("Some Epic Book"),
+        Title.build("Some Epic Book"),
         Price.build(BigDecimal(98.34)),
         None,
         None
