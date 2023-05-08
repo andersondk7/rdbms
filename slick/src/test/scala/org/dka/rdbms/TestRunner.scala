@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import cats.data.State
 import org.scalatest.Assertions.{fail, succeed}
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 sealed trait RunnerStepResult[R] {
   def result: Option[Try[R]]
@@ -31,7 +31,15 @@ final case class SetupException(message: String, cause: Option[Throwable] = None
 // test
 //
 final case class TestResult(result: Option[Try[Assertion]]) extends RunnerStepResult[Assertion] {
-  val value: Object = failure.getOrElse(succeed)
+  def evaluate: Assertion = result match {
+    case None => succeed
+    case Some(t) =>
+      println(s"value: $t")
+      t match {
+        case Failure(ex) => fail(ex)
+        case Success(a) => a
+      }
+  }
 }
 
 object TestResult {
@@ -56,8 +64,8 @@ final case class TestRunnerResult(
   setupResult: SetupResult,
   testResult: TestResult,
   tearDownResult: TearDownResult) {
-  val setupGood: Boolean = setupResult.result.isEmpty
-  val tearDownGood: Boolean = tearDownResult.result.isEmpty
+  val setupGood: Boolean = setupResult.result.fold(false)(_.isSuccess)
+  val tearDownGood: Boolean = tearDownResult.result.fold(false)(_.isSuccess)
   val shouldCheck: Boolean = setupGood && tearDownGood
 
   def +(setup: SetupResult): TestRunnerResult =

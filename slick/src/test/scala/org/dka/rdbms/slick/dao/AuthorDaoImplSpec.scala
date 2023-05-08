@@ -1,15 +1,18 @@
 package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
-import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.{Address, Author, City, FirstName, ID, LastName, Phone, State, Zip}
-import AuthorDaoImplSpec._
+import org.dka.rdbms.{TearDownException, TestResult}
+import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID}
+import org.dka.rdbms.common.model.item
+import org.dka.rdbms.common.model.item.Author
+import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
@@ -21,27 +24,19 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       AuthorDaoImpl.toDB(mt) match {
         case None => fail(s"could not convert $mt")
-        case Some((id, last, first, phone, address, city, state, zip)) =>
-          id shouldBe mt.id.value
+        case Some((id, last, first, locationId)) =>
+          id shouldBe mt.id.value.toString
           last shouldBe mt.lastName.value
-          first shouldBe mt.firstName.value
-          phone shouldBe mt.phone.map(_.value)
-          address shouldBe mt.address.map(_.value)
-          city shouldBe mt.city.map(_.value)
-          state shouldBe mt.state.map(_.value)
-          zip shouldBe mt.zip.map(_.value)
+          first shouldBe mt.firstName.map(_.value)
+          locationId shouldBe mt.locationId.map(_.value.toString)
       }
     }
     it("should convert from db to domain") {
       val db = (
-        mt.id.value,
+        mt.id.value.toString,
         mt.lastName.value,
-        mt.firstName.value,
-        mt.phone.map(_.value),
-        mt.address.map(_.value),
-        mt.city.map(_.value),
-        mt.state.map(_.value),
-        mt.zip.map(_.value)
+        mt.firstName.map(_.value),
+        mt.locationId.map(_.value.toString)
       )
       val converted = AuthorDaoImpl.fromDB(db)
       converted shouldBe mt
@@ -65,7 +60,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
     it("should add multiple authors") {
       val result = withDB(
@@ -96,7 +91,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         case None => println(s"no failures here")
       }
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
     it("should find a specific author") {
       val result = withDB(
@@ -105,17 +100,53 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
           Try {
             Await.result(factory.authorsDao.read(eh.id), delay) match {
               case Left(e) => fail(e)
-              case Right(opt) => opt.fold(fail(s"did not find $jm"))(author => author shouldBe jm)
+              case Right(opt) => opt.fold(fail(s"did not find $eh"))(author => author shouldBe eh)
             }
           },
         tearDown = factory => deleteAuthor(eh.id)(factory, ec)
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
   }
 
+  describe("queries") {
+    it("should find authors for a given book") {
+      val bookId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
+      val titleName = "Grimms Fairy Tales"
+      val result = withDB(
+        noSetup,
+        test = factory =>
+          Try {
+            val response = Await.result(factory.authorsDao.getAuthorsForTitle(ID.build(bookId)), delay)
+            val x = response match {
+              case Left(e) =>
+                fail(e)
+              case Right(summaries) =>
+                println(s"summaries: \n${summaries.mkString("\n")}")
+
+                summaries.length shouldBe 2 // jacob and wilhelm
+                val wilhelm = summaries.head
+                val jacob = summaries.tail.head
+                wilhelm.titleName.value shouldBe titleName
+                jacob.titleName.value shouldBe titleName
+            }
+            x
+//        },
+          }.recoverWith { case t: Throwable =>
+            println(s"caught $t")
+            t.printStackTrace()
+            fail(t)
+          },
+        noSetup
+      )
+      println(s"setup:  ${result.setupResult}")
+      result.setupGood shouldBe true
+      result.tearDownGood shouldBe true
+      result.testResult.evaluate
+    }
+  }
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.create(author), delay) match {
       case Left(e) => fail(e)
@@ -142,55 +173,35 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
 object AuthorDaoImplSpec {
 
-  val jm: Author = Author(
-    ID.build("1"),
+  val jm: Author = item.Author(
+    ID.build,
     LastName.build("Milton"),
-    FirstName.build("John"),
-    None,
-    Some(Address.build("Bread Street")),
-    Some(City.build("London")),
-    Some(State.build("UK")),
-    Some(Zip.build("12345"))
+    Some(FirstName.build("John")),
+    None
   )
-  val ja: Author = Author(
-    ID.build("2"),
+  val ja: Author = item.Author(
+    ID.build,
     LastName.build("Austen"),
-    FirstName.build("Jane"),
-    None,
-    Some(Address.build("11 Common Way")),
-    Some(City.build("Steventon")),
-    None,
+    Some(FirstName.build("Jane")),
     None
   )
-  val cd: Author = Author(
-    ID.build("3"),
+  val cd: Author = item.Author(
+    ID.build,
     LastName.build("Dickens"),
-    FirstName.build("Charles"),
-    Some(Phone.build("555-345-6789")),
-    Some(Address.build("Landport")),
-    Some(City.build("Portsmouth")),
-    Some(State.build("UK")),
+    Some(FirstName.build("Charles")),
     None
   )
-  val mt: Author = Author(
-    ID.build("4"),
+  val mt: Author = item.Author(
+    ID.build,
     LastName.build("Twain"),
-    FirstName.build("Mark"),
-    None,
-    None,
-    Some(City.build("Hannibal")),
-    Some(State.build("MO")),
-    Some(Zip.build("45678"))
+    Some(FirstName.build("Mark")),
+    None
   )
-  val eh: Author = Author(
-    ID.build("5"),
+  val eh: Author = item.Author(
+    ID.build,
     LastName.build("Hemmingway"),
-    FirstName.build("Ernest"),
-    Some(Phone.build("555-789-0123")),
     None,
-    Some(City.build("Oak Park")),
-    Some(State.build("IL")),
-    Some(Zip.build("60302"))
+    None
   )
 
   val multipleAuthors: Seq[Author] = Seq(ja, jm, cd, mt)

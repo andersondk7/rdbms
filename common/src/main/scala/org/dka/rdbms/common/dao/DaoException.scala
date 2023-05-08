@@ -22,3 +22,7 @@ case class ConfigurationException(reasons: List[String], override val underlying
   extends DaoException {
   override val reason: String = reasons.mkString("\t")
 }
+
+object Validation {
+  type DaoErrorsOr[T] = Either[DaoException, T]
+}
