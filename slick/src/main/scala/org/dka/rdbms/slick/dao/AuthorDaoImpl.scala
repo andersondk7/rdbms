@@ -50,13 +50,13 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
       .filter(_._1._1.bookId === bookId.value.toString)
       .result
       .map(seq =>
-        seq.map(result => {
+        seq.map { result =>
           val relationship: AuthorBookRelationship = result._1._1
           val book = result._1._2 // from bookTable
           val author = result._2 // from authorTable
           BookAuthorSummary(relationship, book, author)
-        }))(ec)
-        }
+        })(ec)
+  }
 
   //
   // implementation of AuthorDao methods

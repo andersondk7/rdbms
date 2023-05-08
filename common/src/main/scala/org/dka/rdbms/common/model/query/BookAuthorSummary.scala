@@ -12,7 +12,7 @@ final case class BookAuthorSummary(
 
 object BookAuthorSummary {
   def apply(relationship: AuthorBookRelationship, book: Book, author: Author): BookAuthorSummary =
-    new BookAuthorSummary(book.title, author.lastName, author.firstName, relationship.authorOrder )
+    new BookAuthorSummary(book.title, author.lastName, author.firstName, relationship.authorOrder)
 
   implicit val encodeTitleAuthorSummary: Encoder[BookAuthorSummary] = (summary: BookAuthorSummary) => {
     val objects = List(
