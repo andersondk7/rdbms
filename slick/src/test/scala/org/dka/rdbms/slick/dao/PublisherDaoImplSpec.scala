@@ -36,7 +36,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
     it("should add multiple publishers") {
       val result = withDB(
@@ -67,7 +67,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         case None => println(s"no failures here")
       }
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
 
     it("should find a specific publisher") {
@@ -84,7 +84,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
-      result.testResult.value
+      result.testResult.evaluate
     }
   }
 

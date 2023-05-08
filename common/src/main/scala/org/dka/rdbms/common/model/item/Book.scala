@@ -3,16 +3,15 @@ package org.dka.rdbms.common.model.item
 import cats.data.Validated._
 import cats.implicits._
 import io.circe._
-import org.dka.rdbms.common.model.components.{ID, Price, PublishDate, PublisherID, TitleName}
+import org.dka.rdbms.common.model.components.{ID, Price, PublishDate, PublisherID, Title}
 import org.dka.rdbms.common.model.validation.Validation._
 
 final case class Book(
-                       id: ID,
-                       title: TitleName,
-                       price: Price,
-                       publisherID: Option[PublisherID],
-                       publishDate: Option[PublishDate]
-                      )
+  id: ID,
+  title: Title,
+  price: Price,
+  publisherID: Option[PublisherID],
+  publishDate: Option[PublishDate])
 //  publishedDate: Option[PublishDate])
 
 object Book {
@@ -21,7 +20,7 @@ object Book {
     println(s"encodeTitle: json.id: ${ID.toJson(t.id)}")
     val objects = List(
       Some(ID.toJson(t.id)),
-      Some(TitleName.toJson(t.title)),
+      Some(Title.toJson(t.title)),
       Some(Price.toJson(t.price)),
       PublisherID.toJson(t.publisherID),
       PublishDate.toJson(t.publishDate)
@@ -36,7 +35,7 @@ object Book {
     val result: ValidationErrorsOr[Book] =
       (
         ID.fromJson(c),
-        TitleName.fromJson(c),
+        Title.fromJson(c),
         Price.fromJson(c),
         PublisherID.fromOptionalJson(c),
         PublishDate.fromOptionalJson(c)

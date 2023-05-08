@@ -1,7 +1,7 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.BookDao
-import org.dka.rdbms.common.model.components.{ID, Price, PublishDate, PublisherID, TitleName}
+import org.dka.rdbms.common.model.components.{ID, Price, PublishDate, PublisherID, Title}
 import org.dka.rdbms.common.model.item.Book
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
@@ -37,12 +37,12 @@ object BookDaoImpl {
     extends Table[Book](
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
-      "titles") {
+      "books") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
-    val title = column[String]("name")
+    val title = column[String]("title")
     val price = column[BigDecimal]("price")
     val publisherId = column[Option[String]]("publisher_id")
-    val publishDate = column[Option[LocalDate]]("zip")
+    val publishDate = column[Option[LocalDate]]("publish_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, title, price, publisherId, publishDate) <> (fromDB, toDB)
@@ -56,7 +56,7 @@ object BookDaoImpl {
 
   private type BookTuple = (
     String, // id
-    String, // name
+    String, // title
     BigDecimal, // price
     Option[String], // publisherId
     Option[LocalDate] // published date
@@ -66,7 +66,7 @@ object BookDaoImpl {
     val (id, title, price, publisherId, publishDate) = tuple
     Book(
       ID.build(UUID.fromString(id)),
-      title = TitleName.build(title),
+      title = Title.build(title),
       price = Price.build(price),
       publisherID = publisherId.map(s => PublisherID.build(UUID.fromString(s))),
       publishDate = publishDate.map(d => PublishDate.build(d))

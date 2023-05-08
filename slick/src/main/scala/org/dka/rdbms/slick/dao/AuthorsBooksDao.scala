@@ -1,32 +1,32 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.model.components.ID
-import org.dka.rdbms.common.model.item.AuthorTitleRelationship
+import org.dka.rdbms.common.model.item.AuthorBookRelationship
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import java.util.UUID
 import scala.language.implicitConversions
 
-class AuthorsTitlesDao(val db: Database) {
+class AuthorsBooksDao(val db: Database) {
 //  import AuthorsTitlesDao._
 
 }
 
-object AuthorsTitlesDao {
-  val tableQuery = TableQuery[AuthorsTitlesTable]
+object AuthorsBooksDao {
+  val tableQuery = TableQuery[AuthorsBooksTable]
 
-  class AuthorsTitlesTable(tag: Tag)
-    extends Table[AuthorTitleRelationship](
+  class AuthorsBooksTable(tag: Tag)
+    extends Table[AuthorBookRelationship](
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
-      "authors_titles") {
+      "authors_books") {
     val authorId = column[String]("author_id")
-    val titleId = column[String]("title_id")
+    val bookId = column[String]("book_id")
     val authorOrder = column[Int]("author_order")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (authorId, titleId, authorOrder) <> (fromDB, toDB)
+    override def * = (authorId, bookId, authorOrder) <> (fromDB, toDB)
   }
 
   //
@@ -37,22 +37,22 @@ object AuthorsTitlesDao {
 
   private type AuthorTitleTuple = (
     String, // authorID
-    String, // TitleId
+    String, // bookId
     Int // authorOrder
   )
 
-  def fromDB(tuple: AuthorTitleTuple): AuthorTitleRelationship = {
-    val (authorId, titleId, authorOrder) = tuple
-    AuthorTitleRelationship(
+  def fromDB(tuple: AuthorTitleTuple): AuthorBookRelationship = {
+    val (authorId, bookId, authorOrder) = tuple
+    AuthorBookRelationship(
       authorId = ID.build(UUID.fromString(authorId)),
-      titleId = ID.build(UUID.fromString(authorId)),
+      bookId = ID.build(UUID.fromString(bookId)),
       authorOrder = authorOrder
     )
   }
 
-  def toDB(relationship: AuthorTitleRelationship): Option[AuthorTitleTuple] = Some(
+  def toDB(relationship: AuthorBookRelationship): Option[AuthorTitleTuple] = Some(
     relationship.authorId.value.toString,
-    relationship.titleId.value.toString,
+    relationship.bookId.value.toString,
     relationship.authorOrder
   )
 
