@@ -2,7 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.components.{FirstName, ID, LastName}
+import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
 import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._

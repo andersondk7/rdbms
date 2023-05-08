@@ -3,7 +3,7 @@ package org.dka.rdbms.common.model.item
 import cats.data.Validated._
 import cats.implicits._
 import io.circe._
-import org.dka.rdbms.common.model.components.{CountryID, FirstName, ID, LastName, LocationID}
+import org.dka.rdbms.common.model.fields.{CountryID, FirstName, ID, LastName, LocationID}
 import org.dka.rdbms.common.model.validation.Validation._
 
 final case class Author(

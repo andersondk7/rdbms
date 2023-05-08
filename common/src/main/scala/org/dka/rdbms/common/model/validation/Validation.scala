@@ -3,7 +3,7 @@ package org.dka.rdbms.common.model.validation
 import cats.data.Validated._
 import cats.data.{NonEmptyChain, ValidatedNec}
 import io.circe._
-import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.fields.Field
 import org.dka.rdbms.common.model.validation.Validation._
 
 import scala.language.implicitConversions
@@ -16,7 +16,7 @@ import scala.language.implicitConversions
  * @tparam T
  *   item from source type
  */
-trait Validation[I, S, T <: Item[S]] {
+trait Validation[I, S, T <: Field[S]] {
   val fieldName: String
 
   /**

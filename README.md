@@ -43,3 +43,6 @@ The consumer of the library must:
 This project is based on the git-flow pattern described by [Atlassian](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
 
 Specific steps are detailed [here](release.md)
+
+## Code structure
+The code structure is detailed [here](structure.md)

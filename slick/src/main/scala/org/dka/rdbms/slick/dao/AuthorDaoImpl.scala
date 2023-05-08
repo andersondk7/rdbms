@@ -2,13 +2,10 @@ package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
-import org.dka.rdbms.common.model.components.{FirstName, ID, LastName, LocationID, Title}
+import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.{Author, AuthorBookRelationship}
 import org.dka.rdbms.common.model.query.BookAuthorSummary
-import org.dka.rdbms.slick.dao
-import org.dka.rdbms.slick.dao.AuthorsBooksDao.AuthorsBooksTable
-import shapeless.tupled
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery

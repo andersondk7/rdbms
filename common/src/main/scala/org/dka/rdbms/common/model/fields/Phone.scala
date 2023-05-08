@@ -1,13 +1,12 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
  * phone requirements:
  *   - must be 12 characters
  */
-final case class Phone private (override val value: String) extends Item[String]
+final case class Phone private (override val value: String) extends Field[String]
 
 object Phone extends StringLengthValidation[Phone] {
   override val maxLength = 12

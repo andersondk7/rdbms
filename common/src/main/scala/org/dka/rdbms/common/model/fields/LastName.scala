@@ -1,6 +1,5 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
@@ -8,7 +7,7 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
  *   - can't be empty
  *   - can not be more than 40
  */
-final case class LastName private (override val value: String) extends Item[String]
+final case class LastName private (override val value: String) extends Field[String]
 
 object LastName extends StringLengthValidation[LastName] {
   override val maxLength = 40

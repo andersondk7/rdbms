@@ -4,7 +4,7 @@ import cats.data.Validated._
 import cats.implicits._
 import io.circe._
 import org.dka.rdbms.common.model.validation.Validation._
-import org.dka.rdbms.common.model.components.{CountryAbbreviation, CountryName, ID}
+import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID}
 
 final case class Country(
   id: ID,

@@ -1,11 +1,10 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.UUIDValidation
 
 import java.util.UUID
 
-final case class ID private (override val value: UUID) extends Item[UUID]
+final case class ID private (override val value: UUID) extends Field[UUID]
 
 object ID extends UUIDValidation[ID] {
   override val fieldName: String = "ID"

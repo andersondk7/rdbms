@@ -2,7 +2,7 @@ package org.dka.rdbms.common.model.item
 
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.dka.rdbms.common.model.components._
+import org.dka.rdbms.common.model.fields._
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Publisher._
 import org.scalatest.funspec.AnyFunSpec

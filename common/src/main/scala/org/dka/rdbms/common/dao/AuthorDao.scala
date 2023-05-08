@@ -1,7 +1,7 @@
 package org.dka.rdbms.common.dao
 
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
-import org.dka.rdbms.common.model.components.ID
+import org.dka.rdbms.common.model.fields.ID
 import org.dka.rdbms.common.model.item.Author
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 

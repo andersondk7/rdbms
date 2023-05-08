@@ -1,13 +1,12 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
  * website requirements:
  *   - can not be more than 60
  */
-final case class WebSite private (override val value: String) extends Item[String]
+final case class WebSite private (override val value: String) extends Field[String]
 
 object WebSite extends StringLengthValidation[WebSite] {
   override val maxLength = 60

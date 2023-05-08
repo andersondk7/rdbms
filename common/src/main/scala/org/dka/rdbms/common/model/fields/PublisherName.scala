@@ -1,6 +1,5 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
@@ -9,7 +8,7 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
  *   - can not be more than 40
  */
 
-final case class PublisherName private (override val value: String) extends Item[String]
+final case class PublisherName private (override val value: String) extends Field[String]
 
 object PublisherName extends StringLengthValidation[PublisherName] {
   override val minLength: Int = 1
