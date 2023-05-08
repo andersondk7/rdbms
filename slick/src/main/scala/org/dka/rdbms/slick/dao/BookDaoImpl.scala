@@ -31,9 +31,9 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
 }
 
 object BookDaoImpl {
-  val tableQuery = TableQuery[TitleTable]
+  val tableQuery = TableQuery[BooksTable]
 
-  class TitleTable(tag: Tag)
+  class BooksTable(tag: Tag)
     extends Table[Book](
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes

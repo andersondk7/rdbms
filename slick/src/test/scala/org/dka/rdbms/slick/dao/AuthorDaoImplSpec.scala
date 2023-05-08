@@ -118,7 +118,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         noSetup,
         test = factory =>
           Try {
-            val response = Await.result(factory.authorsDao.getAuthorsForTitle(ID.build(bookId)), delay)
+            val response = Await.result(factory.authorsDao.getAuthorsForBook(ID.build(bookId)), delay)
             response match {
               case Left(e) =>
                 fail(e)
@@ -129,7 +129,9 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
                 val wilhelm = summaries.head
                 val jacob = summaries.tail.head
                 wilhelm.titleName.value shouldBe titleName
+                wilhelm.authorOrder shouldBe 2
                 jacob.titleName.value shouldBe titleName
+                jacob.authorOrder shouldBe 1
             }
           }.recoverWith { case t: Throwable =>
             println(s"caught $t")
