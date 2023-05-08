@@ -1,6 +1,5 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
@@ -8,7 +7,7 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
  *   - can't be empty
  *   - can not be more than 30
  */
-final case class Title private (override val value: String) extends Item[String]
+final case class Title private (override val value: String) extends Field[String]
 
 object Title extends StringLengthValidation[Title] {
   override val maxLength = 200

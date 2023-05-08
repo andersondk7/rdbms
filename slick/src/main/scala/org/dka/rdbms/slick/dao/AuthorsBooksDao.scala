@@ -1,6 +1,6 @@
 package org.dka.rdbms.slick.dao
 
-import org.dka.rdbms.common.model.components.ID
+import org.dka.rdbms.common.model.fields.ID
 import org.dka.rdbms.common.model.item.AuthorBookRelationship
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery

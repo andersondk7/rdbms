@@ -1,6 +1,5 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
@@ -8,7 +7,7 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
  *   - must be 2 characters
  */
 
-final case class State private (override val value: String) extends Item[String]
+final case class State private (override val value: String) extends Field[String]
 
 object State extends StringLengthValidation[State] {
   val maxLength = 2

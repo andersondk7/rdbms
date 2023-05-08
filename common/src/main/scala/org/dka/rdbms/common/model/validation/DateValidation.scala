@@ -3,14 +3,14 @@ package org.dka.rdbms.common.model.validation
 import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
-import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.fields.Field
 import org.dka.rdbms.common.model.validation.DateValidation.formatter
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
-trait DateValidation[T <: Item[LocalDate]] extends Validation[String, LocalDate, T] {
+trait DateValidation[T <: Field[LocalDate]] extends Validation[String, LocalDate, T] {
   import Validation._
 
   def validate(string: String): ValidationErrorsOr[T] =

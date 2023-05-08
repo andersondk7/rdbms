@@ -1,9 +1,8 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
 import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe.{DecodingFailure, HCursor}
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.Validation.ValidationErrorsOr
 import org.dka.rdbms.common.model.validation.{BigDecimalValidation, JsonParseException, NumberTooSmallException}
 
@@ -12,7 +11,7 @@ import org.dka.rdbms.common.model.validation.{BigDecimalValidation, JsonParseExc
  *   - can't be empty
  *   - can not be more than 30
  */
-final case class Price private (override val value: BigDecimal) extends Item[BigDecimal]
+final case class Price private (override val value: BigDecimal) extends Field[BigDecimal]
 
 object Price extends BigDecimalValidation[Price] {
   override val fieldName: String = "price"

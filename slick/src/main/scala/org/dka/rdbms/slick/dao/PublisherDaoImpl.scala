@@ -1,7 +1,7 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.PublisherDao
-import org.dka.rdbms.common.model.components.{ID, LocationID, PublisherName, WebSite}
+import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, WebSite}
 import org.dka.rdbms.common.model.item.Publisher
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._

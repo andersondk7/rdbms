@@ -5,9 +5,9 @@ import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
 import Validation.ValidationErrorsOr
 import org.dka.rdbms.common.model._
-import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.fields.Field
 
-trait StringLengthValidation[T <: Item[String]] extends Validation[String, String, T] {
+trait StringLengthValidation[T <: Field[String]] extends Validation[String, String, T] {
   val maxLength: Int
   val minLength: Int
 

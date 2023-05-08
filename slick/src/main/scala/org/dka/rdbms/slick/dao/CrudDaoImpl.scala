@@ -1,7 +1,7 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao._
-import org.dka.rdbms.common.model.components.ID
+import org.dka.rdbms.common.model.fields.ID
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
 

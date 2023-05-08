@@ -1,13 +1,12 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
 /**
  * country requirements:
  *   - can not be more than 40
  */
-final case class LocationAbbreviation private (override val value: String) extends Item[String]
+final case class LocationAbbreviation private (override val value: String) extends Field[String]
 
 object LocationAbbreviation extends StringLengthValidation[LocationAbbreviation] {
   override val maxLength = 40

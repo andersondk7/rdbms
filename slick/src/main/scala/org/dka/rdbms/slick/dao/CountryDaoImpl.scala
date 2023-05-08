@@ -1,7 +1,7 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.CountryDao
-import org.dka.rdbms.common.model.components.{CountryAbbreviation, CountryName, ID}
+import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID}
 import org.dka.rdbms.common.model.item.Country
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._

@@ -1,9 +1,8 @@
-package org.dka.rdbms.common.model.components
+package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.item.Item
 import org.dka.rdbms.common.model.validation.StringLengthValidation
 
-final case class Zip private (override val value: String) extends Item[String]
+final case class Zip private (override val value: String) extends Field[String]
 
 object Zip extends StringLengthValidation[Zip] {
   override val maxLength = 10

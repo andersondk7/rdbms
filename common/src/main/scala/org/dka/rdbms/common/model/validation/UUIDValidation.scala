@@ -3,12 +3,12 @@ package org.dka.rdbms.common.model.validation
 import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
-import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.fields.Field
 
 import java.util.UUID
 import scala.util.{Failure, Success, Try}
 
-trait UUIDValidation[T <: Item[UUID]] extends Validation[String, UUID, T] {
+trait UUIDValidation[T <: Field[UUID]] extends Validation[String, UUID, T] {
   import Validation._
 
   def validate(string: String): ValidationErrorsOr[T] =

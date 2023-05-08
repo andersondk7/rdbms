@@ -3,11 +3,11 @@ package org.dka.rdbms.common.model.validation
 import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
-import org.dka.rdbms.common.model.item.Item
+import org.dka.rdbms.common.model.fields.Field
 
 import scala.util.{Failure, Success, Try}
 
-trait BigDecimalValidation[T <: Item[BigDecimal]] extends Validation[String, BigDecimal, T] {
+trait BigDecimalValidation[T <: Field[BigDecimal]] extends Validation[String, BigDecimal, T] {
   import Validation._
 
   def validate(string: String): ValidationErrorsOr[T] =

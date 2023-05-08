@@ -2,7 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.components.{ID, LocationID, PublisherName, WebSite}
+import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, WebSite}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Publisher
 import org.dka.rdbms.slick.dao.PublisherDaoImplSpec._
