@@ -19,7 +19,8 @@ object Params {
   private val publisher = "publisher"
   private val author = "author"
   private val title = "title"
-  private val usage = s"Usage: generator: [--$country c], [--$location l], [--$publisher p], [--$author a], [--$title t]"
+  private val usage =
+    s"Usage: generator: [--$country c], [--$location l], [--$publisher p], [--$author a], [--$title t]"
 
   def apply(map: Map[String, Int]): Params =
     new Params(

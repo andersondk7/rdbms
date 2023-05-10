@@ -9,9 +9,10 @@ trait BulkLoad[I] {
 
 object BulkLoadValueInstances {
   implicit val bulkLoadCountry: BulkLoad[Country] = new BulkLoad[Country] {
-    override def header: String ="insert into countries(id, country_name, country_abbreviation)\n  values"
+    override def header: String = "insert into countries(id, country_name, country_abbreviation)\n  values"
 
-    override def insertLine(c: Country): String = s"('${c.id.value.toString}', ${c.countryName.value}', ${c.countryAbbreviation.value})"
+    override def insertLine(c: Country): String =
+      s"('${c.id.value.toString}', ${c.countryName.value}', ${c.countryAbbreviation.value})"
   }
 }
 
