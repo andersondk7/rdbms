@@ -49,4 +49,11 @@ object Dependencies {
     circeParser,
     scalaTest
   )
+
+  val dbDeps = Seq(
+    catsCore,
+    logging,
+    logBack,
+    scalaTest
+  )
 }
