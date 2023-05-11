@@ -2,6 +2,7 @@ package org.dka.rdbms.db.load
 
 import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID}
 import org.dka.rdbms.common.model.item.Country
+import Generator._
 
 import java.util.UUID
 
@@ -14,7 +15,11 @@ class CountryGenerator(
 
   override def insertLine(uuid: UUID): String = {
 
-    val country = Country(ID(uuid), CountryName.build("countryName"), CountryAbbreviation.build("CN"))
+    val country = Country(
+      ID(uuid),
+      CountryName.build(genString(CountryName.maxLength)),
+      CountryAbbreviation.build(genString(CountryAbbreviation.maxLength))
+    )
     bulkLoadCountry.insertLine(country)
   }
 }
@@ -24,6 +29,6 @@ object CountryGenerator {
     override def header: String = "insert into countries(id, country_name, country_abbreviation)\n  values\n"
 
     override def insertLine(c: Country): String =
-      s"('${c.id.value.toString}', ${c.countryName.value}', ${c.countryAbbreviation.value}),"
+      s"('${c.id.value.toString}', '${c.countryName.value}', '${c.countryAbbreviation.value}'),"
   }
 }

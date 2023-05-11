@@ -2,8 +2,9 @@ package org.dka.rdbms.db.load
 
 import java.util.UUID
 import java.io._
-
 import scala.util.{Success, Try}
+
+import ItemGenerator._
 
 trait ItemGenerator {
   def count: Int
@@ -22,11 +23,15 @@ trait ItemGenerator {
       uuids
     }
 
-  private def replaceTrailingComma(lines: Seq[String]): String = {
+  private def generateInsertBlock(uuids: Seq[UUID]): String = replaceTrailingComma(uuids.map(insertLine))
+
+}
+
+object ItemGenerator {
+  def replaceTrailingComma(lines: Seq[String]): String = {
     val reversed = lines.reverse
     val updated = reversed.head.dropRight(1) + "\n;\n"
     (updated +: reversed.tail).reverse.mkString("\n")
   }
-  private def generateInsertBlock(uuids: Seq[UUID]): String = replaceTrailingComma(uuids.map(insertLine))
 
 }
