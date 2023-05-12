@@ -10,27 +10,33 @@ ThisBuild / scalaVersion := scala213
 
 lazy val common = project
   .in(file("common"))
+  .configs(IntegrationTest)
   .settings(
     crossScalaVersions := supportedScalaVersions,
-    libraryDependencies ++= commonDeps
+    libraryDependencies ++= commonDeps,
+    Defaults.itSettings
   )
 
 
 lazy val db = project
   .in(file("db"))
+  .configs(IntegrationTest)
   .enablePlugins(FlywayPlugin)
   .settings(
     libraryDependencies ++= dbDeps,
     crossScalaVersions := Seq(scala322),
-      flywaySettings
+    flywaySettings,
+    Defaults.itSettings
   )
   .dependsOn(common)
 
 lazy val slick = project
   .in(file("slick"))
+  .configs(IntegrationTest)
   .settings(
     crossScalaVersions := List(scala213),
     libraryDependencies ++= slickDeps,
+    Defaults.itSettings
   )
   .dependsOn(common)
 
@@ -42,12 +48,14 @@ lazy val flywaySettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val rdbms = project
   .in(file("."))
+  .configs(IntegrationTest)
   .aggregate(
     common,
     db,
     slick
   )
   .settings(
-    crossScalaVersions := Nil
+    crossScalaVersions := Nil,
+    Defaults.itSettings
   )
 

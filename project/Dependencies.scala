@@ -20,7 +20,7 @@ object Dependencies {
   private val logging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
   private val logBack = "ch.qos.logback" % "logback-classic" % "1.3.6"
   private val scalatic = "org.scalactic" %% "scalactic" % "3.2.13"
-  private val scalaTest = "org.scalatest" %% "scalatest" % "3.2.13" % "test"
+  private val scalaTest = "org.scalatest" %% "scalatest" % "3.2.13" % "it,test"
   private val circeCore = "io.circe" %% "circe-core" % circe_version
   private val circeGeneric = "io.circe" %% "circe-generic" % circe_version
   private val circeParser = "io.circe" %% "circe-parser" % circe_version

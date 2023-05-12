@@ -10,7 +10,6 @@ object ID extends UUIDValidation[ID] {
   override val fieldName: String = "ID"
 
   override def build(id: UUID): ID = {
-    println(s"building with $id")
     new ID(id)
   }
   def build: ID = new ID(UUID.randomUUID())
