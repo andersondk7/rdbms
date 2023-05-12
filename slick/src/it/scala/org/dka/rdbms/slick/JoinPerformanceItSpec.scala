@@ -1,6 +1,7 @@
 package org.dka.rdbms.slick
 
 import com.typesafe.scalalogging.Logger
+import org.dka.rdbms.common.dao.BookDao
 import org.dka.rdbms.common.model.fields.ID
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 import org.dka.rdbms.slick.dao.{DaoFactory, DaoFactoryBuilder}
@@ -25,22 +26,51 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
     }
 
   describe("join testing") {
-    it("getAuthorsForBooks log a statement") {
+    it("getAuthorsForBooks single query") {
+      ""
+      withFactory { factory =>
+        val ids: Seq[ID] = Await.result(factory.bookDao.getAllIds, delay)
+          .getOrElse(fail("could not get ids"))
+        val id: ID = ids.head
+        val now = System.currentTimeMillis()
+        // make a call for each book (all 2000 of them)
+        Await.result(factory.bookDao.getAuthorsForBook(id), delay).getOrElse(throw new Exception("error"))
+        val time = System.currentTimeMillis() - now
+        println(s"single query, time: $time")
+      }
+    }
+    it("getAuthorsForBooks concurrently") {
       ""
       withFactory { factory =>
         val ids: Seq[ID] = Await.result(factory.bookDao.getAllIds, delay)
           .getOrElse(fail("could not get ids"))
         ids.size shouldBe bookCount
         val now = System.currentTimeMillis()
+        // 2000 concurrent queries
         // make a call for each book (all 2000 of them)
         val queries: Future[Seq[BookAuthorSummary]] = Future.sequence(ids.map(id => {
           factory.bookDao.getAuthorsForBook(id).map(_.getOrElse(throw new Exception(s"failed reading bookDao for $id")))
         })).map(_.flatten)
         val summaries: Seq[BookAuthorSummary] = Await.result(queries, delay)
         val time = System.currentTimeMillis() - now
-        println(s"summaries.size: ${summaries.size}") // load has 4 authors per book
-        println(s"time: $time")
-        println(s"avg time: ${time / ids.size}")
+        println(s"concurrent for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
+        summaries.size shouldBe (bookCount * authorsPerBook)
+      }
+    }
+    it("getAuthorsForBooks sequentially") {
+      ""
+      withFactory { factory =>
+        val ids: Seq[ID] = Await.result(factory.bookDao.getAllIds, delay)
+          .getOrElse(fail("could not get ids"))
+        ids.size shouldBe bookCount
+        val now = System.currentTimeMillis()
+        // sequential queries
+        val query: (ID, BookDao) => Seq[BookAuthorSummary] = (id, dao) =>
+          Await.result(dao.getAuthorsForBook(id), delay).getOrElse(throw new Exception(s"could not get summary for $id"))
+        val summaries: Seq[BookAuthorSummary] = ids.flatMap(query(_, factory.bookDao))
+        val time = System.currentTimeMillis() - now
+//        println(s"summaries.size: ${summaries.size}") // load has 4 authors per book
+        println(s"sequential for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
         summaries.size shouldBe (bookCount * authorsPerBook)
       }
     }
