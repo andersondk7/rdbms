@@ -21,7 +21,16 @@ The test was run on a laptop configured:
 - postgres hosted in a docker image
 Because the test and the postgresql instance were on the same machine, the network overhead was minimal
 
-Tests were run from within Intellij
+Tests were run from within Intellij  
+
+### Config
+For these tests, the database was configured:
+- queueSize = 10000
+- maxConnections = 8
+- numThreads = 8
+
+I believe the large queue size was needed for the concurrent test (combining of 2000 futures)
+
 
 ## Slick
 There are 2 ways to execute queries in slick:
@@ -31,15 +40,15 @@ There are 2 ways to execute queries in slick:
 ### results
 all times in milliseconds
 #### as scala
-slick: first single query, time: 65
-slick: concurrent for 2000 queries, time: 4628, avg time: 2
-slick: sequential for 2000 queries, time: 25015, avg time: 12
-slick: last single query, time: 10
+- slick: first single query, time: 65
+- slick: concurrent for 2000 queries, time: 4628, avg time: 2
+- slick: sequential for 2000 queries, time: 25015, avg time: 12
+- slick: last single query, time: 10
 #### as sql
-sql: first single query, time: 35
-sql: concurrent for 2000 queries, time: 3131, avg time: 1
-sql: sequential for 2000 queries, time: 21933, avg time: 10
-sql: last single query, time: 11
+- sql: first single query, time: 35
+- sql: concurrent for 2000 queries, time: 3131, avg time: 1
+- sql: sequential for 2000 queries, time: 21933, avg time: 10
+- sql: last single query, time: 11
 
 #### slick summary
 - the first run takes longer than subsequent runs
