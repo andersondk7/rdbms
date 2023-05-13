@@ -110,42 +110,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
-  describe("queries") {
-    it("should find authors for a given book") {
-      val bookId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
-      val titleName = "Grimms Fairy Tales"
-      val result = withDB(
-        noSetup,
-        test = factory =>
-          Try {
-            val response = Await.result(factory.authorsDao.getAuthorsForBook(ID.build(bookId)), delay)
-            response match {
-              case Left(e) =>
-                fail(e)
-              case Right(summaries) =>
-                println(s"summaries: \n${summaries.mkString("\n")}")
 
-                summaries.length shouldBe 2 // jacob and wilhelm
-                val wilhelm = summaries.head
-                val jacob = summaries.tail.head
-                wilhelm.titleName.value shouldBe titleName
-                wilhelm.authorOrder shouldBe 2
-                jacob.titleName.value shouldBe titleName
-                jacob.authorOrder shouldBe 1
-            }
-          }.recoverWith { case t: Throwable =>
-            println(s"caught $t")
-            t.printStackTrace()
-            fail(t)
-          },
-        noSetup
-      )
-      println(s"setup:  ${result.setupResult}")
-      result.setupGood shouldBe true
-      result.tearDownGood shouldBe true
-      result.testResult.evaluate
-    }
-  }
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.create(author), delay) match {
       case Left(e) => fail(e)

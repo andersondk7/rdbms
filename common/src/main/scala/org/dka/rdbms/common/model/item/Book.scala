@@ -5,6 +5,7 @@ import cats.implicits._
 import io.circe._
 import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title}
 import org.dka.rdbms.common.model.validation.Validation._
+import org.dka.rdbms.common.model.query.BookAuthorSummary
 
 final case class Book(
   id: ID,

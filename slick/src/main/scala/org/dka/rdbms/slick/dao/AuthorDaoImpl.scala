@@ -1,17 +1,15 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
-import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
 import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID}
 import org.dka.rdbms.common.model.item
-import org.dka.rdbms.common.model.item.{Author, AuthorBookRelationship}
-import org.dka.rdbms.common.model.query.BookAuthorSummary
+import org.dka.rdbms.common.model.item.Author
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
 class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with AuthorDao {
@@ -32,34 +30,9 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
   // needed to support AuthorDao
   //
 
-  private val bookAuthorSummary: (ID, ExecutionContext) => DBIO[Seq[BookAuthorSummary]] = (bookId, ec) => {
-    // the first join:  join author_books table and books table on bookId  -> (authorBookTable, bookTable)
-    // second join:  join the first with authors table on authorBookTable.authorID == authorTable.id
-
-    val innerJoin = for {
-      ((authorBookTable, bookTable), authorTable) <-
-        AuthorsBooksDao.tableQuery join
-          BookDaoImpl.tableQuery on (_.bookId === _.id) join
-          AuthorDaoImpl.tableQuery on (_._1.authorId === _.id)
-    } yield ((authorBookTable, bookTable), authorTable)
-    innerJoin
-      // authorBookTable.bookId == bookTable.bookId
-      .filter(_._1._1.bookId === bookId.value.toString)
-      .result
-      .map(seq =>
-        seq.map { result =>
-          val relationship: AuthorBookRelationship = result._1._1
-          val book = result._1._2 // from bookTable
-          val author = result._2 // from authorTable
-          BookAuthorSummary(relationship, book, author)
-        })(ec)
-  }
-
   //
   // implementation of AuthorDao methods
   //
-  def getAuthorsForBook(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
-    db.run(bookAuthorSummary(bookId, ec)).map(r => Right(r))
 
 }
 
@@ -100,7 +73,6 @@ object AuthorDaoImpl {
       lastName = LastName.build(lastName),
       firstName = firstName.map(FirstName.build),
       locationId = locationId.map { s =>
-        println(s"building locationId from $s")
         LocationID.build(UUID.fromString(s))
       }
     )

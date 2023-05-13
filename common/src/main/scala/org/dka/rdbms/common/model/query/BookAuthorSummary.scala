@@ -14,6 +14,9 @@ object BookAuthorSummary {
   def apply(relationship: AuthorBookRelationship, book: Book, author: Author): BookAuthorSummary =
     new BookAuthorSummary(book.title, author.lastName, author.firstName, relationship.authorOrder)
 
+  def fromDB(title: String, lastName: String, firstName: Option[String], order: Int) =
+    BookAuthorSummary(Title.build(title), LastName.build(lastName), FirstName.build(firstName), order)
+
   implicit val encodeTitleAuthorSummary: Encoder[BookAuthorSummary] = (summary: BookAuthorSummary) => {
     val objects = List(
       Some(Title.toJson(summary.titleName)),
