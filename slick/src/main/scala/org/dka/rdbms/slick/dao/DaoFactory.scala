@@ -22,7 +22,7 @@ class DaoFactory(val database: Database) {
   val locationDao: LocationDaoImpl = new LocationDaoImpl(database)
   val authorsDao: AuthorDaoImpl = new AuthorDaoImpl(database)
   val publisherDao: PublisherDaoImpl = new PublisherDaoImpl(database)
-  val titleDao: BookDaoImpl = new BookDaoImpl(database)
+  val bookDao: BookDaoImpl = new BookDaoImpl(database)
   val authorsTitlesDao: AuthorsBooksDao = new AuthorsBooksDao(database)
 }
 
