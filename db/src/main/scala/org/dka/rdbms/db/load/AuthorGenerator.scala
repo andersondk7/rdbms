@@ -7,9 +7,9 @@ import Generator._
 import java.util.UUID
 
 class AuthorGenerator(
-                          override val count: Int,
-                          val locationIds: Seq[UUID],
-                          override val fileName: String = "authorInsert.sql")
+  override val count: Int,
+  val locationIds: Seq[UUID],
+  override val fileName: String = "authorInsert.sql")
   extends ItemGenerator {
   import AuthorGenerator._
 

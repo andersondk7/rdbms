@@ -31,8 +31,7 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
   // needed to support AuthorDao
   //
 
-  val getAllIdsIO: (ExecutionContext) => DBIO[Seq[ID]] = (ec) =>
-    tableQuery.result.map(seq => seq.map(at => at.id))(ec)
+  val getAllIdsIO: (ExecutionContext) => DBIO[Seq[ID]] = (ec) => tableQuery.result.map(seq => seq.map(at => at.id))(ec)
 
   private val bookAuthorSummaryIO: (ID, ExecutionContext) => DBIO[Seq[BookAuthorSummary]] = (bookId, ec) => {
     // the first join:  join author_books table and books table on bookId  -> (authorBookTable, bookTable)
@@ -65,17 +64,20 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
     db.run(getAllIdsIO(ec))
       .map(r => Right(r))
 
-  override def getAuthorsForBook(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
+  override def getAuthorsForBook(
+    bookId: ID
+  )(implicit ec: ExecutionContext
+  ): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
     db.run(bookAuthorSummaryIO(bookId, ec)).map(r => Right(r))
 
   def getAuthorsForBookSql(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[List[BookAuthorSummary]]] = {
-    val query = sql"select b.title, a.last_name, a.first_name, r.author_order from authors_books as r join books as b on b .id = r.book_id join authors as a on a .id = r.author_id where r .book_id = ${bookId.value.toString}"
-      .as[(String, String, Option[String], Int)]
+    val query =
+      sql"select b.title, a.last_name, a.first_name, r.author_order from authors_books as r join books as b on b .id = r.book_id join authors as a on a .id = r.author_id where r .book_id = ${bookId.value.toString}"
+        .as[(String, String, Option[String], Int)]
     db.run(query)
       .map(r => r.map(t => BookAuthorSummary.fromDB _ tupled t).toList)
       .map(f => Right(f))
   }
-
 
 }
 

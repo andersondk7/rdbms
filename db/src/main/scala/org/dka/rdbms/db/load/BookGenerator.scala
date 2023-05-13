@@ -7,9 +7,9 @@ import Generator._
 import java.util.UUID
 
 class BookGenerator(
-                       override val count: Int,
-                       val publisherIds: Seq[UUID],
-                       override val fileName: String = "bookInsert.sql")
+  override val count: Int,
+  val publisherIds: Seq[UUID],
+  override val fileName: String = "bookInsert.sql")
   extends ItemGenerator {
 
   import BookGenerator._
@@ -42,4 +42,3 @@ object BookGenerator {
     }
   }
 }
-

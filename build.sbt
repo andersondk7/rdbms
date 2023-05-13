@@ -5,7 +5,7 @@ lazy val scala322 = "3.2.2"
 lazy val supportedScalaVersions = List(scala213, scala322)
 
 ThisBuild / organization := "org.dka.rdbms"
-ThisBuild / version      := "0.4.5-SNAPSHOT"
+ThisBuild / version      := "0.4.5"
 ThisBuild / scalaVersion := scala213
 
 lazy val common = project

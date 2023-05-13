@@ -13,9 +13,9 @@ import scala.concurrent.{ExecutionContext, Future}
  * this interface is db agnostic and allows for easy unit testing since an database is not required
  */
 trait BookDao extends CrudDao[Book] {
+
   /**
-   * get the ids of all books
-   * // should be a stream!!!
+   * get the ids of all books // should be a stream!!!
    */
   def getAllIds(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[ID]]]
 

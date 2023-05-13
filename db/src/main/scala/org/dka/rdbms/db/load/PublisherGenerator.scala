@@ -7,9 +7,9 @@ import Generator._
 import java.util.UUID
 
 class PublisherGenerator(
-                        override val count: Int,
-                        val locationIds: Seq[UUID],
-                        override val fileName: String = "publisherInsert.sql")
+  override val count: Int,
+  val locationIds: Seq[UUID],
+  override val fileName: String = "publisherInsert.sql")
   extends ItemGenerator {
   import PublisherGenerator._
 
@@ -28,7 +28,7 @@ class PublisherGenerator(
   private def randomLocationId: UUID = locationIds(util.Random.nextInt(locationSize))
 }
 
-object PublisherGenerator{
+object PublisherGenerator {
   private val bulkLoadPublisher: BulkLoad[Publisher] = new BulkLoad[Publisher] {
     override def header: String = "insert into publishers(id, publisher_name, location_id, website)\n  values\n"
 
