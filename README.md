@@ -46,3 +46,6 @@ Specific steps are detailed [here](release.md)
 
 ## Code structure
 The code structure is detailed [here](structure.md)
+
+## Performance tests
+Limited Performance testing is described [here](performance.md)

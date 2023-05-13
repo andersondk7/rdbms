@@ -68,10 +68,13 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
   override def getAuthorsForBook(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
     db.run(bookAuthorSummaryIO(bookId, ec)).map(r => Right(r))
 
-//  override def getAuthorsForBookSql(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] = {
-//    val query = sql"select * from SomeTable"
-//    db.run(query.as[(String, String, Option[String], Int)].map(r => r.map(t => BookAuthorSummary.appklyt))
-//  }
+  def getAuthorsForBookSql(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[List[BookAuthorSummary]]] = {
+    val query = sql"select b.title, a.last_name, a.first_name, r.author_order from authors_books as r join books as b on b .id = r.book_id join authors as a on a .id = r.author_id where r .book_id = ${bookId.value.toString}"
+      .as[(String, String, Option[String], Int)]
+    db.run(query)
+      .map(r => r.map(t => BookAuthorSummary.fromDB _ tupled t).toList)
+      .map(f => Right(f))
+  }
 
 
 }
