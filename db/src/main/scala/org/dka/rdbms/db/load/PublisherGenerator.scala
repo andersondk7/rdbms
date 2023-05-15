@@ -1,6 +1,6 @@
 package org.dka.rdbms.db.load
 
-import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, WebSite}
+import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version, WebSite}
 import org.dka.rdbms.common.model.item.Publisher
 import Generator._
 
@@ -18,6 +18,7 @@ class PublisherGenerator(
   override def insertLine(uuid: UUID): String = {
     val publisher = Publisher(
       ID(uuid),
+      Version.defaultVersion,
       PublisherName.build(genString(PublisherName.maxLength)),
       Some(LocationID.build(randomLocationId)),
       Some(WebSite.build(genWebSite(WebSite.maxLength)))

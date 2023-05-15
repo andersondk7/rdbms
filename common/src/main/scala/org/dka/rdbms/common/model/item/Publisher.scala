@@ -3,11 +3,12 @@ package org.dka.rdbms.common.model.item
 import cats.data.Validated._
 import cats.implicits._
 import io.circe._
-import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, WebSite}
+import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version, WebSite}
 import org.dka.rdbms.common.model.validation.Validation._
 
 final case class Publisher(
   id: ID,
+  version: Version,
   name: PublisherName,
   locationId: Option[LocationID],
   webSite: Option[WebSite])
@@ -17,6 +18,7 @@ object Publisher {
   implicit val encodePublisher: Encoder[Publisher] = (p: Publisher) => {
     val objects = List(
       Some(ID.toJson(p.id)),
+      Some(Version.toJson(p.version)),
       Some(PublisherName.toJson(p.name)),
       LocationID.toJson(p.locationId),
       WebSite.toJson(p.webSite)
@@ -27,6 +29,7 @@ object Publisher {
   implicit val decodePublisher: Decoder[Publisher] = (c: HCursor) =>
     (
       ID.fromJson(c),
+      Version.fromJson(c),
       PublisherName.fromJson(c),
       LocationID.fromOptionalJson(c),
       WebSite.fromOptionalJson(c)

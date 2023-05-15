@@ -2,7 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, WebSite}
+import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version, WebSite}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Publisher
 import org.dka.rdbms.slick.dao.PublisherDaoImplSpec._
@@ -92,8 +92,9 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       PublisherDaoImpl.toDB(rh) match {
         case None => fail(s"could not convert $rh")
-        case Some((id, publisherName, locationId, webSite)) =>
+        case Some((id, version, publisherName, locationId, webSite)) =>
           id shouldBe rh.id.value.toString
+          version shouldBe rh.version.value
           publisherName shouldBe rh.name.value
           locationId shouldBe rh.locationId.map(_.value.toString)
           webSite shouldBe rh.webSite.map(_.value)
@@ -102,6 +103,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from db to domain") {
       val db = (
         rh.id.value.toString,
+        rh.version.value,
         rh.name.value,
         rh.locationId.map(_.value.toString),
         rh.webSite.map(_.value)
@@ -139,24 +141,28 @@ object PublisherDaoImplSpec {
 
   val rh: Publisher = item.Publisher(
     ID.build,
+    Version.defaultVersion,
     PublisherName.build("RandomHouse"),
     None,
     Some(WebSite.build("www.random.com"))
   )
   val hb: Publisher = item.Publisher(
     ID.build,
+    Version.defaultVersion,
     PublisherName.build("Hachette Book Group"),
     None,
     None
   )
   val hc: Publisher = item.Publisher(
     ID.build,
+    Version.defaultVersion,
     PublisherName.build("Harper Collins"),
     None,
     Some(WebSite.build("www.harperCollins.com"))
   )
   val ad: Publisher = item.Publisher(
     ID.build,
+    Version.defaultVersion,
     PublisherName.build("Addison-Wesley"),
     None,
     None

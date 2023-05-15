@@ -11,6 +11,7 @@ class CountrySpec extends AnyFunSpec with Matchers {
     it("with all fields") {
       val country = Country(
         ID.build,
+        Version.defaultVersion,
         CountryName.build("Far Far Away"),
         CountryAbbreviation.build("FFA")
       )

@@ -15,6 +15,7 @@ class PublisherSpec extends AnyFunSpec with Matchers {
     it("with all fields") {
       val publisher = Publisher(
         ID.build,
+        Version.defaultVersion,
         PublisherName.build("Harper"),
         Some(LocationID.build),
         Some(WebSite.build("http://somehere.com"))
@@ -29,6 +30,7 @@ class PublisherSpec extends AnyFunSpec with Matchers {
     it("with optional fields") {
       val publisher = item.Publisher(
         ID.build,
+        Version.defaultVersion,
         PublisherName.build("Harper"),
         None,
         None

@@ -2,7 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.fields.{ID, Price, Title}
+import org.dka.rdbms.common.model.fields.{ID, Price, Title, Version}
 import org.dka.rdbms.common.model.item.Book
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -22,7 +22,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       BookDaoImpl.toDB(PandP) match {
         case None => fail(s"could not convert $PandP")
-        case Some((id, title, price, _, _)) =>
+        case Some((id, version, title, price, _, _)) =>
           id shouldBe PandP.id.value.toString
           title shouldBe PandP.title.value
           price shouldBe PandP.price.value
@@ -31,6 +31,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from db to domain") {
       val db = (
         PandP.id.value.toString,
+        PandP.version.value,
         PandP.title.value,
         PandP.price.value,
         None,
@@ -176,6 +177,7 @@ object BookDaoImplSpec {
 
   val PandP: Book = Book(
     ID.build,
+    Version.defaultVersion,
     Title.build("Pride and Prejudice"),
     Price.build(BigDecimal(12.34)),
     None,

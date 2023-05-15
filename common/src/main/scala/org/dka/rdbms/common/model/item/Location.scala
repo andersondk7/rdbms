@@ -4,10 +4,11 @@ import cats.data.Validated._
 import cats.implicits._
 import io.circe._
 import org.dka.rdbms.common.model.validation.Validation._
-import org.dka.rdbms.common.model.fields.{CountryID, ID, LocationAbbreviation, LocationName}
+import org.dka.rdbms.common.model.fields.{CountryID, ID, LocationAbbreviation, LocationName, Version}
 
 final case class Location(
   id: ID,
+  version: Version,
   locationName: LocationName,
   locationAbbreviation: LocationAbbreviation,
   countryID: CountryID)
@@ -16,6 +17,7 @@ object Location {
   implicit val encodeLocation: Encoder[Location] = (l: Location) => {
     val objects = List(
       ID.toJson(l.id),
+      Version.toJson(l.version),
       LocationName.toJson(l.locationName),
       LocationAbbreviation.toJson(l.locationAbbreviation),
       CountryID.toJson(l.countryID)
@@ -27,6 +29,7 @@ object Location {
     val result: ValidationErrorsOr[Location] =
       (
         ID.fromJson(c),
+        Version.fromJson(c),
         LocationName.fromJson(c),
         LocationAbbreviation.fromJson(c),
         CountryID.fromJson(c)

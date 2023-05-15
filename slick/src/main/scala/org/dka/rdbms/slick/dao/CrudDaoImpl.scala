@@ -18,20 +18,20 @@ trait CrudDaoImpl[D] extends CrudDao[D] {
   //
   // crud IO operations
   //
-  protected def singleInsertIO: D => DBIO[Int]
-  protected def multipleInsertIO: Seq[D] => DBIO[Option[Int]]
+  protected def singleCreateIO: D => DBIO[Int]
+  protected def multipleCreateIO: Seq[D] => DBIO[Option[Int]]
   protected def getIO: (ID, ExecutionContext) => DBIO[Option[D]]
   protected def deletedIO: ID => DBIO[Int]
 
   override def create(item: D)(implicit ec: ExecutionContext): Future[Either[DaoException, D]] =
-    db.run(singleInsertIO(item))
+    db.run(singleCreateIO(item))
       .map { c: Int =>
         if (c == 1) Right(item)
         else Left(InsertException(s"${item.getClass.getName}: could not insert $item"))
       }
 
   override def create(items: Seq[D])(implicit ec: ExecutionContext): Future[Either[DaoException, Int]] =
-    db.run(multipleInsertIO(items)).map {
+    db.run(multipleCreateIO(items)).map {
       case Some(count) => Right(count)
       case None =>
         Left(InsertException(s"${items.getClass.getName} could not insert ${items.size}"))

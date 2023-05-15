@@ -1,6 +1,6 @@
 package org.dka.rdbms.db.load
 
-import org.dka.rdbms.common.model.fields.{CountryID, ID, LocationAbbreviation, LocationName}
+import org.dka.rdbms.common.model.fields.{CountryID, ID, LocationAbbreviation, LocationName, Version}
 import org.dka.rdbms.common.model.item.Location
 import Generator._
 
@@ -21,6 +21,7 @@ class LocationGenerator(
 
     val location = Location(
       ID(uuid),
+      Version.defaultVersion,
       LocationName.build(genString(LocationName.maxLength)),
       LocationAbbreviation.build(genString(LocationAbbreviation.maxLength)),
       CountryID.build(randomCountryId)

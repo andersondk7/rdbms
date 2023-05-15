@@ -1,7 +1,7 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
-import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID}
+import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID, Version}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
 import slick.jdbc.JdbcBackend.Database
@@ -19,8 +19,8 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
   //
   // crud IO operations
   //
-  override protected val singleInsertIO: Author => DBIO[Int] = author => tableQuery += author
-  override protected val multipleInsertIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
+  override protected val singleCreateIO: Author => DBIO[Int] = author => tableQuery += author
+  override protected val multipleCreateIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     tableQuery.filter(x => x.id === id.value.toString).result.map(x => x.headOption)(ec)
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
@@ -45,12 +45,13 @@ object AuthorDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val version = column[Int]("version")
     val lastName = column[String]("last_name")
     val firstName = column[Option[String]]("first_name")
     val locationId = column[Option[String]]("location_id")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, lastName, firstName, locationId) <> (fromDB, toDB)
+    override def * = (id, version, lastName, firstName, locationId) <> (fromDB, toDB)
   }
 
   //
@@ -61,15 +62,17 @@ object AuthorDaoImpl {
 
   private type AuthorTuple = (
     String, // id
+    Int, // version
     String, // last name
     Option[String], // first name
     Option[String] // location id
   )
 
   def fromDB(tuple: AuthorTuple): Author = {
-    val (id, lastName, firstName, locationId) = tuple
+    val (id, version, lastName, firstName, locationId) = tuple
     item.Author(
       ID.build(UUID.fromString(id)),
+      Version.build(version),
       lastName = LastName.build(lastName),
       firstName = firstName.map(FirstName.build),
       locationId = locationId.map { s =>
@@ -81,6 +84,7 @@ object AuthorDaoImpl {
 
   def toDB(author: Author): Option[AuthorTuple] = Some(
     author.id.value.toString,
+    author.version.value,
     author.lastName.value,
     author.firstName.map(_.value),
     author.locationId.map(_.value.toString)

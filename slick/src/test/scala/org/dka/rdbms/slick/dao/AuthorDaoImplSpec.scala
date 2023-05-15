@@ -2,7 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName}
+import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, Version}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
 import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._
@@ -23,8 +23,9 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       AuthorDaoImpl.toDB(mt) match {
         case None => fail(s"could not convert $mt")
-        case Some((id, last, first, locationId)) =>
+        case Some((id, version, last, first, locationId)) =>
           id shouldBe mt.id.value.toString
+          version shouldBe mt.version.value
           last shouldBe mt.lastName.value
           first shouldBe mt.firstName.map(_.value)
           locationId shouldBe mt.locationId.map(_.value.toString)
@@ -33,6 +34,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from db to domain") {
       val db = (
         mt.id.value.toString,
+        mt.version.value,
         mt.lastName.value,
         mt.firstName.map(_.value),
         mt.locationId.map(_.value.toString)
@@ -138,30 +140,35 @@ object AuthorDaoImplSpec {
 
   val jm: Author = item.Author(
     ID.build,
+    Version.defaultVersion,
     LastName.build("Milton"),
     Some(FirstName.build("John")),
     None
   )
   val ja: Author = item.Author(
     ID.build,
+    Version.defaultVersion,
     LastName.build("Austen"),
     Some(FirstName.build("Jane")),
     None
   )
   val cd: Author = item.Author(
     ID.build,
+    Version.defaultVersion,
     LastName.build("Dickens"),
     Some(FirstName.build("Charles")),
     None
   )
   val mt: Author = item.Author(
     ID.build,
+    Version.defaultVersion,
     LastName.build("Twain"),
     Some(FirstName.build("Mark")),
     None
   )
   val eh: Author = item.Author(
     ID.build,
+    Version.defaultVersion,
     LastName.build("Hemmingway"),
     None,
     None
