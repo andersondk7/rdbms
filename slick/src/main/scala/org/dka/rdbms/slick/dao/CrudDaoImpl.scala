@@ -5,9 +5,11 @@ import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
 import org.dka.rdbms.common.dao._
 import org.dka.rdbms.common.model.fields.ID
 import org.dka.rdbms.common.model.item.Updatable
+import org.postgresql.util.PSQLException
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.TransactionIsolation
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -56,22 +58,39 @@ trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
 
   override def update(item: D)(implicit ec: ExecutionContext): Future[DaoErrorsOr[D]] = {
     val getItemAction = getIO(item.id, ec).map {
-      case None => throw ItemNotFoundException(item.id)
+      case None => Left(ItemNotFoundException(item.id))
       case Some(i) if i.version == item.version =>
-        println(s"update same version: ${i.version.value}, ${item.version.value}")
-        i
+        logger.info(s"update same version: ${i.version.value}, ${item.version.value}")
+        logger.info(s"existing: $i, update: $item")
+        Right(i)
       case Some(i) =>
-        println(s"update different version: ${i.version.value}, ${item.version.value}")
-        throw InvalidVersionException(item.version, i.version)
+        logger.info(s"update different version: ${i.version.value}, ${item.version.value}")
+        Left(InvalidVersionException(item.version))
     }
 
-    val combo = (getItemAction andThen updateAction(item, ec))
-      .transactionally
+    val combo = ( for {
+      target <- getItemAction
+      _ = logger.info(s"target: $target")
+      update <- updateAction(item, ec)
+    } yield {
+      (target, update)
+    })
+      // these type of transaction boundary does not block until the row is released, it blows up
+      // only these levels work:
+      // TransactionIsolation.RepeatableRead
+      // TransactionIsolation.Serializable
+      .transactionally.withTransactionIsolation(TransactionIsolation.RepeatableRead)
 
     db.run(combo)
-      .map(Right(_))
-      .recoverWith {
-        case de: DaoException => Future(Left(de))
+      .map {
+        case (Left(e), _) => Left(e)
+        case (_, item) => Right(item)
+      }
+      .recover {
+        case e: PSQLException =>
+          // plsql exception gives no useful information
+//          println(s"******************* caught exception: \n ${e.getClass.getName}, message ${e.getMessage}, ${e.getCause} \n ****************")
+          Left(InvalidVersionException(item.version))
       }
   }
 }

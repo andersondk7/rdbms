@@ -175,8 +175,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             }
           }
         },
-//        tearDown = factory => deleteAuthor(nd.id)(factory, ec)
-        tearDown = noSetup
+        tearDown = factory => deleteAuthor(nd.id)(factory, ec)
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None
@@ -189,8 +188,8 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - susan wants to update only the last name of an author
       - neither bill nor susan is aware of the other's edits
       result:
-      - the first one to make an update (first Name) succeeds
-      - the second one to make an update (last Name) fails
+      - since this is async, it is indeterminate which will succeed and which will fail
+      -  but there will be one of each
        */
       val updatedFirstName = "Nanette"
       val updatedLastName = "Drewmore"
@@ -212,14 +211,15 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             }
             val errors = finished.collect {
               case Left(e) =>
-                logger.info(s"error: $e")
+                logger.info(s"error: ${e.getMessage}")
+                e
             }
             authors.size shouldBe 1
             errors.size shouldBe 1
           }
         },
-        //        tearDown = factory => deleteAuthor(nd.id)(factory, ec)
-        tearDown = noSetup
+                tearDown = factory => deleteAuthor(nd.id)(factory, ec)
+//        tearDown = noSetup
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure shouldBe None

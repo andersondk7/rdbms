@@ -31,9 +31,9 @@ case class ItemNotFoundException(val id: ID)
   override val underlyingCause: Option[Throwable] = None
 }
 
-case class InvalidVersionException(updateVersion: Version, currentVersion: Version) extends DaoException {
+case class InvalidVersionException(version: Version) extends DaoException {
   override val underlyingCause: Option[Throwable] = None
-  override val reason: String = s"attempt to update version $updateVersion when currentVersion is $currentVersion"
+  override val reason: String = s"attempt to update old version $version"
 }
 
 object Validation {
