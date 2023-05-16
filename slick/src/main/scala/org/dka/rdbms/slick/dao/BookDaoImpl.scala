@@ -6,6 +6,7 @@ import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, T
 import org.dka.rdbms.common.model.item.{AuthorBookRelationship, Book}
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
@@ -26,9 +27,14 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
+  override protected val updateAction: (Book, ExecutionContext) => DBIO[Book] = (item, ec) => ???
+//  val query = tableQuery.filter(_.version === item.version.value).map(bt => (bt.version, bt.title, bt.price, bt.publisherId, bt.publishDate))
+//    query.update( (item.version.value + 1, item.title.value, item.price.value, item.publisherID.map(_.value.toString), item.publishDate.map(_.value)))
+//  }
+
   //
   // additional IO operations
-  // needed to support AuthorDao
+  // needed to support BookDao
   //
 
   val getAllIdsIO: (ExecutionContext) => DBIO[Seq[ID]] = (ec) => tableQuery.result.map(seq => seq.map(at => at.id))(ec)

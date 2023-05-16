@@ -37,7 +37,7 @@ object PublisherGenerator {
       val locationId = p.locationId.fold("'null'")(id => s"${id.value.toString}")
       val webSite = p.webSite.fold("'null'")(site => s"${site.value}")
 
-      s"('${p.id.value.toString}', '${p.name.value}', '$locationId', '$webSite'),"
+      s"('${p.id.value.toString}', '${p.publisherName.value}', '$locationId', '$webSite'),"
     }
   }
 }

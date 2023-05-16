@@ -95,7 +95,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         case Some((id, version, publisherName, locationId, webSite)) =>
           id shouldBe rh.id.value.toString
           version shouldBe rh.version.value
-          publisherName shouldBe rh.name.value
+          publisherName shouldBe rh.publisherName.value
           locationId shouldBe rh.locationId.map(_.value.toString)
           webSite shouldBe rh.webSite.map(_.value)
       }
@@ -104,7 +104,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       val db = (
         rh.id.value.toString,
         rh.version.value,
-        rh.name.value,
+        rh.publisherName.value,
         rh.locationId.map(_.value.toString),
         rh.webSite.map(_.value)
       )

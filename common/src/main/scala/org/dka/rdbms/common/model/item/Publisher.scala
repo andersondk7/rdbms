@@ -7,11 +7,14 @@ import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version
 import org.dka.rdbms.common.model.validation.Validation._
 
 final case class Publisher(
-  id: ID,
-  version: Version,
-  name: PublisherName,
-  locationId: Option[LocationID],
-  webSite: Option[WebSite])
+                            override val id: ID,
+                            override val version: Version,
+                            publisherName: PublisherName,
+                            locationId: Option[LocationID],
+                            webSite: Option[WebSite]
+                          ) extends Updatable[Publisher] {
+  override def update: Publisher = this.copy(version = version.next)
+}
 
 object Publisher {
 
@@ -19,7 +22,7 @@ object Publisher {
     val objects = List(
       Some(ID.toJson(p.id)),
       Some(Version.toJson(p.version)),
-      Some(PublisherName.toJson(p.name)),
+      Some(PublisherName.toJson(p.publisherName)),
       LocationID.toJson(p.locationId),
       WebSite.toJson(p.webSite)
     ).flatten

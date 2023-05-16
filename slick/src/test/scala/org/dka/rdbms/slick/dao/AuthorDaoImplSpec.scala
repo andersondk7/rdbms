@@ -2,6 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
+import org.dka.rdbms.common.dao.InvalidVersionException
 import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, Version}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
@@ -112,6 +113,119 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
+  describe("updating") {
+    it("should update once") {
+      val updatedLastName = "Hardy"
+      val result = withDB(
+        setup = factory => loadAuthor(nd)(factory, ec),
+        test = factory => {
+          Try {
+            val updatedAuthor = nd.copy(lastName = LastName.build(updatedLastName))
+            logger.info(s"initial: $nd")
+            logger.info(s"before: $updatedAuthor")
+            Await.result(factory.authorsDao.update(updatedAuthor)(ec), delay) match {
+              case Left(e) => fail(e)
+              case Right(updated) =>
+                logger.info(s"after:  $updated")
+                updated.version shouldBe nd.version.next
+                updated.lastName shouldBe LastName.build(updatedLastName)
+                updated.firstName shouldBe nd.firstName
+            }
+          }
+        },
+        tearDown = factory => deleteAuthor(nd.id)(factory, ec)
+      )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
+    }
+    it("should fail update with old version (sequentially)") {
+      /*
+      sceanrio:
+      - bill wants to update only the first name of an author
+      - susan wants to update only the last name of an author
+      - neither bill nor susan is aware of the other's edits
+      result:
+      - the first one to make an update (first Name) succeeds
+      - the second one to make an update (last Name) fails
+       */
+      val updatedFirstName = "Nanette"
+      val updatedLastName = "Drewmore"
+      val result = withDB(
+        setup = factory => loadAuthor(nd)(factory, ec),
+        test = factory => {
+          Try {
+            val firstChange = nd.copy(firstName = FirstName.build(Some(updatedFirstName)))
+            val secondChange = nd.copy(lastName = LastName.build(updatedLastName))
+
+            logger.debug(s"firstChange: $firstChange")
+            Await.result(factory.authorsDao.update(firstChange)(ec), delay) match {
+              case Left(e) => fail(s"firstChange failed with",e)
+              case Right(updated) =>
+                updated shouldBe firstChange.update
+            }
+            logger.debug(s"secondChange: $secondChange")
+            Await.result(factory.authorsDao.update(secondChange)(ec), delay) match {
+              case Left(e) =>
+                println(s"failed with $e")
+                e shouldBe a [InvalidVersionException]
+              case Right(updated) =>
+                println(s"updated:  $updated")
+                fail(s"second change ($secondChange) with old version succeeded")
+            }
+          }
+        },
+//        tearDown = factory => deleteAuthor(nd.id)(factory, ec)
+        tearDown = noSetup
+      )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
+    }
+    it("should fail update with old version (async)") {
+      /*
+      sceanrio:
+      - bill wants to update only the first name of an author
+      - susan wants to update only the last name of an author
+      - neither bill nor susan is aware of the other's edits
+      result:
+      - the first one to make an update (first Name) succeeds
+      - the second one to make an update (last Name) fails
+       */
+      val updatedFirstName = "Nanette"
+      val updatedLastName = "Drewmore"
+      val result = withDB(
+        setup = factory => loadAuthor(nd)(factory, ec),
+        test = factory => {
+          Try {
+            val firstChange = nd.copy(firstName = FirstName.build(Some(updatedFirstName)))
+            val secondChange = nd.copy(lastName = LastName.build(updatedLastName))
+            // launch async
+            val attempt1 = factory.authorsDao.update(firstChange)(ec)
+            val attempt2 = factory.authorsDao.update(secondChange)(ec)
+
+            val finished = Await.result(Future.sequence(Seq(attempt1, attempt2)), delay)
+            val authors = finished.collect {
+              case Right(author) =>
+                logger.info(s"successful $author")
+                author
+            }
+            val errors = finished.collect {
+              case Left(e) =>
+                logger.info(s"error: $e")
+            }
+            authors.size shouldBe 1
+            errors.size shouldBe 1
+          }
+        },
+        //        tearDown = factory => deleteAuthor(nd.id)(factory, ec)
+        tearDown = noSetup
+      )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
+    }
+  }
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorsDao.create(author), delay) match {
       case Left(e) => fail(e)
@@ -152,11 +266,11 @@ object AuthorDaoImplSpec {
     Some(FirstName.build("Jane")),
     None
   )
-  val cd: Author = item.Author(
+  val nd: Author = item.Author(
     ID.build,
     Version.defaultVersion,
-    LastName.build("Dickens"),
-    Some(FirstName.build("Charles")),
+    LastName.build("Drew"),
+    Some(FirstName.build("Nancy")),
     None
   )
   val mt: Author = item.Author(
@@ -174,6 +288,6 @@ object AuthorDaoImplSpec {
     None
   )
 
-  val multipleAuthors: Seq[Author] = Seq(ja, jm, cd, mt)
+  val multipleAuthors: Seq[Author] = Seq(ja, jm, nd, mt)
   val authorIds: Seq[ID] = AuthorDaoImplSpec.multipleAuthors.map(_.id)
 }

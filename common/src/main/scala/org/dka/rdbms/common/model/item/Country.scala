@@ -7,10 +7,13 @@ import org.dka.rdbms.common.model.validation.Validation._
 import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
 
 final case class Country(
-  id: ID,
-  version: Version,
+  override val id: ID,
+  override val version: Version,
   countryName: CountryName,
-  countryAbbreviation: CountryAbbreviation)
+  countryAbbreviation: CountryAbbreviation
+                        ) extends Updatable[Country] {
+  override def update: Country = this.copy(version = version.next)
+}
 
 object Country {
   implicit val encodeAuthor: Encoder[Country] = (c: Country) => {

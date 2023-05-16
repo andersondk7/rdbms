@@ -4,6 +4,7 @@ import org.dka.rdbms.common.dao.CountryDao
 import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
 import org.dka.rdbms.common.model.item.Country
 import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
@@ -23,9 +24,15 @@ class CountryDaoImpl(override val db: Database) extends CrudDaoImpl[Country] wit
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
+  override protected val updateAction: (Country, ExecutionContext) => DBIO[Country] = (item, ec) => ???
+//  override def updateAction(item: Country): PostgresProfile.ProfileAction[Int, NoStream, Effect.Write] = {
+//    val query = tableQuery.filter(_.version === item.version.value).map(ct => (ct.version, ct.countryName, ct.countryAbbreviation))
+//    query.update((item.version.value + 1, item.countryName.value, item.countryAbbreviation.value))
+//  }
+
   //
   // additional IO operations
-  // needed to support AuthorDao
+  // needed to support CountryDao
   //
 }
 
@@ -39,8 +46,8 @@ object CountryDaoImpl {
       "countries") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
     val version = column[Int]("version")
-    private val countryName = column[String]("country_name")
-    private val countryAbbreviation = column[String]("country_abbreviation")
+    val countryName = column[String]("country_name")
+    val countryAbbreviation = column[String]("country_abbreviation")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, version, countryName, countryAbbreviation) <> (fromDB, toDB)

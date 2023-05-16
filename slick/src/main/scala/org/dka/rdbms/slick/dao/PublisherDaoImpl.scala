@@ -4,6 +4,7 @@ import org.dka.rdbms.common.dao.PublisherDao
 import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version, WebSite}
 import org.dka.rdbms.common.model.item.Publisher
 import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
@@ -19,10 +20,14 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher]
   override protected val singleCreateIO: Publisher => DBIO[Int] = publisher => tableQuery += publisher
   override protected val multipleCreateIO: Seq[Publisher] => DBIO[Option[Int]] = publishers => tableQuery ++= publishers
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Publisher]] = (id, ec) =>
-    // the '_' is what comes back from the db, so _.id is a string based on the AuthorTable definition
-    // the id is the model object, which is a final case class Id(...)
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
+  override protected val updateAction: (Publisher, ExecutionContext) => DBIO[Publisher] = (item, ec) => ???
+
+//  override def updateAction(item: Publisher): PostgresProfile.ProfileAction[Int, NoStream, Effect.Write] = {
+//    val query = tableQuery.filter(_.version === item.version.value).map(pt => (pt.version, pt.publisherName, pt.locationId, pt.website ))
+//    query.update((item.version.value + 1, item.publisherName.value, item.locationId.map(_.value.toString), item.webSite.map(_.value)))
+//  }
 
   //
   // additional IO operations
@@ -41,9 +46,9 @@ object PublisherDaoImpl {
       "publishers") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
     val version = column[Int]("version")
-    private val publisherName = column[String]("publisher_name")
-    private val locationId = column[Option[String]]("location_id")
-    private val website = column[Option[String]]("website")
+    val publisherName = column[String]("publisher_name")
+    val locationId = column[Option[String]]("location_id")
+    val website = column[Option[String]]("website")
 
     override def * = (id, version, publisherName, locationId, website) <> (fromDB, toDB)
   }
@@ -75,7 +80,7 @@ object PublisherDaoImpl {
   def toDB(publisher: Publisher): Option[PublisherTuple] = Some(
     publisher.id.value.toString,
     publisher.version.value,
-    publisher.name.value,
+    publisher.publisherName.value,
     publisher.locationId.map(_.value.toString),
     publisher.webSite.map(_.value)
   )

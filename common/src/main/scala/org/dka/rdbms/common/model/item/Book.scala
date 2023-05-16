@@ -8,12 +8,16 @@ import org.dka.rdbms.common.model.validation.Validation._
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 
 final case class Book(
-  id: ID,
-  version: Version,
+  override val id: ID,
+  override val version: Version,
   title: Title,
   price: Price,
   publisherID: Option[PublisherID],
-  publishDate: Option[PublishDate])
+  publishDate: Option[PublishDate]
+                     ) extends Updatable[Book] {
+  override def update: Book = this.copy(version = version.next)
+
+}
 
 object Book {
   implicit val encodeTitle: Encoder[Book] = (b: Book) => {
