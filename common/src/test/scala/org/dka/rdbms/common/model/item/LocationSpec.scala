@@ -11,6 +11,7 @@ class LocationSpec extends AnyFunSpec with Matchers {
     it("with all fields") {
       val location = Location(
         ID.build,
+        Version.defaultVersion,
         LocationName.build("Far Far Away"),
         LocationAbbreviation.build("FFA"),
         CountryID.build

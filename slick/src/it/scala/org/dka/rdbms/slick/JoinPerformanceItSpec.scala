@@ -15,6 +15,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
+  private val logger = Logger(getClass.getName)
 
   import JoinPerformanceItSpec._
 
@@ -27,7 +28,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         // make a call for each book (all 2000 of them)
         Await.result(factory.bookDao.getAuthorsForBook(id), delay).getOrElse(throw new Exception("error"))
         val time = System.currentTimeMillis() - now
-        println(s"slick: first single query, time: $time")
+        logger.info(s"slick: first single query, time: $time")
       }
     }
     it("getAuthorsForBooks concurrently") {
@@ -46,7 +47,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
           .map(_.flatten)
         val summaries: Seq[BookAuthorSummary] = Await.result(queries, delay)
         val time = System.currentTimeMillis() - now
-        println(s"slick: concurrent for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
+        logger.info(s"slick: concurrent for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
         summaries.size shouldBe (bookCount * authorsPerBook)
       }
     }
@@ -62,7 +63,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
             .getOrElse(throw new Exception(s"could not get summary for $id"))
         val summaries: Seq[BookAuthorSummary] = ids.flatMap(query(_, factory.bookDao))
         val time = System.currentTimeMillis() - now
-        println(s"slick: sequential for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
+        logger.info(s"slick: sequential for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
         summaries.size shouldBe (bookCount * authorsPerBook)
       }
     }
@@ -75,7 +76,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         // make a call for each book (all 2000 of them)
         Await.result(factory.bookDao.getAuthorsForBook(id), delay).getOrElse(throw new Exception("error"))
         val time = System.currentTimeMillis() - now
-        println(s"slick: last single query, time: $time")
+        logger.info(s"slick: last single query, time: $time")
       }
     }
   }
@@ -89,7 +90,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         // make a call for each book (all 2000 of them)
         Await.result(factory.bookDao.getAuthorsForBookSql(id), delay).getOrElse(throw new Exception("error"))
         val time = System.currentTimeMillis() - now
-        println(s"sql: first single query, time: $time")
+        logger.info(s"sql: first single query, time: $time")
       }
     }
     it("getAuthorsForBooks concurrently") {
@@ -108,7 +109,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
           .map(_.flatten)
         val summaries: Seq[BookAuthorSummary] = Await.result(queries, delay)
         val time = System.currentTimeMillis() - now
-        println(s"sql: concurrent for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
+        logger.info(s"sql: concurrent for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
         summaries.size shouldBe (bookCount * authorsPerBook)
       }
     }
@@ -124,7 +125,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
             .getOrElse(throw new Exception(s"could not get summary for $id"))
         val summaries: Seq[BookAuthorSummary] = ids.flatMap(query(_, factory.bookDao))
         val time = System.currentTimeMillis() - now
-        println(s"sql: sequential for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
+        logger.info(s"sql: sequential for ${ids.size} queries, time: $time, avg time: ${time / ids.size}")
         summaries.size shouldBe (bookCount * authorsPerBook)
       }
     }
@@ -137,7 +138,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         // make a call for each book (all 2000 of them)
         Await.result(factory.bookDao.getAuthorsForBookSql(id), delay).getOrElse(throw new Exception("error"))
         val time = System.currentTimeMillis() - now
-        println(s"sql: last single query, time: $time")
+        logger.info(s"sql: last single query, time: $time")
       }
     }
   }

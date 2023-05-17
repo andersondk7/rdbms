@@ -4,7 +4,7 @@ import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe.{DecodingFailure, HCursor}
 import org.dka.rdbms.common.model.validation.Validation.ValidationErrorsOr
-import org.dka.rdbms.common.model.validation.{BigDecimalValidation, JsonParseException, NumberTooSmallException}
+import org.dka.rdbms.common.model.validation.{BigDecimalValidation, JsonParseException, NumberTooSmallException, PositiveIntegerValidation}
 
 /**
  * titleName requirements:

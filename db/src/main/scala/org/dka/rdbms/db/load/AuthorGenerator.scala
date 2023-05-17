@@ -1,6 +1,6 @@
 package org.dka.rdbms.db.load
 
-import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID}
+import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID, Version}
 import org.dka.rdbms.common.model.item.Author
 import Generator._
 
@@ -18,6 +18,7 @@ class AuthorGenerator(
   override def insertLine(uuid: UUID): String = {
     val author = Author(
       ID(uuid),
+      Version.defaultVersion,
       LastName.build(genString(LastName.maxLength)),
       Some(FirstName.build(genString(FirstName.maxLength))),
       Some(LocationID.build(randomLocationId))
