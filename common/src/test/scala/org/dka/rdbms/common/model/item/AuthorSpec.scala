@@ -16,9 +16,13 @@ class AuthorSpec extends AnyFunSpec with Matchers {
         Version.defaultVersion,
         LastName.build("Doe"),
         Some(FirstName.build("John")),
-        Some(LocationID.build)
+        Some(LocationID.build),
+        CreateDate.now,
+        UpdateDate.now
       )
+      println(s"author: $author")
       val json = author.asJson.noSpaces
+      println(s"json: $json")
       decode[Author](json) match {
         case Left(error) => fail(error)
         case Right(decoded) => decoded shouldBe author

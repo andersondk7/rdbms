@@ -4,7 +4,7 @@ create table countries (
   version int not null default 1,
   country_name varchar(40) not null,
   country_abbreviation varchar(5) not null,
-  create_date TIMESTAMP not null default CURRENT_DATE,
+  create_date TIMESTAMP not null default CURRENT_TIMESTAMP,
   update_date TIMESTAMP
   );
 grant select on countries to public;

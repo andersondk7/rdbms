@@ -3,7 +3,7 @@ package org.dka.rdbms.slick.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.common.dao.InvalidVersionException
-import org.dka.rdbms.common.model.fields.{ID, PublisherName, Version, WebSite}
+import org.dka.rdbms.common.model.fields.{ID, PublisherName, UpdateDate, Version, WebSite}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Publisher
 import org.dka.rdbms.slick.dao.PublisherDaoImplSpec._
@@ -24,12 +24,14 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       PublisherDaoImpl.toDB(rh) match {
         case None => fail(s"could not convert $rh")
-        case Some((id, version, publisherName, locationId, webSite)) =>
+        case Some((id, version, publisherName, locationId, webSite, createDate, updateDate)) =>
           id shouldBe rh.id.value.toString
           version shouldBe rh.version.value
           publisherName shouldBe rh.publisherName.value
           locationId shouldBe rh.locationId.map(_.value.toString)
           webSite shouldBe rh.webSite.map(_.value)
+          createDate shouldBe rh.createDate.asTimestamp
+          updateDate shouldBe rh.lastUpdate.map(_.asTimeStamp)
       }
     }
     it("should convert from db to domain") {
@@ -38,7 +40,9 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         rh.version.value,
         rh.publisherName.value,
         rh.locationId.map(_.value.toString),
-        rh.webSite.map(_.value)
+        rh.webSite.map(_.value),
+        rh.createDate.asTimestamp,
+        rh.lastUpdate.map(_.asTimeStamp)
       )
       val converted = PublisherDaoImpl.fromDB(db)
       converted shouldBe rh
@@ -123,14 +127,15 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         setup = factory => loadPublisher(hb)(factory, ec),
         test = factory =>
           Try {
-            val updatedAuthor = hb.copy(publisherName = PublisherName.build(updatedPublisherName))
-            Await.result(factory.publisherDao.update(updatedAuthor)(ec), delay) match {
+            val updatedPublisher = hb.copy(publisherName = PublisherName.build(updatedPublisherName))
+            Await.result(factory.publisherDao.update(updatedPublisher)(ec), delay) match {
               case Left(e) => fail(e)
               case Right(updated) =>
-                updated.version shouldBe hb.version.next
-                updated.publisherName shouldBe PublisherName.build(updatedPublisherName)
-                updated.locationId shouldBe hb.locationId
-                updatedAuthor.webSite shouldBe hb.webSite
+                updated.version shouldBe updatedPublisher.version.next
+                updated.publisherName shouldBe updatedPublisher.publisherName
+                updated.locationId shouldBe updatedPublisher.locationId
+                updated.webSite shouldBe updatedPublisher.webSite
+                updated.lastUpdate should not be updatedPublisher.lastUpdate
             }
           },
         tearDown = factory => deletePublisher(hb.id)(factory, ec)
@@ -161,7 +166,11 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             Await.result(factory.publisherDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
               case Right(updated) =>
-                updated shouldBe firstChange.update
+                updated.version shouldBe firstChange.version.next
+                updated.publisherName shouldBe firstChange.publisherName
+                updated.locationId shouldBe firstChange.locationId
+                updated.webSite shouldBe firstChange.webSite
+                updated.lastUpdate should not be firstChange.lastUpdate
             }
             logger.debug(s"secondChange: $secondChange")
             Await.result(factory.publisherDao.update(secondChange)(ec), delay) match {

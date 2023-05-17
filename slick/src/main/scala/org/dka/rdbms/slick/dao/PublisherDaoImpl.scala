@@ -1,12 +1,13 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.PublisherDao
-import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version, WebSite}
+import org.dka.rdbms.common.model.fields.{CreateDate, ID, LocationID, PublisherName, UpdateDate, Version, WebSite}
 import org.dka.rdbms.common.model.item.Publisher
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.sql.Timestamp
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 
@@ -32,7 +33,8 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher]
           pt.version,
           pt.publisherName,
           pt.locationId,
-          pt.website
+          pt.website,
+          pt.updateDate
         ))
       .update(
         (
@@ -40,7 +42,8 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher]
           updated.version.value,
           updated.publisherName.value,
           updated.locationId.map(_.value.toString),
-          updated.webSite.map(_.value)
+          updated.webSite.map(_.value),
+          updated.lastUpdate.map(_.asTimeStamp)
         )
       )
       .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
@@ -66,8 +69,10 @@ object PublisherDaoImpl {
     val publisherName = column[String]("publisher_name")
     val locationId = column[Option[String]]("location_id")
     val website = column[Option[String]]("website")
+    val createDate = column[Timestamp]("create_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
-    override def * = (id, version, publisherName, locationId, website) <> (fromDB, toDB)
+    override def * = (id, version, publisherName, locationId, website, createDate, updateDate) <> (fromDB, toDB)
   }
 
   //
@@ -80,17 +85,21 @@ object PublisherDaoImpl {
     Int, // version
     String, // publisherName
     Option[String], // locationId
-    Option[String] // website
+    Option[String], // website
+    Timestamp, // createDate
+    Option[Timestamp] // updateDate
   )
 
   def fromDB(tuple: PublisherTuple): Publisher = {
-    val (id, version, publisherName, locationId, webSite) = tuple
+    val (id, version, publisherName, locationId, webSite, createDate, updateDate) = tuple
     Publisher(
       ID.build(UUID.fromString(id)),
       Version.build(version),
       PublisherName.build(publisherName),
       LocationID.fromOpt(locationId),
-      WebSite.build(webSite)
+      WebSite.build(webSite),
+      CreateDate.build(createDate),
+      updateDate.map(UpdateDate.build)
     )
   }
 
@@ -99,6 +108,8 @@ object PublisherDaoImpl {
     publisher.version.value,
     publisher.publisherName.value,
     publisher.locationId.map(_.value.toString),
-    publisher.webSite.map(_.value)
+    publisher.webSite.map(_.value),
+    publisher.createDate.asTimestamp,
+    publisher.lastUpdate.map(_.asTimeStamp)
   )
 }

@@ -14,7 +14,9 @@ class LocationSpec extends AnyFunSpec with Matchers {
         Version.defaultVersion,
         LocationName.build("Far Far Away"),
         LocationAbbreviation.build("FFA"),
-        CountryID.build
+        CountryID.build,
+        CreateDate.now,
+        UpdateDate.now
       )
       val json = location.asJson.noSpaces
       decode[Location](json) match {

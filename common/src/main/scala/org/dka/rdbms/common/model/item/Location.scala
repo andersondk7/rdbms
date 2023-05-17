@@ -4,27 +4,31 @@ import cats.data.Validated._
 import cats.implicits._
 import io.circe._
 import org.dka.rdbms.common.model.validation.Validation._
-import org.dka.rdbms.common.model.fields.{CountryID, ID, LocationAbbreviation, LocationName, Version}
+import org.dka.rdbms.common.model.fields.{CountryID, CreateDate, ID, LocationAbbreviation, LocationName, UpdateDate, Version}
 
 final case class Location(
   override val id: ID,
   override val version: Version,
   locationName: LocationName,
   locationAbbreviation: LocationAbbreviation,
-  countryID: CountryID)
+  countryID: CountryID,
+  createDate: CreateDate = CreateDate.now,
+  override val lastUpdate: Option[UpdateDate] = None)
   extends Updatable[Location] {
-  override def update: Location = this.copy(version = version.next)
+  override def update: Location = this.copy(version = version.next, lastUpdate = UpdateDate.now)
 }
 
 object Location {
   implicit val encodeLocation: Encoder[Location] = (l: Location) => {
     val objects = List(
-      ID.toJson(l.id),
-      Version.toJson(l.version),
-      LocationName.toJson(l.locationName),
-      LocationAbbreviation.toJson(l.locationAbbreviation),
-      CountryID.toJson(l.countryID)
-    )
+      Some(ID.toJson(l.id)),
+      Some(Version.toJson(l.version)),
+      UpdateDate.toJson(l.lastUpdate),
+      Some(LocationName.toJson(l.locationName)),
+      Some(LocationAbbreviation.toJson(l.locationAbbreviation)),
+      Some(CountryID.toJson(l.countryID)),
+      Some(CreateDate.toJson(l.createDate))
+    ).flatten
     Json.obj(objects: _*)
   }
 
@@ -35,7 +39,9 @@ object Location {
         Version.fromJson(c),
         LocationName.fromJson(c),
         LocationAbbreviation.fromJson(c),
-        CountryID.fromJson(c)
+        CountryID.fromJson(c),
+        CreateDate.fromJson(c),
+        UpdateDate.fromOptionalJson(c)
       ).mapN(Location.apply)
     result match {
       case Invalid(errors) =>

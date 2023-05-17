@@ -24,12 +24,14 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       LocationDaoImpl.toDB(bamberg) match {
         case None => fail(s"could not convert $bamberg")
-        case Some((id, version, name, abbreviation, countryId)) =>
+        case Some((id, version, name, abbreviation, countryId, createDate, updateDate)) =>
           id shouldBe bamberg.id.value.toString
           version shouldBe bamberg.version.value
           name shouldBe bamberg.locationName.value
           abbreviation shouldBe bamberg.locationAbbreviation.value
           countryId shouldBe bamberg.countryID.value.toString
+          createDate shouldBe bamberg.createDate.asTimestamp
+          updateDate shouldBe bamberg.lastUpdate.map(_.asTimeStamp)
       }
     }
     it("should convert from db to domain") {
@@ -38,7 +40,9 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         bamberg.version.value,
         bamberg.locationName.value,
         bamberg.locationAbbreviation.value,
-        bamberg.countryID.value.toString
+        bamberg.countryID.value.toString,
+        bamberg.createDate.asTimestamp,
+        bamberg.lastUpdate.map(_.asTimeStamp)
       )
       val converted = LocationDaoImpl.fromDB(db)
       converted shouldBe bamberg
@@ -96,9 +100,11 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             Await.result(factory.locationDao.update(updatedLocation)(ec), delay) match {
               case Left(e) => fail(e)
               case Right(updated) =>
-                updated.version shouldBe bamberg.version.next
-                updated.locationName shouldBe bamberg.locationName
-                updated.locationAbbreviation shouldBe LocationAbbreviation.build(updatedAbbreviation)
+                updated.version shouldBe updatedLocation.version.next
+                updated.createDate shouldBe updatedLocation.createDate
+                updated.locationName shouldBe updatedLocation.locationName
+                updated.locationAbbreviation shouldBe updatedLocation.locationAbbreviation
+                updated.lastUpdate should not be updatedLocation.lastUpdate
             }
           },
         tearDown = factory => deleteLocation(bamberg.id)(factory, ec)
@@ -130,8 +136,11 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             Await.result(factory.locationDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
               case Right(updated) =>
-                logger.debug(s"after first change: $updated")
-                updated shouldBe firstChange.update
+                updated.version shouldBe firstChange.version.next
+                updated.createDate shouldBe firstChange.createDate
+                updated.locationName shouldBe firstChange.locationName
+                updated.locationAbbreviation shouldBe firstChange.locationAbbreviation
+                updated.lastUpdate should not be firstChange.lastUpdate
             }
             logger.debug(s"secondChange: $secondChange")
             Await.result(factory.locationDao.update(secondChange)(ec), delay) match {

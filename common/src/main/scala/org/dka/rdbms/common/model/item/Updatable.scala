@@ -1,6 +1,6 @@
 package org.dka.rdbms.common.model.item
 
-import org.dka.rdbms.common.model.fields.{ID, Version}
+import org.dka.rdbms.common.model.fields.{ID, UpdateDate, Version}
 
 /**
  * Represents a CRUD Item that can be updated
@@ -11,6 +11,7 @@ import org.dka.rdbms.common.model.fields.{ID, Version}
 trait Updatable[T] {
   def id: ID
   def version: Version
+  def lastUpdate: Option[UpdateDate]
 
   /**
    * change the values in the item that should be updated (typically the updateDate and version

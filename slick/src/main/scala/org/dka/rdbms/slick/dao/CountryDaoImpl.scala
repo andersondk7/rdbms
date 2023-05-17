@@ -1,12 +1,13 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.CountryDao
-import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
+import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, CreateDate, ID, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Country
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.sql.Timestamp
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
@@ -32,14 +33,16 @@ class CountryDaoImpl(override val db: Database) extends CrudDaoImpl[Country] wit
           ct.id,
           ct.version,
           ct.countryName,
-          ct.countryAbbreviation
+          ct.countryAbbreviation,
+          ct.updateDate
         ))
       .update(
         (
           updated.id.value.toString,
           updated.version.value,
           updated.countryName.value,
-          updated.countryAbbreviation.value
+          updated.countryAbbreviation.value,
+          updated.lastUpdate.map(_.asTimeStamp)
         )
       )
       .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
@@ -64,9 +67,11 @@ object CountryDaoImpl {
     val version = column[Int]("version")
     val countryName = column[String]("country_name")
     val countryAbbreviation = column[String]("country_abbreviation")
+    val createDate = column[Timestamp]("create_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, version, countryName, countryAbbreviation) <> (fromDB, toDB)
+    override def * = (id, version, countryName, countryAbbreviation, createDate, updateDate) <> (fromDB, toDB)
   }
 
   //
@@ -79,16 +84,20 @@ object CountryDaoImpl {
     String, // id
     Int, // version
     String, // country_name
-    String // country_abbreviation
+    String, // country_abbreviation
+    Timestamp, // create date
+    Option[Timestamp] // update date
   )
 
   def fromDB(tuple: CountryTuple): Country = {
-    val (id, version, countryName, countryAbbreviation) = tuple
+    val (id, version, countryName, countryAbbreviation, createDate, updateDate) = tuple
     Country(
       ID.build(UUID.fromString(id)),
       Version.build(version),
       countryName = CountryName.build(countryName),
-      countryAbbreviation = CountryAbbreviation.build(countryAbbreviation)
+      countryAbbreviation = CountryAbbreviation.build(countryAbbreviation),
+      createDate = CreateDate.build(createDate),
+      lastUpdate = updateDate.map(UpdateDate.build)
     )
   }
 
@@ -96,7 +105,9 @@ object CountryDaoImpl {
     country.id.value.toString,
     country.version.value,
     country.countryName.value,
-    country.countryAbbreviation.value
+    country.countryAbbreviation.value,
+    country.createDate.asTimestamp,
+    country.lastUpdate.map(_.asTimeStamp)
   )
 
 }

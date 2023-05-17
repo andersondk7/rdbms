@@ -1,6 +1,6 @@
 package org.dka.rdbms.common.model.fields
 
-import org.dka.rdbms.common.model.validation.DateValidation
+import org.dka.rdbms.common.model.validation.LocalDateValidation
 
 import java.time.LocalDate
 
@@ -11,7 +11,7 @@ import java.time.LocalDate
  */
 final case class PublishDate private (override val value: LocalDate) extends Field[LocalDate]
 
-object PublishDate extends DateValidation[PublishDate] {
+object PublishDate extends LocalDateValidation[PublishDate] {
   override val fieldName: String = "publishDate"
 
   override def build(tn: LocalDate): PublishDate = new PublishDate(tn)

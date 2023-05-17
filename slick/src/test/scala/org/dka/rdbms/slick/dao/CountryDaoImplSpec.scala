@@ -3,7 +3,7 @@ package org.dka.rdbms.slick.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.common.dao.InvalidVersionException
-import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
+import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, CreateDate, ID, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Country
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -23,11 +23,14 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       CountryDaoImpl.toDB(iceland) match {
         case None => fail(s"could not convert $iceland")
-        case Some((id, version, name, abbreviation)) =>
+        case Some((id, version, name, abbreviation, createDate, updateDate)) =>
           id shouldBe iceland.id.value.toString
           version shouldBe iceland.version.value
           name shouldBe iceland.countryName.value
           abbreviation shouldBe iceland.countryAbbreviation.value
+          createDate shouldBe iceland.createDate.asTimestamp
+          updateDate shouldBe iceland.lastUpdate.map(_.asTimeStamp)
+
       }
     }
     it("should convert from db to domain") {
@@ -35,7 +38,9 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         iceland.id.value.toString,
         iceland.version.value,
         iceland.countryName.value,
-        iceland.countryAbbreviation.value
+        iceland.countryAbbreviation.value,
+        iceland.createDate.asTimestamp,
+        iceland.lastUpdate.map(_.asTimeStamp)
       )
       val converted = CountryDaoImpl.fromDB(db)
       converted shouldBe iceland
@@ -92,9 +97,11 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             Await.result(factory.countryDao.update(updatedCountry)(ec), delay) match {
               case Left(e) => fail(e)
               case Right(updated) =>
-                updated.version shouldBe iceland.version.next
-                updated.countryName shouldBe iceland.countryName
-                updated.countryAbbreviation shouldBe CountryAbbreviation.build(updatedAbbreviation)
+                updated.version shouldBe updatedCountry.version.next
+                updated.createDate shouldBe updatedCountry.createDate
+                updated.countryName shouldBe updatedCountry.countryName
+                updated.countryAbbreviation shouldBe updatedCountry.countryAbbreviation
+                updated.lastUpdate should not be updatedCountry.lastUpdate
             }
           },
         tearDown = factory => deleteCountry(iceland.id)(factory, ec)
@@ -124,10 +131,12 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             Await.result(factory.countryDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
               case Right(updated) =>
-                logger.debug(s"after first change: $updated")
-                updated shouldBe firstChange.update
+                updated.version shouldBe firstChange.version.next
+                updated.createDate shouldBe firstChange.createDate
+                updated.countryName shouldBe firstChange.countryName
+                updated.countryAbbreviation shouldBe firstChange.countryAbbreviation
+                updated.lastUpdate should not be firstChange.lastUpdate
             }
-            logger.debug(s"secondChange: $secondChange")
             Await.result(factory.countryDao.update(secondChange)(ec), delay) match {
               case Left(e) =>
                 logger.info(s"failed with $e")
@@ -209,6 +218,8 @@ object CountryDaoImplSpec {
     ID.build,
     Version.defaultVersion,
     CountryName.build("Iceland"),
-    CountryAbbreviation.build("ICL")
+    CountryAbbreviation.build("ICL"),
+    CreateDate.now,
+    UpdateDate.now
   )
 }
