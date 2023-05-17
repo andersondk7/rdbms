@@ -16,7 +16,9 @@ class CountrySpec extends AnyFunSpec with Matchers {
         ID.build,
         Version.defaultVersion,
         CountryName.build("Far Far Away"),
-        CountryAbbreviation.build("FFA")
+        CountryAbbreviation.build("FFA"),
+        CreateDate.now,
+        UpdateDate.now
       )
       val json = country.asJson.noSpaces
       logger.debug(s"with all args: json: $json")

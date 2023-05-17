@@ -1,16 +1,15 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
-import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID, Version}
-import org.dka.rdbms.common.model.item
+import org.dka.rdbms.common.model.fields.{CreateDate, FirstName, ID, LastName, LocationID, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Author
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.sql.Timestamp
 import java.util.UUID
 import scala.concurrent.ExecutionContext
-
 import scala.language.implicitConversions
 
 class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with AuthorDao {
@@ -36,7 +35,8 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
           at.version,
           at.lastName,
           at.firstName,
-          at.locationId
+          at.locationId,
+          at.updateDate
         ))
       .update(
         (
@@ -44,7 +44,8 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
           updated.version.value,
           updated.lastName.value,
           updated.firstName.map(_.value),
-          updated.locationId.map(_.value.toString)
+          updated.locationId.map(_.value.toString),
+          updated.lastUpdate.map(_.asTimeStamp)
         )
       )
       .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
@@ -74,9 +75,11 @@ object AuthorDaoImpl {
     val lastName = column[String]("last_name")
     val firstName = column[Option[String]]("first_name")
     val locationId = column[Option[String]]("location_id")
+    val createDate = column[Timestamp]("create_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, version, lastName, firstName, locationId) <> (fromDB, toDB)
+    override def * = (id, version, lastName, firstName, locationId, createDate, updateDate) <> (fromDB, toDB)
 
   }
 
@@ -91,29 +94,38 @@ object AuthorDaoImpl {
     Int, // version
     String, // last name
     Option[String], // first name
-    Option[String] // location id
+    Option[String], // location id
+    Timestamp, // createDate
+    Option[Timestamp] // lastUpdate
   )
 
   def fromDB(tuple: AuthorTuple): Author = {
-    val (id, version, lastName, firstName, locationId) = tuple
-    item.Author(
+    val (id, version, lastName, firstName, locationId, createDate, updateDate) = tuple
+    println(s"loading $tuple")
+    val result = Author(
       ID.build(UUID.fromString(id)),
       Version.build(version),
       lastName = LastName.build(lastName),
       firstName = firstName.map(FirstName.build),
-      locationId = locationId.map { s =>
-        LocationID.build(UUID.fromString(s))
-      }
+      locationId = locationId.map(s => LocationID.build(UUID.fromString(s))),
+      createDate = CreateDate.build(createDate),
+      updateDate.map(UpdateDate.build)
     )
-
+    println(s"loaded: $result")
+    result
   }
 
-  def toDB(author: Author): Option[AuthorTuple] = Some(
-    author.id.value.toString,
-    author.version.value,
-    author.lastName.value,
-    author.firstName.map(_.value),
-    author.locationId.map(_.value.toString)
-  )
+  def toDB(author: Author): Option[AuthorTuple] = {
+    println(s"writing $author")
+    Some(
+      author.id.value.toString,
+      author.version.value,
+      author.lastName.value,
+      author.firstName.map(_.value),
+      author.locationId.map(_.value.toString),
+      author.createDate.asTimestamp,
+      author.lastUpdate.map(_.asTimeStamp)
+    )
+  }
 
 }

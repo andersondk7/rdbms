@@ -21,7 +21,9 @@ class BookSpec extends AnyFunSpec with Matchers {
         Title.build("Some Epic Book"),
         Price.build(BigDecimal(98.34)),
         Some(PublisherID.build(UUID.randomUUID())),
-        Some(PublishDate.build(LocalDate.now()))
+        Some(PublishDate.build(LocalDate.now())),
+        CreateDate.now,
+        UpdateDate.now
       )
       val json = title.asJson.noSpaces
       logger.debug(s"title: $title")

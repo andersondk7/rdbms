@@ -5,7 +5,7 @@ create table locations (
   location_name varchar(40) not null,
   location_abbreviation varchar(4) not null,
   country_id char(36) references countries(id),
-  create_date TIMESTAMP not null default CURRENT_DATE,
+  create_date TIMESTAMP not null default CURRENT_TIMESTAMP,
   update_date TIMESTAMP
   );
 grant select on locations to public;

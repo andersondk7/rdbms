@@ -4,22 +4,27 @@ import cats.data.Validated._
 import cats.implicits.catsSyntaxValidatedIdBinCompat0
 import io.circe._
 import org.dka.rdbms.common.model.fields.Field
-import org.dka.rdbms.common.model.validation.DateValidation.formatter
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
-trait DateValidation[T <: Field[LocalDate]] extends Validation[String, LocalDate, T] {
+trait LocalDateTimeValidation[T <: Field[LocalDateTime]] extends Validation[String, LocalDateTime, T] {
   import Validation._
+  import LocalDateTimeValidation._
 
   def validate(string: String): ValidationErrorsOr[T] =
-    Try(LocalDate.parse(string)) match {
+    Try(LocalDateTime.parse(string)) match {
       case Failure(t) => InvalidDateException(fieldName, t).invalidNec
       case Success(date) => Valid(build(date))
     }
 
-  def toJson(item: T): (String, Json) = (fieldName, Json.fromString(formatter.format(item.value)))
+  def toJson(item: T): (String, Json) = {
+    println(s"item: ${item}")
+    println(s"item: ${item.value}")
+    println(s"item: ${formatter.format(item.value)}\n")
+    (fieldName, Json.fromString(formatter.format(item.value)))
+  }
 
   def fromJson(
     c: HCursor
@@ -51,6 +56,6 @@ trait DateValidation[T <: Field[LocalDate]] extends Validation[String, LocalDate
   }
 }
 
-object DateValidation {
-  val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
+object LocalDateTimeValidation {
+  val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
 }

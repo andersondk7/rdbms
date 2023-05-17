@@ -9,8 +9,6 @@ import org.dka.rdbms.common.model.item.Publisher._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.util.UUID
-
 class PublisherSpec extends AnyFunSpec with Matchers {
   private val logger = Logger(getClass.getName)
 
@@ -21,7 +19,9 @@ class PublisherSpec extends AnyFunSpec with Matchers {
         Version.defaultVersion,
         PublisherName.build("Harper"),
         Some(LocationID.build),
-        Some(WebSite.build("http://somehere.com"))
+        Some(WebSite.build("http://somehere.com")),
+        CreateDate.now,
+        UpdateDate.now
       )
       val json = publisher.asJson.noSpaces
       logger.debug(s"with all args: json: $json")

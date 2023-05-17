@@ -2,13 +2,14 @@ package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.BookDao
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
-import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title, Version}
+import org.dka.rdbms.common.model.fields.{CreateDate, ID, Price, PublishDate, PublisherID, Title, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.{AuthorBookRelationship, Book}
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.sql.Timestamp
 import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +38,8 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
           bt.title,
           bt.price,
           bt.publisherId,
-          bt.publishDate
+          bt.publishDate,
+          bt.updateDate
         ))
       .update(
         (
@@ -46,7 +48,8 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
           updated.title.value,
           updated.price.value,
           updated.publisherID.map(_.value.toString),
-          updated.publishDate.map(_.value)
+          updated.publishDate.map(_.value),
+          updated.lastUpdate.map(_.asTimeStamp)
         )
       )
       .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
@@ -122,9 +125,11 @@ object BookDaoImpl {
     val price = column[BigDecimal]("price")
     val publisherId = column[Option[String]]("publisher_id")
     val publishDate = column[Option[LocalDate]]("publish_date")
+    val createDate = column[Timestamp]("create_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, version, title, price, publisherId, publishDate) <> (fromDB, toDB)
+    override def * = (id, version, title, price, publisherId, publishDate, createDate, updateDate) <> (fromDB, toDB)
   }
 
   //
@@ -139,18 +144,22 @@ object BookDaoImpl {
     String, // title
     BigDecimal, // price
     Option[String], // publisherId
-    Option[LocalDate] // published date
+    Option[LocalDate], // published date
+    Timestamp, // create date
+    Option[Timestamp] // lastUpdate
   )
 
   def fromDB(tuple: BookTuple): Book = {
-    val (id, version, title, price, publisherId, publishDate) = tuple
+    val (id, version, title, price, publisherId, publishDate, createDate, updateDate) = tuple
     Book(
       ID.build(UUID.fromString(id)),
       Version.build(version),
       title = Title.build(title),
       price = Price.build(price),
       publisherID = publisherId.map(s => PublisherID.build(UUID.fromString(s))),
-      publishDate = publishDate.map(d => PublishDate.build(d))
+      publishDate = publishDate.map(d => PublishDate.build(d)),
+      createDate = CreateDate.build(createDate),
+      lastUpdate = updateDate.map(UpdateDate.build)
     )
   }
 
@@ -160,7 +169,9 @@ object BookDaoImpl {
     book.title.value,
     book.price.value,
     book.publisherID.map(_.value.toString),
-    book.publishDate.map(_.value)
+    book.publishDate.map(_.value),
+    book.createDate.asTimestamp,
+    book.lastUpdate.map(_.asTimeStamp)
   )
 
 }

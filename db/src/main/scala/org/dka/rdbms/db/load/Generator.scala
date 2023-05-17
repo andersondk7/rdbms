@@ -1,6 +1,6 @@
 package org.dka.rdbms.db.load
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import scala.util.Random
 
 object Generator {
@@ -28,6 +28,11 @@ object Generator {
 
   def genDate: LocalDate = {
     val now = LocalDate.now()
+    now.minusWeeks(random.nextLong(2600)) // within the last 50 years
+  }
+
+  def genDateTime: LocalDateTime = {
+    val now = LocalDateTime.now()
     now.minusWeeks(random.nextLong(2600)) // within the last 50 years
   }
 
