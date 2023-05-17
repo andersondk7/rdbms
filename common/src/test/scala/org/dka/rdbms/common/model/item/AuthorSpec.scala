@@ -8,13 +8,12 @@ import org.dka.rdbms.common.model.item.Author._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.util.UUID
-
 class AuthorSpec extends AnyFunSpec with Matchers {
   describe("read and write from json") {
     it("with all fields") {
       val author = Author(
         ID.build,
+        Version.defaultVersion,
         LastName.build("Doe"),
         Some(FirstName.build("John")),
         Some(LocationID.build)
@@ -28,6 +27,7 @@ class AuthorSpec extends AnyFunSpec with Matchers {
     it("with optional fields") {
       val author = item.Author(
         ID.build,
+        Version.defaultVersion,
         LastName.build("Doe"),
         None,
         None
@@ -87,7 +87,7 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       val json =
         s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","firstName":"123456789 123456789 12345", "last_name: ""} """
       decode[Author](json) match {
-        case Left(error) => succeed
+        case Left(_) => succeed
         case Right(_) => fail(s"should not have parsed")
       }
     }

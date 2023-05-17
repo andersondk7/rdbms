@@ -3,31 +3,32 @@ package org.dka.rdbms.common.model.item
 import cats.data.Validated._
 import cats.implicits._
 import io.circe._
-import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title}
+import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title, Version}
 import org.dka.rdbms.common.model.validation.Validation._
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 
 final case class Book(
-  id: ID,
+  override val id: ID,
+  override val version: Version,
   title: Title,
   price: Price,
   publisherID: Option[PublisherID],
   publishDate: Option[PublishDate])
-//  publishedDate: Option[PublishDate])
+  extends Updatable[Book] {
+  override def update: Book = this.copy(version = version.next)
+
+}
 
 object Book {
-  implicit val encodeTitle: Encoder[Book] = (t: Book) => {
-    println(s"encodeTitle: title: id: ${t.id}")
-    println(s"encodeTitle: json.id: ${ID.toJson(t.id)}")
+  implicit val encodeTitle: Encoder[Book] = (b: Book) => {
     val objects = List(
-      Some(ID.toJson(t.id)),
-      Some(Title.toJson(t.title)),
-      Some(Price.toJson(t.price)),
-      PublisherID.toJson(t.publisherID),
-      PublishDate.toJson(t.publishDate)
-//      PublishDate.toJson(t.publishedDate)
+      Some(ID.toJson(b.id)),
+      Some(Version.toJson(b.version)),
+      Some(Title.toJson(b.title)),
+      Some(Price.toJson(b.price)),
+      PublisherID.toJson(b.publisherID),
+      PublishDate.toJson(b.publishDate)
     ).flatten // filter out the None, i.e. only needed lines
-    println(s"objects list: $objects")
     val json = Json.obj(objects: _*)
     json
   }
@@ -36,6 +37,7 @@ object Book {
     val result: ValidationErrorsOr[Book] =
       (
         ID.fromJson(c),
+        Version.fromJson(c),
         Title.fromJson(c),
         Price.fromJson(c),
         PublisherID.fromOptionalJson(c),

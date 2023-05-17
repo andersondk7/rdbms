@@ -1,6 +1,6 @@
 package org.dka.rdbms.db.load
 
-import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID}
+import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
 import org.dka.rdbms.common.model.item.Country
 import Generator._
 
@@ -17,6 +17,7 @@ class CountryGenerator(
 
     val country = Country(
       ID(uuid),
+      Version.defaultVersion,
       CountryName.build(genString(CountryName.maxLength)),
       CountryAbbreviation.build(genString(CountryAbbreviation.maxLength))
     )

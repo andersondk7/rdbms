@@ -18,4 +18,5 @@ trait CrudDao[D] {
   def create(items: Seq[D])(implicit ec: ExecutionContext): Future[DaoErrorsOr[Int]]
   def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[D]]]
   def delete(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[ID]]]
+  def update(item: D)(implicit ec: ExecutionContext): Future[DaoErrorsOr[D]]
 }

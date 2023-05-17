@@ -20,7 +20,7 @@ class DaoFactory(val database: Database) {
   import org.dka.rdbms.slick.config.DBConfig._ // keep inspite of intellij
   val countryDao: CountryDaoImpl = new CountryDaoImpl(database)
   val locationDao: LocationDaoImpl = new LocationDaoImpl(database)
-  val authorsDao: AuthorDaoImpl = new AuthorDaoImpl(database)
+  val authorDao: AuthorDaoImpl = new AuthorDaoImpl(database)
   val publisherDao: PublisherDaoImpl = new PublisherDaoImpl(database)
   val bookDao: BookDaoImpl = new BookDaoImpl(database)
   val authorsTitlesDao: AuthorsBooksDao = new AuthorsBooksDao(database)

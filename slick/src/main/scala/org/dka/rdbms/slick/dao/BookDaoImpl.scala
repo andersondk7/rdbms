@@ -2,7 +2,7 @@ package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.BookDao
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
-import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title}
+import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title, Version}
 import org.dka.rdbms.common.model.item.{AuthorBookRelationship, Book}
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 import slick.jdbc.JdbcBackend.Database
@@ -20,18 +20,45 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
   //
   // crud IO operations
   //
-  override protected val singleInsertIO: Book => DBIO[Int] = title => tableQuery += title
-  override protected val multipleInsertIO: Seq[Book] => DBIO[Option[Int]] = titles => tableQuery ++= titles
+  override protected val singleCreateIO: Book => DBIO[Int] = title => tableQuery += title
+  override protected val multipleCreateIO: Seq[Book] => DBIO[Option[Int]] = titles => tableQuery ++= titles
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Book]] = (id, ec) =>
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
+  override protected val updateAction: (Book, ExecutionContext) => DBIO[Book] = (item, ec) => {
+    val updated = item.update
+    tableQuery
+      .filter(_.id === item.id.value.toString)
+      .map(bt =>
+        (
+          bt.id,
+          bt.version,
+          bt.title,
+          bt.price,
+          bt.publisherId,
+          bt.publishDate
+        ))
+      .update(
+        (
+          updated.id.value.toString,
+          updated.version.value,
+          updated.title.value,
+          updated.price.value,
+          updated.publisherID.map(_.value.toString),
+          updated.publishDate.map(_.value)
+        )
+      )
+      .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
+  }
+
   //
   // additional IO operations
-  // needed to support AuthorDao
+  // needed to support BookDao
   //
 
-  val getAllIdsIO: (ExecutionContext) => DBIO[Seq[ID]] = (ec) => tableQuery.result.map(seq => seq.map(at => at.id))(ec)
+  private val getAllIdsIO: ExecutionContext => DBIO[Seq[ID]] = ec =>
+    tableQuery.result.map(seq => seq.map(at => at.id))(ec)
 
   private val bookAuthorSummaryIO: (ID, ExecutionContext) => DBIO[Seq[BookAuthorSummary]] = (bookId, ec) => {
     // the first join:  join author_books table and books table on bookId  -> (authorBookTable, bookTable)
@@ -90,13 +117,14 @@ object BookDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "books") {
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val version = column[Int]("version")
     val title = column[String]("title")
     val price = column[BigDecimal]("price")
     val publisherId = column[Option[String]]("publisher_id")
     val publishDate = column[Option[LocalDate]]("publish_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, title, price, publisherId, publishDate) <> (fromDB, toDB)
+    override def * = (id, version, title, price, publisherId, publishDate) <> (fromDB, toDB)
   }
 
   //
@@ -107,6 +135,7 @@ object BookDaoImpl {
 
   private type BookTuple = (
     String, // id
+    Int, // version
     String, // title
     BigDecimal, // price
     Option[String], // publisherId
@@ -114,9 +143,10 @@ object BookDaoImpl {
   )
 
   def fromDB(tuple: BookTuple): Book = {
-    val (id, title, price, publisherId, publishDate) = tuple
+    val (id, version, title, price, publisherId, publishDate) = tuple
     Book(
       ID.build(UUID.fromString(id)),
+      Version.build(version),
       title = Title.build(title),
       price = Price.build(price),
       publisherID = publisherId.map(s => PublisherID.build(UUID.fromString(s))),
@@ -126,6 +156,7 @@ object BookDaoImpl {
 
   def toDB(book: Book): Option[BookTuple] = Some(
     book.id.value.toString,
+    book.version.value,
     book.title.value,
     book.price.value,
     book.publisherID.map(_.value.toString),
