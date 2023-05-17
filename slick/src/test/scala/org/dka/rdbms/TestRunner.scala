@@ -34,7 +34,6 @@ final case class TestResult(result: Option[Try[Assertion]]) extends RunnerStepRe
   def evaluate: Assertion = result match {
     case None => succeed
     case Some(t) =>
-      println(s"value: $t")
       t match {
         case Failure(ex) => fail(ex)
         case Success(a) => a

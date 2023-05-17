@@ -6,14 +6,12 @@ import io.circe._
 import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID, Version}
 import org.dka.rdbms.common.model.validation.Validation._
 
-
 final case class Author(
   override val id: ID,
   override val version: Version,
   lastName: LastName,
   firstName: Option[FirstName],
-  locationId: Option[LocationID]
-  )
+  locationId: Option[LocationID])
   extends Updatable[Author] {
   override def update: Author = this.copy(version = version.next)
 }

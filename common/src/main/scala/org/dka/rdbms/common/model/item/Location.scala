@@ -11,8 +11,8 @@ final case class Location(
   override val version: Version,
   locationName: LocationName,
   locationAbbreviation: LocationAbbreviation,
-  countryID: CountryID
-                         ) extends Updatable[Location] {
+  countryID: CountryID)
+  extends Updatable[Location] {
   override def update: Location = this.copy(version = version.next)
 }
 

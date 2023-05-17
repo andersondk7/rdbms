@@ -1,5 +1,6 @@
 package org.dka.rdbms.common.model.item
 
+import com.typesafe.scalalogging.Logger
 import io.circe.parser.decode
 import io.circe.syntax._
 import org.dka.rdbms.common.model.fields._
@@ -10,6 +11,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 class BookSpec extends AnyFunSpec with Matchers {
+  private val logger = Logger(getClass.getName)
+
   describe("read and write from json") {
     it("with all fields") {
       val title = Book(
@@ -21,8 +24,8 @@ class BookSpec extends AnyFunSpec with Matchers {
         Some(PublishDate.build(LocalDate.now()))
       )
       val json = title.asJson.noSpaces
-      println(s"title: $title")
-      println(s"with all fields json: $json")
+      logger.debug(s"title: $title")
+      logger.debug(s"with all fields json: $json")
       decode[Book](json) match {
         case Left(error) => fail(error)
         case Right(decoded) => decoded shouldBe title
@@ -51,7 +54,7 @@ class BookSpec extends AnyFunSpec with Matchers {
       val json = s""" {"ID":"1234","title":"","price":"0.00"} """
       decode[Book](json) match {
         case Left(error) =>
-          println(s"title model errors: $error")
+          logger.debug(s"title model errors: $error")
           succeed
         case Right(_) => fail(s"should not have parsed")
       }
@@ -61,7 +64,7 @@ class BookSpec extends AnyFunSpec with Matchers {
       val json = s""" {"ID":"1234","title":"some epic novel"} """
       decode[Book](json) match {
         case Left(error) =>
-          println(s"title missing field errors: $error")
+          logger.debug(s"title missing field errors: $error")
         case Right(_) => fail(s"should not have parsed")
       }
     }
@@ -69,7 +72,7 @@ class BookSpec extends AnyFunSpec with Matchers {
       val json = s""" {"ID":"1234","title":"some epic novel", "price": "76,21", "publisher" "1234"} """
       decode[Book](json) match {
         case Left(error) =>
-          println(s"title invalid json errors: $error")
+          logger.debug(s"title invalid json errors: $error")
           succeed
         case Right(_) => fail(s"should not have parsed")
       }

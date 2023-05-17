@@ -10,8 +10,8 @@ final case class Country(
   override val id: ID,
   override val version: Version,
   countryName: CountryName,
-  countryAbbreviation: CountryAbbreviation
-                        ) extends Updatable[Country] {
+  countryAbbreviation: CountryAbbreviation)
+  extends Updatable[Country] {
   override def update: Country = this.copy(version = version.next)
 }
 

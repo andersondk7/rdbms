@@ -2,7 +2,8 @@ package org.dka.rdbms.slick.dao
 
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
-import org.dka.rdbms.common.model.fields.{ID, LocationID, PublisherName, Version, WebSite}
+import org.dka.rdbms.common.dao.InvalidVersionException
+import org.dka.rdbms.common.model.fields.{ID, PublisherName, Version, WebSite}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Publisher
 import org.dka.rdbms.slick.dao.PublisherDaoImplSpec._
@@ -18,6 +19,31 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   implicit private val ec: ExecutionContext = ExecutionContext.global
   private val logger = Logger(getClass.getName)
   val delay: FiniteDuration = 10.seconds
+
+  describe("conversion to/from db") {
+    it("should convert from domain to db") {
+      PublisherDaoImpl.toDB(rh) match {
+        case None => fail(s"could not convert $rh")
+        case Some((id, version, publisherName, locationId, webSite)) =>
+          id shouldBe rh.id.value.toString
+          version shouldBe rh.version.value
+          publisherName shouldBe rh.publisherName.value
+          locationId shouldBe rh.locationId.map(_.value.toString)
+          webSite shouldBe rh.webSite.map(_.value)
+      }
+    }
+    it("should convert from db to domain") {
+      val db = (
+        rh.id.value.toString,
+        rh.version.value,
+        rh.publisherName.value,
+        rh.locationId.map(_.value.toString),
+        rh.webSite.map(_.value)
+      )
+      val converted = PublisherDaoImpl.fromDB(db)
+      converted shouldBe rh
+    }
+  }
 
   describe("populating") {
     it("should add a publisher") {
@@ -63,8 +89,10 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       )
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure match {
-        case Some(t) => t.printStackTrace()
-        case None => println(s"no failures here")
+        case Some(t) =>
+          logger.warn(s"caught $t")
+          t.printStackTrace()
+        case None => logger.debug(s"no failures here")
       }
       result.tearDownResult.failure shouldBe None
       result.testResult.evaluate
@@ -88,28 +116,108 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     }
   }
 
-  describe("conversion to/from db") {
-    it("should convert from domain to db") {
-      PublisherDaoImpl.toDB(rh) match {
-        case None => fail(s"could not convert $rh")
-        case Some((id, version, publisherName, locationId, webSite)) =>
-          id shouldBe rh.id.value.toString
-          version shouldBe rh.version.value
-          publisherName shouldBe rh.publisherName.value
-          locationId shouldBe rh.locationId.map(_.value.toString)
-          webSite shouldBe rh.webSite.map(_.value)
-      }
-    }
-    it("should convert from db to domain") {
-      val db = (
-        rh.id.value.toString,
-        rh.version.value,
-        rh.publisherName.value,
-        rh.locationId.map(_.value.toString),
-        rh.webSite.map(_.value)
+  describe("updating") {
+    it("should update once") {
+      val updatedPublisherName = "Riley"
+      val result = withDB(
+        setup = factory => loadPublisher(hb)(factory, ec),
+        test = factory =>
+          Try {
+            val updatedAuthor = hb.copy(publisherName = PublisherName.build(updatedPublisherName))
+            Await.result(factory.publisherDao.update(updatedAuthor)(ec), delay) match {
+              case Left(e) => fail(e)
+              case Right(updated) =>
+                updated.version shouldBe hb.version.next
+                updated.publisherName shouldBe PublisherName.build(updatedPublisherName)
+                updated.locationId shouldBe hb.locationId
+                updatedAuthor.webSite shouldBe hb.webSite
+            }
+          },
+        tearDown = factory => deletePublisher(hb.id)(factory, ec)
       )
-      val converted = PublisherDaoImpl.fromDB(db)
-      converted shouldBe rh
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
+    }
+    it("should fail update with old version (sequentially)") {
+      /*
+      scenario:
+      - bill wants to update only the publisher name
+      - susan wants to update only the web site
+      - neither bill nor susan is aware of the other's edits
+      result:
+      - the first one to make an update (publisher name) succeeds
+      - the second one to make an update (web site) fails
+       */
+      val updatedName = "Riley"
+      val updatedWebSite = Some("http://riley.com")
+      val result = withDB(
+        setup = factory => loadPublisher(hb)(factory, ec),
+        test = factory =>
+          Try {
+            val firstChange = hb.copy(publisherName = PublisherName.build(updatedName))
+            val secondChange = hb.copy(webSite = WebSite.build(updatedWebSite))
+
+            Await.result(factory.publisherDao.update(firstChange)(ec), delay) match {
+              case Left(e) => fail(s"firstChange failed with", e)
+              case Right(updated) =>
+                updated shouldBe firstChange.update
+            }
+            logger.debug(s"secondChange: $secondChange")
+            Await.result(factory.publisherDao.update(secondChange)(ec), delay) match {
+              case Left(e) => e shouldBe a[InvalidVersionException]
+              case Right(updated) =>
+                logger.debug(s"updated:  $updated")
+                fail(s"second change ($secondChange) with old version succeeded")
+            }
+          },
+        tearDown = factory => deletePublisher(hb.id)(factory, ec)
+      )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
+    }
+    it("should fail update with old version (async)") {
+      /*
+      scenario:
+      - bill wants to update only the publisher name
+      - susan wants to update only the web site
+      - neither bill nor susan is aware of the other's edits
+      result:
+      - the first one to make an update (publisher name) succeeds
+      - the second one to make an update (web site) fails
+      result:
+      - since this is async, it is indeterminate which will succeed and which will fail
+      -  but there will be one of each
+       */
+      val updatedName = "Riley"
+      val updatedWebSite = Some("http://riley.com")
+      val result = withDB(
+        setup = factory => loadPublisher(hb)(factory, ec),
+        test = factory =>
+          Try {
+            val firstChange = hb.copy(publisherName = PublisherName.build(updatedName))
+            val secondChange = hb.copy(webSite = WebSite.build(updatedWebSite))
+            // launch async
+            val attempt1 = factory.publisherDao.update(firstChange)(ec)
+            val attempt2 = factory.publisherDao.update(secondChange)(ec)
+
+            val finished = Await.result(Future.sequence(Seq(attempt1, attempt2)), delay)
+            val publishers = finished.collect { case Right(publisher) =>
+              publisher
+            }
+            val errors = finished.collect { case Left(e) =>
+              logger.info(s"error: ${e.getMessage}")
+              e
+            }
+            publishers.size shouldBe 1
+            errors.size shouldBe 1
+          },
+        tearDown = factory => deletePublisher(hb.id)(factory, ec)
+      )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
     }
   }
 

@@ -1,17 +1,15 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.AuthorDao
-import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
 import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, LocationID, Version}
 import org.dka.rdbms.common.model.item
 import org.dka.rdbms.common.model.item.Author
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 import scala.language.implicitConversions
 
@@ -29,17 +27,27 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   override protected val updateAction: (Author, ExecutionContext) => DBIO[Author] = (item, ec) => {
-    val query = tableQuery.filter(_.id === item.id.value.toString).map(at => (at.id, at.version, at.lastName, at.firstName, at.locationId))
-    val result = query.update(
-      (
-        item.id.value.toString,
-        item.version.value + 1,
-        item.lastName.value,
-        item.firstName.map(_.value),
-        item.locationId.map(_.value.toString)
+    val updated = item.update
+    tableQuery
+      .filter(_.id === item.id.value.toString)
+      .map(at =>
+        (
+          at.id,
+          at.version,
+          at.lastName,
+          at.firstName,
+          at.locationId
+        ))
+      .update(
+        (
+          updated.id.value.toString,
+          updated.version.value,
+          updated.lastName.value,
+          updated.firstName.map(_.value),
+          updated.locationId.map(_.value.toString)
+        )
       )
-    ).map(_ =>item.update )(ec)
-    result
+      .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
   }
 
   //

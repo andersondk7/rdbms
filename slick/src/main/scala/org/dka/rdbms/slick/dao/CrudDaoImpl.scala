@@ -68,13 +68,11 @@ trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
         Left(InvalidVersionException(item.version))
     }
 
-    val combo = ( for {
+    val combo = (for {
       target <- getItemAction
       _ = logger.info(s"target: $target")
       update <- updateAction(item, ec)
-    } yield {
-      (target, update)
-    })
+    } yield (target, update))
       // these type of transaction boundary does not block until the row is released, it blows up
       // only these levels work:
       // TransactionIsolation.RepeatableRead
@@ -86,11 +84,10 @@ trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
         case (Left(e), _) => Left(e)
         case (_, item) => Right(item)
       }
-      .recover {
-        case e: PSQLException =>
-          // plsql exception gives no useful information
-//          println(s"******************* caught exception: \n ${e.getClass.getName}, message ${e.getMessage}, ${e.getCause} \n ****************")
-          Left(InvalidVersionException(item.version))
+      .recover { case e: PSQLException =>
+        // plsql exception gives no useful information
+//          lobber.warn(s"******************* caught exception: \n ${e.getClass.getName}, message ${e.getMessage}, ${e.getCause} \n ****************")
+        Left(InvalidVersionException(item.version))
       }
   }
 }

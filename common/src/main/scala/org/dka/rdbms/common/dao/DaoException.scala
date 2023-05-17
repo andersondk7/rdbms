@@ -25,8 +25,7 @@ case class ConfigurationException(reasons: List[String], override val underlying
   override val reason: String = reasons.mkString("\t")
 }
 
-case class ItemNotFoundException(val id: ID)
-  extends DaoException {
+case class ItemNotFoundException(val id: ID) extends DaoException {
   override val reason: String = s"could not find $id"
   override val underlyingCause: Option[Throwable] = None
 }

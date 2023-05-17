@@ -13,8 +13,8 @@ final case class Book(
   title: Title,
   price: Price,
   publisherID: Option[PublisherID],
-  publishDate: Option[PublishDate]
-                     ) extends Updatable[Book] {
+  publishDate: Option[PublishDate])
+  extends Updatable[Book] {
   override def update: Book = this.copy(version = version.next)
 
 }

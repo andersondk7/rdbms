@@ -6,7 +6,6 @@ import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, T
 import org.dka.rdbms.common.model.item.{AuthorBookRelationship, Book}
 import org.dka.rdbms.common.model.query.BookAuthorSummary
 import slick.jdbc.JdbcBackend.Database
-import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
@@ -27,17 +26,39 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
-  override protected val updateAction: (Book, ExecutionContext) => DBIO[Book] = (item, ec) => ???
-//  val query = tableQuery.filter(_.version === item.version.value).map(bt => (bt.version, bt.title, bt.price, bt.publisherId, bt.publishDate))
-//    query.update( (item.version.value + 1, item.title.value, item.price.value, item.publisherID.map(_.value.toString), item.publishDate.map(_.value)))
-//  }
+  override protected val updateAction: (Book, ExecutionContext) => DBIO[Book] = (item, ec) => {
+    val updated = item.update
+    tableQuery
+      .filter(_.id === item.id.value.toString)
+      .map(bt =>
+        (
+          bt.id,
+          bt.version,
+          bt.title,
+          bt.price,
+          bt.publisherId,
+          bt.publishDate
+        ))
+      .update(
+        (
+          updated.id.value.toString,
+          updated.version.value,
+          updated.title.value,
+          updated.price.value,
+          updated.publisherID.map(_.value.toString),
+          updated.publishDate.map(_.value)
+        )
+      )
+      .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
+  }
 
   //
   // additional IO operations
   // needed to support BookDao
   //
 
-  val getAllIdsIO: (ExecutionContext) => DBIO[Seq[ID]] = (ec) => tableQuery.result.map(seq => seq.map(at => at.id))(ec)
+  private val getAllIdsIO: ExecutionContext => DBIO[Seq[ID]] = ec =>
+    tableQuery.result.map(seq => seq.map(at => at.id))(ec)
 
   private val bookAuthorSummaryIO: (ID, ExecutionContext) => DBIO[Seq[BookAuthorSummary]] = (bookId, ec) => {
     // the first join:  join author_books table and books table on bookId  -> (authorBookTable, bookTable)
