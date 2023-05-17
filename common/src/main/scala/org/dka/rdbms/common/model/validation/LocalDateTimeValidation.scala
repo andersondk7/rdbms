@@ -19,12 +19,8 @@ trait LocalDateTimeValidation[T <: Field[LocalDateTime]] extends Validation[Stri
       case Success(date) => Valid(build(date))
     }
 
-  def toJson(item: T): (String, Json) = {
-    println(s"item: ${item}")
-    println(s"item: ${item.value}")
-    println(s"item: ${formatter.format(item.value)}\n")
+  def toJson(item: T): (String, Json) =
     (fieldName, Json.fromString(formatter.format(item.value)))
-  }
 
   def fromJson(
     c: HCursor

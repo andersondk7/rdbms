@@ -20,7 +20,6 @@ final case class Author(
 
 object Author {
   implicit val encodeAuthor: Encoder[Author] = (a: Author) => {
-    println(s"encodeAuthor: $a")
     val objects = List(
       Some(ID.toJson(a.id)),
       Some(Version.toJson(a.version)),
