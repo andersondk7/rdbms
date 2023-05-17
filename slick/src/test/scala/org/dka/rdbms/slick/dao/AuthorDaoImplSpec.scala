@@ -3,12 +3,13 @@ package org.dka.rdbms.slick.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.common.dao.InvalidVersionException
-import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, Version}
+import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Author
 import org.dka.rdbms.slick.dao.AuthorDaoImplSpec._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.sql.Timestamp
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -23,12 +24,14 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       AuthorDaoImpl.toDB(mt) match {
         case None => fail(s"could not convert $mt")
-        case Some((id, version, last, first, locationId)) =>
+        case Some((id, version, last, first, locationId, createDate, lastUpdate)) =>
           id shouldBe mt.id.value.toString
           version shouldBe mt.version.value
           last shouldBe mt.lastName.value
           first shouldBe mt.firstName.map(_.value)
           locationId shouldBe mt.locationId.map(_.value.toString)
+          lastUpdate.map(_.toLocalDateTime) shouldBe mt.lastUpdate
+          createDate.toLocalDateTime shouldBe mt.createDate.value
       }
     }
     it("should convert from db to domain") {
@@ -37,7 +40,9 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         mt.version.value,
         mt.lastName.value,
         mt.firstName.map(_.value),
-        mt.locationId.map(_.value.toString)
+        mt.locationId.map(_.value.toString),
+        Timestamp.valueOf(mt.createDate.value),
+        mt.lastUpdate.map(t => Timestamp.valueOf(t.value))
       )
       val converted = AuthorDaoImpl.fromDB(db)
       converted shouldBe mt
@@ -129,6 +134,8 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
                 updated.version shouldBe nd.version.next
                 updated.lastName shouldBe LastName.build(updatedLastName)
                 updated.firstName shouldBe nd.firstName
+                updated.createDate shouldBe nd.createDate
+                updated.lastUpdate should not be nd.lastUpdate
             }
           },
         tearDown = factory => deleteAuthor(nd.id)(factory, ec)
@@ -153,14 +160,21 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         setup = factory => loadAuthor(nd)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = nd.copy(firstName = FirstName.build(Some(updatedFirstName)))
-            val secondChange = nd.copy(lastName = LastName.build(updatedLastName))
+            val firstChange = nd.copy(firstName = FirstName.build(Some(updatedFirstName)), lastUpdate = UpdateDate.now)
+            val secondChange = nd.copy(lastName = LastName.build(updatedLastName), lastUpdate = UpdateDate.now)
 
             logger.debug(s"firstChange: $firstChange")
             Await.result(factory.authorDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
               case Right(updated) =>
-                updated shouldBe firstChange.update
+                // everything but updateDate, since the exact time of the update is somewhat indeterminate
+                updated.id shouldBe firstChange.id
+                updated.version shouldBe firstChange.version.next
+                updated.lastName shouldBe firstChange.lastName
+                updated.firstName shouldBe firstChange.firstName
+                updated.locationId shouldBe firstChange.locationId
+                updated.createDate shouldBe firstChange.createDate
+                updated.lastUpdate should not be firstChange.lastUpdate // verify only that it changed
             }
             logger.debug(s"secondChange: $secondChange")
             Await.result(factory.authorDao.update(secondChange)(ec), delay) match {
@@ -250,7 +264,7 @@ object AuthorDaoImplSpec {
     Version.defaultVersion,
     LastName.build("Milton"),
     Some(FirstName.build("John")),
-    None
+    None // locationId
   )
   val ja: Author = Author(
     ID.build,

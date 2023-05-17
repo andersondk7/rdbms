@@ -6,7 +6,7 @@ create table books (
   price dec(5,2) not null,
   publisher_id char(36) references publishers(id),
   publish_date DATE,
-  create_date TIMESTAMP not null default CURRENT_DATE,
+  create_date TIMESTAMP not null default CURRENT_TIMESTAMP,
   update_date TIMESTAMP
   );
 grant select on books to public;

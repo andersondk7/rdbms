@@ -1,12 +1,13 @@
 package org.dka.rdbms.slick.dao
 
 import org.dka.rdbms.common.dao.LocationDao
-import org.dka.rdbms.common.model.fields.{CountryID, ID, LocationAbbreviation, LocationName, Version}
+import org.dka.rdbms.common.model.fields.{CountryID, CreateDate, ID, LocationAbbreviation, LocationName, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Location
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
+import java.sql.Timestamp
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
@@ -33,7 +34,8 @@ class LocationDaoImpl(override val db: Database) extends CrudDaoImpl[Location] w
           lt.version,
           lt.locationName,
           lt.locationAbbreviation,
-          lt.countryID
+          lt.countryID,
+          lt.updateDate
         ))
       .update(
         (
@@ -41,7 +43,8 @@ class LocationDaoImpl(override val db: Database) extends CrudDaoImpl[Location] w
           updated.version.value,
           updated.locationName.value,
           updated.locationAbbreviation.value,
-          updated.countryID.value.toString
+          updated.countryID.value.toString,
+          updated.lastUpdate.map(_.asTimeStamp)
         ))
       .map(_ => updated)(ec) // convert number of rows updated to the updated item (i.e. updated version etc.)
   }
@@ -65,9 +68,12 @@ object LocationDaoImpl {
     val locationName = column[String]("location_name")
     val locationAbbreviation = column[String]("location_abbreviation")
     val countryID = column[String]("country_id")
+    val createDate = column[Timestamp]("create_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
-    override def * = (id, version, locationName, locationAbbreviation, countryID) <> (fromDB, toDB)
+    override def * =
+      (id, version, locationName, locationAbbreviation, countryID, createDate, updateDate) <> (fromDB, toDB)
   }
 
   //
@@ -81,17 +87,21 @@ object LocationDaoImpl {
     Int, // version
     String, // location_name
     String, // location_abbreviation
-    String // country_id
+    String, // country_id
+    Timestamp, // create date
+    Option[Timestamp] // update date
   )
 
   def fromDB(tuple: LocationTuple): Location = {
-    val (id, version, locationName, locationAbbreviation, countryID) = tuple
+    val (id, version, locationName, locationAbbreviation, countryID, createDate, updateDate) = tuple
     Location(
       ID.build(UUID.fromString(id)),
       Version.build(version),
       locationName = LocationName.build(locationName),
       locationAbbreviation = LocationAbbreviation.build(locationAbbreviation),
-      countryID = CountryID.build(UUID.fromString(countryID))
+      countryID = CountryID.build(UUID.fromString(countryID)),
+      createDate = CreateDate.build(createDate),
+      lastUpdate = updateDate.map(UpdateDate.build)
     )
   }
 
@@ -100,7 +110,9 @@ object LocationDaoImpl {
     location.version.value,
     location.locationName.value,
     location.locationAbbreviation.value,
-    location.countryID.value.toString
+    location.countryID.value.toString,
+    location.createDate.asTimestamp,
+    location.lastUpdate.map(_.asTimeStamp)
   )
 
 }

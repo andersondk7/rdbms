@@ -3,9 +3,8 @@ package org.dka.rdbms.slick.dao
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.TearDownException
 import org.dka.rdbms.common.dao.InvalidVersionException
-import org.dka.rdbms.common.model.fields.{FirstName, ID, LastName, Price, Title, Version}
+import org.dka.rdbms.common.model.fields.{CreateDate, ID, Price, Title, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Book
-import org.dka.rdbms.slick.dao.AuthorDaoImplSpec.nd
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -24,11 +23,15 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
     it("should convert from domain to db") {
       BookDaoImpl.toDB(pridePrejudice) match {
         case None => fail(s"could not convert $pridePrejudice")
-        case Some((id, version, title, price, _, _)) =>
+        case Some((id, version, title, price, publisherId, publishedDate, createDate, updateDate)) =>
           id shouldBe pridePrejudice.id.value.toString
           version shouldBe pridePrejudice.version.value
           title shouldBe pridePrejudice.title.value
           price shouldBe pridePrejudice.price.value
+          publisherId shouldBe pridePrejudice.publisherID.map(_.value.toString)
+          publishedDate shouldBe pridePrejudice.publishDate.map(_.value)
+          createDate shouldBe pridePrejudice.createDate.asTimestamp
+          updateDate shouldBe pridePrejudice.lastUpdate.map(_.asTimeStamp)
       }
     }
     it("should convert from db to domain") {
@@ -38,7 +41,9 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         pridePrejudice.title.value,
         pridePrejudice.price.value,
         None,
-        None
+        None,
+        pridePrejudice.createDate.asTimestamp,
+        pridePrejudice.lastUpdate.map(_.asTimeStamp)
       )
       val converted = BookDaoImpl.fromDB(db)
       converted shouldBe pridePrejudice
@@ -167,15 +172,14 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             val updatedBook = pridePrejudice.copy(title = Title.build(updatedTitle))
-            logger.info(s"initial: $pridePrejudice")
-            logger.info(s"before: $updatedBook")
             Await.result(factory.bookDao.update(updatedBook)(ec), delay) match {
               case Left(e) => fail(e)
               case Right(updated) =>
-                logger.info(s"after:  $updated")
                 updated.version shouldBe pridePrejudice.version.next
                 updated.title shouldBe Title.build(updatedTitle)
                 updated.price shouldBe pridePrejudice.price
+                updated.createDate shouldBe pridePrejudice.createDate
+                updated.lastUpdate should not be pridePrejudice.lastUpdate
             }
           },
         tearDown = factory => deleteBook(pridePrejudice.id)(factory, ec)
@@ -206,12 +210,16 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
             logger.debug(s"firstChange: $firstChange")
             Await.result(factory.bookDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
-              case Right(updated) => updated shouldBe firstChange.update
+              case Right(updated) =>
+                updated.version shouldBe firstChange.version.next
+                updated.title shouldBe firstChange.title
+                updated.price shouldBe firstChange.price
+                updated.createDate shouldBe firstChange.createDate
+                updated.lastUpdate should not be firstChange.lastUpdate
             }
-            logger.debug(s"secondChange: $secondChange")
             Await.result(factory.bookDao.update(secondChange)(ec), delay) match {
               case Left(e) => e shouldBe a[InvalidVersionException]
-              case Right(updated) => fail(s"second change ($secondChange) with old version succeeded")
+              case Right(_) => fail(s"second change ($secondChange) with old version succeeded")
             }
           },
         tearDown = factory => deleteBook(pridePrejudice.id)(factory, ec)
@@ -285,7 +293,9 @@ object BookDaoImplSpec {
     Version.defaultVersion,
     Title.build("Pride and Prejudice"),
     Price.build(BigDecimal(12.34)),
-    None,
-    None
+    None, // publisherID
+    None, // publishDate
+    CreateDate.now,
+    UpdateDate.now
   )
 }

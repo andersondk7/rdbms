@@ -1,6 +1,6 @@
 package org.dka.rdbms.db.load
 
-import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title, Version}
+import org.dka.rdbms.common.model.fields.{ID, Price, PublishDate, PublisherID, Title, UpdateDate, Version}
 import org.dka.rdbms.common.model.item.Book
 import Generator._
 
