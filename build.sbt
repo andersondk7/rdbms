@@ -1,4 +1,5 @@
-import Dependencies._
+import Dependencies.*
+import commandmatrix._
 
 lazy val scala213 = "2.13.10"
 lazy val scala322 = "3.2.2"
@@ -12,6 +13,19 @@ lazy val flywaySettings: Seq[Def.Setting[_]] = Seq(
   flywayUser := sys.env.getOrElse("BZ_USER", "defaultUser"),
   flywayPassword := sys.env.getOrElse("BZ_PASSWORD", "defaultPassword"),
   flywayUrl := s"jdbc:postgresql://localhost:5432/book_biz?&currentSchema=${sys.env.getOrElse("BZ_SCHEMA", "public")}"
+)
+
+inThisBuild(
+  Seq(
+    commands ++= CrossCommand.single(
+      "test",
+      matrices = Seq(common, db, anorm),
+      dimensions = Seq(
+        Dimension.scala(scala322),
+        Dimension.platform()
+      )
+    )
+  )
 )
 
 lazy val common = (projectMatrix in file("common"))
