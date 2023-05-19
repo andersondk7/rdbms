@@ -17,7 +17,7 @@ class AuthorGenerator(
 
   override def insertLine(uuid: UUID): String = {
     val author = Author(
-      ID(uuid),
+      ID.build(uuid),
       Version.defaultVersion,
       LastName.build(genString(LastName.maxLength)),
       Some(FirstName.build(genString(FirstName.maxLength))),

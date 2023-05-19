@@ -1,59 +1,79 @@
 import sbt.*
 
-
 object Dependencies {
 
-  private val cats_version = "2.8.0"
-  private val postgres_driver_version = "42.6.0"
+  private val anorm_version = "2.7.0"
+  private val cats_version = "2.9.0"
+  private val circe_version = "0.14.5"
+  private val config_version = "1.4.2"
   private val hikaricp_version = "2.8.0"
+  private val logback_version = "1.4.6"
+  private val postgres_driver_version = "42.6.0"
+  private val pureConfig_version = "0.17.4"
+  private val scalalogging_version = "3.9.5"
+  private val scalactic_version = "3.2.15"
+  private val scalatest_version = "3.2.15"
   private val slick_version = "3.4.1"
-  private val pureConfig_version = "0.17.2"
-  private val circe_version = "0.14.1"
 
-
-
+  private val anorm = "org.playframework.anorm" %% "anorm" % anorm_version
   private val catsCore = "org.typelevel" %% "cats-core" % cats_version
-  private val slick = "com.typesafe.slick" %% "slick" % slick_version
-  private val connectionPool = "com.typesafe.slick" %% "slick-hikaricp" % slick_version
-  private val postgresDriver = "org.postgresql" % "postgresql" % postgres_driver_version
-  private val pureConfig = "com.github.pureconfig" %% "pureconfig" % pureConfig_version
-  private val logging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
-  private val logBack = "ch.qos.logback" % "logback-classic" % "1.3.6"
-  private val scalatic = "org.scalactic" %% "scalactic" % "3.2.13"
-  private val scalaTest = "org.scalatest" %% "scalatest" % "3.2.13" % "it,test"
   private val circeCore = "io.circe" %% "circe-core" % circe_version
   private val circeGeneric = "io.circe" %% "circe-generic" % circe_version
   private val circeParser = "io.circe" %% "circe-parser" % circe_version
+  private val logBack = "ch.qos.logback" % "logback-classic" % logback_version
+  private val logging = "com.typesafe.scala-logging" %% "scala-logging" % scalalogging_version
+  private val postgresDriver = "org.postgresql" % "postgresql" % postgres_driver_version
+  private val pureConfig = "com.github.pureconfig" % "pureconfig_2.13" % pureConfig_version
+  private val scalatic = "org.scalactic" %% "scalactic" % scalactic_version
+  private val scalaTest = "org.scalatest" %% "scalatest" % scalatest_version % "it,test"
+  private val slick = "com.typesafe.slick" % "slick_2.13" % slick_version
+  private val connectionPool = "com.typesafe.slick" % "slick-hikaricp_2.13" % slick_version
+  private val config = "com.typesafe" % "config" % config_version
 
-  val slickDeps = Seq(
+  val anormDependencies: Seq[ModuleID] = Seq(
+    anorm,
     catsCore,
-    slick,
+    circeCore,
+    circeGeneric,
+    circeParser,
+    config,
+    logBack,
+    logging,
+    postgresDriver,
+    scalatic,
+    scalaTest
+  )
+
+  val commonDependencies: Seq[ModuleID] = Seq(
+    catsCore,
+    config,
+    logging,
+    logBack,
+    circeCore,
+    circeGeneric,
+    circeParser,
+    scalaTest
+  )
+
+  val dbDependencies: Seq[ModuleID] = Seq(
+    catsCore,
+    logging,
+    logBack,
+    scalaTest
+  )
+
+  val slickDependencies: Seq[ModuleID] = Seq(
+    catsCore,
+    circeCore,
+    circeGeneric,
+    circeParser,
     connectionPool,
+    logBack,
+    logging,
     postgresDriver,
     pureConfig,
-    logging,
-    logBack,
     scalatic,
-    circeCore,
-    circeGeneric,
-    circeParser,
-    scalaTest
-  )
-
-  val commonDeps = Seq(
-    catsCore,
-    logging,
-    logBack,
-    circeCore,
-    circeGeneric,
-    circeParser,
-    scalaTest
-  )
-
-  val dbDeps = Seq(
-    catsCore,
-    logging,
-    logBack,
-    scalaTest
+    scalaTest,
+    slick
   )
 }

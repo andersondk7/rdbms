@@ -5,26 +5,36 @@ lazy val scala322 = "3.2.2"
 lazy val supportedScalaVersions = List(scala213, scala322)
 
 ThisBuild / organization := "org.dka.rdbms"
-ThisBuild / version      := "0.4.8"
-ThisBuild / scalaVersion := scala213
+ThisBuild / version := "0.4.8"
+ThisBuild / scalaVersion := scala322
+val ideScala = scala322
+
+lazy val anorm = project
+  .in(file("anorm"))
+  .configs(IntegrationTest)
+  .settings(
+    scalaVersion := scala322,
+    libraryDependencies ++= anormDependencies,
+    Defaults.itSettings
+  )
+  .dependsOn(common)
 
 lazy val common = project
   .in(file("common"))
   .configs(IntegrationTest)
   .settings(
     crossScalaVersions := supportedScalaVersions,
-    libraryDependencies ++= commonDeps,
+    libraryDependencies ++= commonDependencies,
     Defaults.itSettings
   )
-
 
 lazy val db = project
   .in(file("db"))
   .configs(IntegrationTest)
   .enablePlugins(FlywayPlugin)
   .settings(
-    libraryDependencies ++= dbDeps,
-    crossScalaVersions := Seq(scala322),
+    scalaVersion := scala322,
+    libraryDependencies ++= dbDependencies,
     flywaySettings,
     Defaults.itSettings
   )
@@ -34,8 +44,8 @@ lazy val slick = project
   .in(file("slick"))
   .configs(IntegrationTest)
   .settings(
-    crossScalaVersions := List(scala213),
-    libraryDependencies ++= slickDeps,
+    scalaVersion := scala213,
+    libraryDependencies ++= slickDependencies,
     Defaults.itSettings
   )
   .dependsOn(common)
@@ -52,10 +62,10 @@ lazy val rdbms = project
   .aggregate(
     common,
     db,
-    slick
+//    slick,
+    anorm
   )
   .settings(
     crossScalaVersions := Nil,
     Defaults.itSettings
   )
-
