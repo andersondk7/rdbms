@@ -20,7 +20,7 @@ class LocationGenerator(
   override def insertLine(uuid: UUID): String = {
 
     val location = Location(
-      ID(uuid),
+      ID.build(uuid),
       Version.defaultVersion,
       LocationName.build(genString(LocationName.maxLength)),
       LocationAbbreviation.build(genString(LocationAbbreviation.maxLength)),

@@ -1,11 +1,9 @@
 package org.dka.rdbms.slick.dao
 
-import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
+import org.dka.rdbms.common.config.DBConfig
+import org.dka.rdbms.common.config.DBConfig.ConfigErrorsOr
 import org.dka.rdbms.common.dao.ConfigurationException
-import org.dka.rdbms.slick.config.DBConfig
-import pureconfig.ConfigSource
-import pureconfig.generic.auto._
 import slick.jdbc.JdbcBackend.Database
 import slick.util.AsyncExecutor
 
@@ -17,7 +15,6 @@ import scala.util.{Failure, Try} // must be kept even though intellij thinks it 
  *   database that the dao's will use
  */
 class DaoFactory(val database: Database) {
-  import org.dka.rdbms.slick.config.DBConfig._ // keep inspite of intellij
   val countryDao: CountryDaoImpl = new CountryDaoImpl(database)
   val locationDao: LocationDaoImpl = new LocationDaoImpl(database)
   val authorDao: AuthorDaoImpl = new AuthorDaoImpl(database)
@@ -33,38 +30,26 @@ class DaoFactory(val database: Database) {
  *
  * This builder is expected to be called by the client of the library (which could be tests or an application)
  */
+//        .map(errors => ConfigurationException(errors.toList.map(f => f.toString)))
 object DaoFactoryBuilder {
-  import org.dka.rdbms.slick.config.DBConfig._
   private val logger = Logger(getClass.getName)
-  lazy val configure: Either[ConfigurationException, DaoFactory] = {
-    try {
-      logger.info(s"loading configure")
-      ConfigSource
-        .fromConfig(
-          ConfigFactory.load().getConfig("DBConfig") // just want this piece of the config file
+  lazy val configure: ConfigErrorsOr[DaoFactory] = {
+  logger.info(s"loading configure")
+  DBConfig.load
+    .map { config =>
+      // executor construction lifted from Database.forConfig()
+      val executor = AsyncExecutor(
+        config.connectionPool,
+        config.numThreads,
+        config.numThreads,
+        config.queueSize,
+        config.maxConnections,
+        config.registerMBeans
         )
-        .load[DBConfig]
-        .left
-        .map(errors => ConfigurationException(errors.toList.map(f => f.toString)))
-        .map { config =>
-          logger.info(s"config: $config")
-          logger.info(s"url: ${config.url}")
-          // executor construction lifted from Database.forConfig()
-          val executor = AsyncExecutor(
-            config.connectionPool,
-            config.numThreads,
-            config.numThreads,
-            config.queueSize,
-            config.maxConnections,
-            config.registerMBeans
-          )
-          val db = Database.forURL(executor = executor, url = config.url)
-          val factory = new DaoFactory(db)
-          logger.info(s"got factory")
-          factory
-        }
-    } catch {
-      case t: Throwable => Left(ConfigurationException(List(t.getMessage)))
+     val db = Database.forURL(executor = executor, url = config.url)
+     val factory = new DaoFactory(db)
+     logger.info(s"got factory")
+     factory
     }
   }
 

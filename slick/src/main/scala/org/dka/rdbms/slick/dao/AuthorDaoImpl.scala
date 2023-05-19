@@ -101,7 +101,6 @@ object AuthorDaoImpl {
 
   def fromDB(tuple: AuthorTuple): Author = {
     val (id, version, lastName, firstName, locationId, createDate, updateDate) = tuple
-    println(s"loading $tuple")
     val result = Author(
       ID.build(UUID.fromString(id)),
       Version.build(version),
@@ -111,12 +110,10 @@ object AuthorDaoImpl {
       createDate = CreateDate.build(createDate),
       updateDate.map(UpdateDate.build)
     )
-    println(s"loaded: $result")
     result
   }
 
-  def toDB(author: Author): Option[AuthorTuple] = {
-    println(s"writing $author")
+  def toDB(author: Author): Option[AuthorTuple] =
     Some(
       author.id.value.toString,
       author.version.value,
@@ -126,6 +123,5 @@ object AuthorDaoImpl {
       author.createDate.asTimestamp,
       author.lastUpdate.map(_.asTimeStamp)
     )
-  }
 
 }
