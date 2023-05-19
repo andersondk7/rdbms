@@ -1,5 +1,9 @@
 package org.dka.rdbms.slick.dao
 
+import cats.data.NonEmptyChain
+import cats.data.Validated._
+import org.dka.rdbms.common.config.ConfigException
+import org.dka.rdbms.common.config.DBConfig.ConfigErrorsOr
 import org.scalatest.Assertion
 import org.scalatest.Assertions._
 import org.dka.rdbms.{TestRunner, TestRunnerResult}
@@ -8,7 +12,7 @@ import scala.util.{Success, Try}
 
 trait DBTestRunner extends TestRunner[DaoFactory] {
 
-  private val factoryBuilder = DaoFactoryBuilder.configure
+  private val factoryBuilder: ConfigErrorsOr[DaoFactory] = DaoFactoryBuilder.configure
 
   val noSetup: DaoFactory => Try[Unit] = _ => Success()
 
@@ -20,8 +24,10 @@ trait DBTestRunner extends TestRunner[DaoFactory] {
     test: DaoFactory => Try[Assertion],
     tearDown: DaoFactory => Try[Unit]
   ): TestRunnerResult = factoryBuilder match {
-    case Left(e) => fail(e)
-    case Right(factory) => runWithFixture(factory, setup, test, tearDown)
+    case Invalid(chain) =>
+      val reasons = ConfigException.reasons(chain).mkString(" : ")
+      fail( new IllegalStateException(reasons))
+    case Valid(factory) => runWithFixture(factory, setup, test, tearDown)
   }
 
 }

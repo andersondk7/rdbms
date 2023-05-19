@@ -16,7 +16,7 @@ class CountryGenerator(
   override def insertLine(uuid: UUID): String = {
 
     val country = Country(
-      ID(uuid),
+      ID.build(uuid),
       Version.defaultVersion,
       CountryName.build(genString(CountryName.maxLength)),
       CountryAbbreviation.build(genString(CountryAbbreviation.maxLength))

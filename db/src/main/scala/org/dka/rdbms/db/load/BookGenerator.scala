@@ -18,7 +18,7 @@ class BookGenerator(
 
   override def insertLine(uuid: UUID): String = {
     val book = Book(
-      ID(uuid),
+      ID.build(uuid),
       Version.defaultVersion,
       Title.build(genString(Title.maxLength)),
       Price.build(genPrice),

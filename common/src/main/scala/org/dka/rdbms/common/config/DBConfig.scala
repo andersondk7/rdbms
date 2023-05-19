@@ -1,7 +1,11 @@
-package org.dka.rdbms.slick.config
+package org.dka.rdbms.common.config
 
-import pureconfig._
-import pureconfig.generic.ProductHint
+import cats.data.Validated._
+import cats.implicits.{catsSyntaxTuple11Semigroupal, catsSyntaxValidatedIdBinCompat0}
+import cats.data.ValidatedNec
+import com.typesafe.config.{Config, ConfigFactory, ConfigException => TSException}
+
+import scala.language.implicitConversions
 
 /**
  * A postgres instance can have multiple databases running within it. Each database is logically separate from others in
@@ -60,10 +64,67 @@ final case class DBConfig(
 }
 
 object DBConfig {
-  implicit def hint[DBConfig]: ProductHint[DBConfig] =
-    ProductHint[DBConfig](ConfigFieldMapping(CamelCase, CamelCase))
+  type ConfigErrorsOr[T] = ValidatedNec[ConfigException, T]
+  def apply(
+    cp: String,
+    dsc: String,
+    host: String,
+    port: Int,
+    database: String,
+    schema: String,
+    user: String,
+    password: String,
+    nt: Int,
+    mc: Int,
+    qs: Int
+           ): DBConfig = new DBConfig(
+    connectionPool = cp,
+    dataSourceClass = dsc,
+    properties = Properties(host, port, database, schema, user, password),
+    numThreads = nt,
+    maxConnections = mc,
+    queueSize = qs
+  )
+
+  def load: ConfigErrorsOr[DBConfig] = {
+    implicit val config: Config =  ConfigFactory.load().getConfig("DBConfig") // just want this piece of the config file
+    println(s"${config.entrySet()}")
+
+    (
+      readString("connectionPool"),
+      readString("dataSourceClass"),
+      readString("properties.host"),
+      readInt("properties.port"),
+      readString("properties.database"),
+      readString("properties.schema"),
+      readString("properties.user"),
+      readString("properties.password"),
+      readInt("numThreads"),
+      readInt("maxConnections"),
+      readInt("queueSize")
+    ).mapN(DBConfig.apply)
+  }
+
+  private def readString(fieldName: String)(implicit config: Config): ConfigErrorsOr[String] = try {
+    Valid(config.getString(fieldName))
+  } catch
+  {
+    case _: TSException.Missing => MissingFieldException(fieldName).invalidNec
+    case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
+  }
+
+
+  private def readInt(fieldName: String)(implicit config: Config): ConfigErrorsOr[Int] = try {
+    Valid(config.getInt(fieldName))
+  } catch
+    {
+      case _: TSException.Missing => MissingFieldException(fieldName).invalidNec
+      case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
+    }
 
 }
+
+
 final case class Properties(
   host: String,
   port: Int,

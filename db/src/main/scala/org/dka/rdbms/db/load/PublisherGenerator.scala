@@ -17,7 +17,7 @@ class PublisherGenerator(
 
   override def insertLine(uuid: UUID): String = {
     val publisher = Publisher(
-      ID(uuid),
+      ID.build(uuid),
       Version.defaultVersion,
       PublisherName.build(genString(PublisherName.maxLength)),
       Some(LocationID.build(randomLocationId)),
