@@ -20,15 +20,19 @@ object Dependencies {
   private val circeCore = "io.circe" %% "circe-core" % circe_version
   private val circeGeneric = "io.circe" %% "circe-generic" % circe_version
   private val circeParser = "io.circe" %% "circe-parser" % circe_version
-  private val logBack = "ch.qos.logback" % "logback-classic" % logback_version
   private val logging = "com.typesafe.scala-logging" %% "scala-logging" % scalalogging_version
-  private val postgresDriver = "org.postgresql" % "postgresql" % postgres_driver_version
-  private val pureConfig = "com.github.pureconfig" % "pureconfig_2.13" % pureConfig_version
   private val scalatic = "org.scalactic" %% "scalactic" % scalactic_version
   private val scalaTest = "org.scalatest" %% "scalatest" % scalatest_version % "it,test"
-  private val slick = "com.typesafe.slick" % "slick_2.13" % slick_version
-  private val connectionPool = "com.typesafe.slick" % "slick-hikaricp_2.13" % slick_version
+
+  // java libs
   private val config = "com.typesafe" % "config" % config_version
+  private val postgresDriver = "org.postgresql" % "postgresql" % postgres_driver_version
+  private val logBack = "ch.qos.logback" % "logback-classic" % logback_version
+
+  // slick libs
+  private val connectionPool = "com.typesafe.slick" % "slick-hikaricp_2.13" % slick_version
+  private val pureConfig = "com.github.pureconfig" % "pureconfig_2.13" % pureConfig_version
+  private val slick = "com.typesafe.slick" % "slick_2.13" % slick_version
 
   val anormDependencies: Seq[ModuleID] = Seq(
     anorm,

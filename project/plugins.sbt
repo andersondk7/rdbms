@@ -7,5 +7,10 @@
 // https://github.com/scalameta/sbt-scalafmt/releases
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
 addSbtPlugin("io.github.davidmweber" % "flyway-sbt" % "7.4.0")
+
+// allows for easier use of crossbuilding (and enables it, sortof, in intellij
+addSbtPlugin("com.eed3si9n" % "sbt-projectmatrix" % "0.9.0")
+addSbtPlugin("com.indoorvivants" % "sbt-commandmatrix" % "0.0.5")
+
 libraryDependencies += "org.postgresql" % "postgresql" % "42.6.0"
 
