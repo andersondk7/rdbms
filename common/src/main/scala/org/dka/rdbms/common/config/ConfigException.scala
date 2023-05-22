@@ -17,6 +17,5 @@ case class InvalidFieldException(fieldName: String) extends ConfigException {
 
 object ConfigException {
   def reasons(chain: NonEmptyChain[ConfigException]): Seq[String] =
-    chain.foldLeft(Seq("")) ( (list, ex) => list :+ ex.reason )
-      .tail // get rid of leading empty string
- }
+    chain.foldLeft(Seq(""))((list, ex) => list :+ ex.reason).tail // get rid of leading empty string
+}

@@ -48,6 +48,5 @@ final case class NumberTooSmallException(itemName: String, min: BigDecimal) exte
 }
 object ValidationException {
   def reasons(chain: NonEmptyChain[ValidationException]): Seq[String] =
-    chain.foldLeft(Seq("")) ( (list, ex) => list :+ ex.reason )
-      .tail // get rid of leading empty string
+    chain.foldLeft(Seq(""))((list, ex) => list :+ ex.reason).tail // get rid of leading empty string
 }

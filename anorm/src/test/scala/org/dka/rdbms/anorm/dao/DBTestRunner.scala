@@ -1,7 +1,6 @@
-package org.dka.rdbms.slick.dao
+package org.dka.rdbms.anorm.dao
 
-import cats.data.Validated._
-import org.dka.rdbms.{TestRunner, TestRunnerResult}
+import cats.data.Validated.*
 import org.dka.rdbms.common.config.ConfigException
 import org.dka.rdbms.common.config.DBConfig.ConfigErrorsOr
 import org.scalatest.Assertion
@@ -11,9 +10,9 @@ import scala.util.{Success, Try}
 
 trait DBTestRunner extends TestRunner[DaoFactory] {
 
-  private val factoryBuilder: ConfigErrorsOr[DaoFactory] = DaoFactoryBuilder.configure
+  private val factoryBuilder: ConfigErrorsOr[DaoFactory] = DaoFactory.configure
 
-  val noSetup: DaoFactory => Try[Unit] = _ => Success()
+  val noSetup: DaoFactory => Try[Unit] = _ => Success(())
 
   /**
    * Runs test using a DaoFactory

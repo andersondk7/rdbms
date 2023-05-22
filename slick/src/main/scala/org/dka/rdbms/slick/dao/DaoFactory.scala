@@ -34,23 +34,23 @@ class DaoFactory(val database: Database) {
 object DaoFactoryBuilder {
   private val logger = Logger(getClass.getName)
   lazy val configure: ConfigErrorsOr[DaoFactory] = {
-  logger.info(s"loading configure")
-  DBConfig.load
-    .map { config =>
-      // executor construction lifted from Database.forConfig()
-      val executor = AsyncExecutor(
-        config.connectionPool,
-        config.numThreads,
-        config.numThreads,
-        config.queueSize,
-        config.maxConnections,
-        config.registerMBeans
+    logger.info(s"loading configure")
+    DBConfig.load
+      .map { config =>
+        // executor construction lifted from Database.forConfig()
+        val executor = AsyncExecutor(
+          config.connectionPool,
+          config.numThreads,
+          config.numThreads,
+          config.queueSize,
+          config.maxConnections,
+          config.registerMBeans
         )
-     val db = Database.forURL(executor = executor, url = config.url)
-     val factory = new DaoFactory(db)
-     logger.info(s"got factory")
-     factory
-    }
+      val db = Database.forURL(executor = executor, url = config.url)
+      val factory = new DaoFactory(db)
+      logger.info(s"got factory")
+      factory
+      }
   }
 
   def shutdown(database: Database): Try[Unit] = Try {
