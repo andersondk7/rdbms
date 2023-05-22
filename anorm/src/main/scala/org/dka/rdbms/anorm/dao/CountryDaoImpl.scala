@@ -2,6 +2,7 @@ package org.dka.rdbms.anorm.dao
 
 import anorm.*
 import anorm.SqlParser.*
+import com.typesafe.scalalogging.Logger
 import com.zaxxer.hikari.HikariDataSource
 import org.dka.rdbms.common.dao.{CountryDao, CrudDao, ItemNotFoundException}
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
@@ -14,6 +15,8 @@ import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
 class CountryDaoImpl(dataSource: HikariDataSource, dbEx: ExecutionContext) extends CountryDao {
+  import CountryDaoImpl.*
+  private val logger = Logger(getClass.getName)
   override def create(item: Country)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Country]] = ???
 
   override def create(items: Seq[Country])(implicit ec: ExecutionContext): Future[DaoErrorsOr[Int]] = ???
@@ -26,7 +29,7 @@ class CountryDaoImpl(dataSource: HikariDataSource, dbEx: ExecutionContext) exten
       Right(result)
     }.fold(
       ex => {
-        println(s"caught $ex")
+        logger.warn(s"caught $ex")
         connection.close()
         Left(ItemNotFoundException(id))
       },
@@ -40,6 +43,9 @@ class CountryDaoImpl(dataSource: HikariDataSource, dbEx: ExecutionContext) exten
 
   override def update(item: Country)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Country]] = ???
 
+}
+
+object CountryDaoImpl {
   //
   // queries
   //
@@ -47,10 +53,12 @@ class CountryDaoImpl(dataSource: HikariDataSource, dbEx: ExecutionContext) exten
 
   //
   // parsers
+  // if there needs to be parsers for a sub-set of country fields, it would also go here
   //
 
   private val countryParser: RowParser[Country] = {
-    getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation map { case id ~ version ~ countryName ~ countryAbbreviation =>
+    getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation map {
+      case id ~ version ~ countryName ~ countryAbbreviation =>
         Country(id, version, countryName, countryAbbreviation)
       }
   }

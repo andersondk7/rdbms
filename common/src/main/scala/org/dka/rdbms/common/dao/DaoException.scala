@@ -36,5 +36,6 @@ case class InvalidVersionException(version: Version) extends DaoException {
 }
 
 object Validation {
+  // only expect one DaoException, so don't make this a ValidatedNecDaoException, T]
   type DaoErrorsOr[T] = Either[DaoException, T]
 }
