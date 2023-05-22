@@ -7,6 +7,7 @@ import org.dka.rdbms.common.dao.{CountryDao, CrudDao, ItemNotFoundException}
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
 import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
 import org.dka.rdbms.common.model.item.Country
+import org.dka.rdbms.anorm.dao.*
 
 import java.sql.Connection
 import scala.util.Try
@@ -20,7 +21,7 @@ class CountryDaoImpl(dataSource: HikariDataSource, dbEx: ExecutionContext) exten
   override def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[Country]]] = Future {
     implicit val connection: Connection = dataSource.getConnection
     Try {
-      val q: SimpleSql[Row] = SQL"select * from countries where id=${id.value.toString}"
+      val q: SimpleSql[Row] = byIdQ(id)
       val result: Option[Country] = q.as(countryParser.singleOpt)
       Right(result)
     }.fold(
@@ -49,12 +50,11 @@ class CountryDaoImpl(dataSource: HikariDataSource, dbEx: ExecutionContext) exten
   //
 
   private val countryParser: RowParser[Country] = {
-    get[String](ID.fieldName) ~
-      get[Int](Version.fieldName) ~
-      get[String](CountryName.fieldName) ~
-      get[String](CountryAbbreviation.fieldName) map { case i ~ v ~ cn ~ ca =>
-        Country(ID.build(i), Version.build(v), CountryName.build(cn), CountryAbbreviation.build(ca))
-
+    getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation map { case id ~ version ~ countryName ~ countryAbbreviation =>
+        Country(id, version, countryName, countryAbbreviation)
       }
   }
+
+  private def getCountyName: RowParser[CountryName] = get[String](CountryName.fieldName).map(CountryName.build)
+  private def getCountryAbbreviation: RowParser[CountryAbbreviation] = get[String](CountryAbbreviation.fieldName).map(CountryAbbreviation.build)
 }
