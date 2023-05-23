@@ -35,7 +35,7 @@ trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
     db.run(singleCreateIO(item))
       .map { c: Int =>
         if (c == 1) Right(item)
-        else throw InsertException(s"${item.getClass.getName}: could not insert $item")
+        else Left(InsertException(s"${item.getClass.getName}: could not insert $item"))
       }
 
   override def create(items: Seq[D])(implicit ec: ExecutionContext): Future[DaoErrorsOr[Int]] =

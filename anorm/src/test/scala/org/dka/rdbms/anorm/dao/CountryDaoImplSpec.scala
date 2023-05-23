@@ -20,6 +20,26 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   val delay: FiniteDuration = 10.seconds
 
   describe("populating") {
+    it("should add a country") {
+      val result = withDB(
+        setup = noSetup,
+        test = factory =>
+          Try {
+            Await.result(factory.countryDao.create(iceland), delay) match {
+              case Left(e) => fail(e)
+              case Right(country) =>
+                country.id shouldBe iceland.id
+                country.version shouldBe iceland.version
+                country.countryName shouldBe iceland.countryName
+                country.countryAbbreviation shouldBe iceland.countryAbbreviation
+            }
+          },
+        tearDown = factory => deleteCountry(iceland.id)(factory, ec)
+      )
+      result.setupResult.failure shouldBe None
+      result.tearDownResult.failure shouldBe None
+      result.testResult.evaluate
+    }
     it("should find a specific country") {
       val result = withDB(
         setup = noSetup,
