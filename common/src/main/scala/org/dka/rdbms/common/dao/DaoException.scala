@@ -25,7 +25,7 @@ case class ConfigurationException(reasons: List[String], override val underlying
   override val reason: String = reasons.mkString("\t")
 }
 
-case class ItemNotFoundException(val id: ID) extends DaoException {
+case class ItemNotFoundException(id: ID) extends DaoException {
   override val reason: String = s"could not find $id"
   override val underlyingCause: Option[Throwable] = None
 }
@@ -33,6 +33,10 @@ case class ItemNotFoundException(val id: ID) extends DaoException {
 case class InvalidVersionException(version: Version) extends DaoException {
   override val underlyingCause: Option[Throwable] = None
   override val reason: String = s"attempt to update old version $version"
+}
+
+case class UpdateException(id: ID, override val underlyingCause: Option[Throwable] = None) extends DaoException {
+  override val reason: String = s"could not update id: $ID"
 }
 
 object Validation {

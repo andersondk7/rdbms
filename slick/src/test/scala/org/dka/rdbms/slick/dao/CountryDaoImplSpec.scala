@@ -191,6 +191,7 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.testResult.evaluate
     }
   }
+
   private def loadCountry(country: Country)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.countryDao.create(country), delay) match {
       case Left(e) => fail(e)

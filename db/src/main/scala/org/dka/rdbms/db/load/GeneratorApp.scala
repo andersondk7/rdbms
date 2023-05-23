@@ -30,10 +30,11 @@ object Params {
       map.getOrElse(author, 100),
       map.getOrElse(book, 200)
     )
-  def apply(args: Array[String]): Either[String, Params] = if (args.isEmpty) Left(usage)
-  else {
-    Right(Params(nextArg(Map(), args.toList)))
-  }
+  def apply(args: Array[String]): Either[String, Params] = Right(Params(5, 5, 5, 5, 5))
+//  def apply(args: Array[String]): Either[String, Params] = if (args.isEmpty) Left(usage)
+//  else {
+//    Right(Params(nextArg(Map(), args.toList)))
+//  }
 
   @tailrec
   private def nextArg(map: Map[String, Int], list: List[String]): Map[String, Int] =
@@ -63,23 +64,21 @@ object GeneratorApp extends App {
       val countryGenerator = new CountryGenerator(params.country)
       val result = for {
         countryUUIDs <- countryGenerator.write()
-        locationGenerator = new LocationGenerator(params.location, countryUUIDs)
-        locationUUIDs <- locationGenerator.write()
-        publisherGenerator = new PublisherGenerator(params.publisher, locationUUIDs)
-        publisherUUIDs <- publisherGenerator.write()
-        authorGenerator = new AuthorGenerator(params.author, locationUUIDs)
-        authorUUIDs <- authorGenerator.write()
-        bookGenerator = new BookGenerator(params.book, publisherUUIDs)
-        bookUUIDs <- bookGenerator.write()
-        authorsBooksGenerator = new AuthorsBooksGenerator(authorUUIDs, bookUUIDs)
-        _ <- authorsBooksGenerator.write()
-      } yield {
-        println(s"generated ${countryUUIDs.size} countries")
-        println(s"generated ${locationUUIDs.size} locations")
-        println(s"generated ${publisherUUIDs.size} publishers")
-        println(s"generated ${authorUUIDs.size} authors")
-        println(s"generated ${bookUUIDs.size} books")
-      }
+//        locationGenerator = new LocationGenerator(params.location, countryUUIDs)
+//        locationUUIDs <- locationGenerator.write()
+//        publisherGenerator = new PublisherGenerator(params.publisher, locationUUIDs)
+//        publisherUUIDs <- publisherGenerator.write()
+//        authorGenerator = new AuthorGenerator(params.author, locationUUIDs)
+//        authorUUIDs <- authorGenerator.write()
+//        bookGenerator = new BookGenerator(params.book, publisherUUIDs)
+//        bookUUIDs <- bookGenerator.write()
+//        authorsBooksGenerator = new AuthorsBooksGenerator(authorUUIDs, bookUUIDs)
+//        _ <- authorsBooksGenerator.write()
+      } yield println(s"generated ${countryUUIDs.size} countries")
+//        println(s"generated ${locationUUIDs.size} locations")
+//        println(s"generated ${publisherUUIDs.size} publishers")
+//        println(s"generated ${authorUUIDs.size} authors")
+//        println(s"generated ${bookUUIDs.size} books")
       result match {
         case Failure(error) =>
           println(s"did not write lines because: $error")
