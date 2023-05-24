@@ -1,6 +1,5 @@
 package org.dka.rdbms.anorm.dao
 
-
 import com.typesafe.scalalogging.Logger
 import org.dka.rdbms.common.dao.InvalidVersionException
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
@@ -105,7 +104,8 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             val firstChange = bamberg.copy(locationName = LocationName.build(updatedLocationName))
-            val secondChange = bamberg.copy(locationAbbreviation = LocationAbbreviation.build(updatedLocationAbbreviation))
+            val secondChange =
+              bamberg.copy(locationAbbreviation = LocationAbbreviation.build(updatedLocationAbbreviation))
             Await.result(factory.locationDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
               case Right(updated) =>
@@ -147,7 +147,8 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             val firstChange = bamberg.copy(locationName = LocationName.build(updatedLocationName))
-            val secondChange = bamberg.copy(locationAbbreviation = LocationAbbreviation.build(updatedLocationAbbreviation))
+            val secondChange =
+              bamberg.copy(locationAbbreviation = LocationAbbreviation.build(updatedLocationAbbreviation))
             // launch async
             val attempt1 = factory.locationDao.update(firstChange)(ec)
             val attempt2 = factory.locationDao.update(secondChange)(ec)

@@ -80,7 +80,6 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
     }
   }
 
-
   def update(item: T)(implicit ec: ExecutionContext): Future[DaoErrorsOr[T]] = {
     implicit val connection: Connection = dataSource.getConnection
     connection.setAutoCommit(false)
@@ -108,37 +107,37 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
   protected def updateQ(item: T): SimpleSql[Row]
   protected def itemParser: RowParser[T]
 
-  private def checkVersion(item: T)(implicit connection: Connection, ec: ExecutionContext): Future[DaoErrorsOr[T]] = Future {
-    Try {
-      val q: SimpleSql[Row] = byIdQ(item.id)
-      val result: Option[T] = q.as(itemParser.singleOpt)
-      result
-    }.fold(
-      ex => {
-        logger.warn(s"count not read ${item.id} because $ex")
-        Left(ItemNotFoundException(item.id))
-      },
-      {
-        case None => Left(ItemNotFoundException(item.id))
-        case Some(existing) => if (existing.version == item.version) Right(item)
-        else Left(InvalidVersionException(existing.version, Some(item.version)))
-      }
-    )
-  }
+  private def checkVersion(item: T)(implicit connection: Connection, ec: ExecutionContext): Future[DaoErrorsOr[T]] =
+    Future {
+      Try {
+        val q: SimpleSql[Row] = byIdQ(item.id)
+        val result: Option[T] = q.as(itemParser.singleOpt)
+        result
+      }.fold(
+        ex => {
+          logger.warn(s"count not read ${item.id} because $ex")
+          Left(ItemNotFoundException(item.id))
+        },
+        {
+          case None => Left(ItemNotFoundException(item.id))
+          case Some(existing) =>
+            if (existing.version == item.version) Right(item)
+            else Left(InvalidVersionException(existing.version, Some(item.version)))
+        }
+      )
+    }
 
-  private def doUpdate(item: T)(implicit ec: ExecutionContext, connection: Connection): Future[DaoErrorsOr[T]] = Future {
-    val updated = item.update
-    Try {
-      val q = updateQ(updated)
-      q.executeUpdate()
-    }.fold(
-      ex => {
-        Left(UpdateException(updated.id, Some(ex)))
-      },
-      count => {
-        if (count == 1) Right(updated)
-        else Left(UpdateException(updated.id))
-      }
-    )
-  }
+  private def doUpdate(item: T)(implicit ec: ExecutionContext, connection: Connection): Future[DaoErrorsOr[T]] =
+    Future {
+      val updated = item.update
+      Try {
+        val q = updateQ(updated)
+        q.executeUpdate()
+      }.fold(
+        ex => Left(UpdateException(updated.id, Some(ex))),
+        count =>
+          if (count == 1) Right(updated)
+          else Left(UpdateException(updated.id))
+      )
+    }
 }

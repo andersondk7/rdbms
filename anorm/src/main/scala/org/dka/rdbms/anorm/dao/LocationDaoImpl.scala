@@ -1,6 +1,5 @@
 package org.dka.rdbms.anorm.dao
 
-
 import anorm.*
 import anorm.SqlParser.*
 import com.typesafe.scalalogging.Logger
@@ -16,7 +15,7 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl [Location]  with LocationDao {
+class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl[Location] with LocationDao {
 
   import LocationDaoImpl.*
 
@@ -36,7 +35,7 @@ class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDao
 
   override protected def deleteQ(id: ID): SimpleSql[Row] = SQL"delete from locations where id = ${id.value.toString}"
 
-  override protected def updateQ(location: Location): SimpleSql[Row] = {
+  override protected def updateQ(location: Location): SimpleSql[Row] =
     SQL"""
   update locations
   set version = ${location.version.value},
@@ -46,25 +45,25 @@ class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDao
      update_date = ${location.lastUpdate.get.asTimeStamp}
   where id = ${location.id.value.toString}
   """
-  }
 
-    override protected def itemParser: RowParser[Location] =
-      getID ~ getVersion ~ getLocationName ~ getLocationAbbreviation ~ getCountryId ~ getCreateDate ~ getUpdateDate map {
-        case id ~ v ~ ln ~ la ~ ci ~ cd ~ ud =>
-          Location(
-            id = id,
-            version = v,
-            locationName = ln,
-            locationAbbreviation = la,
-            countryID = ci,
-            createDate = cd,
-            lastUpdate = ud
-          )
-      }
+  override protected def itemParser: RowParser[Location] =
+    getID ~ getVersion ~ getLocationName ~ getLocationAbbreviation ~ getCountryId ~ getCreateDate ~ getUpdateDate map {
+      case id ~ v ~ ln ~ la ~ ci ~ cd ~ ud =>
+        Location(
+          id = id,
+          version = v,
+          locationName = ln,
+          locationAbbreviation = la,
+          countryID = ci,
+          createDate = cd,
+          lastUpdate = ud
+        )
+    }
 }
 
 object LocationDaoImpl {
   private def getLocationName: RowParser[LocationName] = get[String](LocationName.fieldName).map(LocationName.build)
-  private def getLocationAbbreviation: RowParser[LocationAbbreviation] = get[String](LocationAbbreviation.fieldName).map(LocationAbbreviation.build)
+  private def getLocationAbbreviation: RowParser[LocationAbbreviation] =
+    get[String](LocationAbbreviation.fieldName).map(LocationAbbreviation.build)
   private def getCountryId: RowParser[CountryID] = get[String](CountryID.fieldName).map(CountryID.build)
 }

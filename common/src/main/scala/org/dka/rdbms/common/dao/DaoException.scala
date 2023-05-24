@@ -32,9 +32,8 @@ case class ItemNotFoundException(id: ID) extends DaoException {
 
 case class InvalidVersionException(oldVersion: Version, newVersion: Option[Version] = None) extends DaoException {
   override val underlyingCause: Option[Throwable] = None
-  override val reason: String = newVersion.fold(s"attempt to update old version $oldVersion")(
-    nv => s"attempt to update old version $oldVersion with $nv"
-  )
+  override val reason: String = newVersion.fold(s"attempt to update old version $oldVersion")(nv =>
+    s"attempt to update old version $oldVersion with $nv")
 }
 
 case class UpdateException(id: ID, override val underlyingCause: Option[Throwable] = None) extends DaoException {

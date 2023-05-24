@@ -12,4 +12,5 @@ def getVersion: RowParser[Version] = get[Int](Version.fieldName).map(Version.bui
 
 def getCreateDate: RowParser[CreateDate] = get[LocalDateTime](CreateDate.fieldName).map(CreateDate.build)
 
-def getUpdateDate: RowParser[Option[UpdateDate]] = get[Option[LocalDateTime]](UpdateDate.fieldName).map(UpdateDate.build)
+def getUpdateDate: RowParser[Option[UpdateDate]] =
+  get[Option[LocalDateTime]](UpdateDate.fieldName).map(UpdateDate.build)

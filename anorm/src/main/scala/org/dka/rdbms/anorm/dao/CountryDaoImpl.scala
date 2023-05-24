@@ -21,7 +21,7 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
 
   override protected def byIdQ(id: ID): SimpleSql[Row] = SQL"select * from countries where id = ${id.value.toString}"
 
-  override protected def insertQ(country: Country): SimpleSql[Row] = {
+  override protected def insertQ(country: Country): SimpleSql[Row] =
     SQL(
       "insert into countries (id, country_name, country_abbreviation, create_date, version) values ({id}, {country_name}, {country_abbreviation}, {create_date}, {version})")
       .on(
@@ -31,11 +31,10 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
         "create_date" -> country.createDate.asTimestamp,
         "version" -> country.version.value
       )
-  }
 
   override protected def deleteQ(id: ID): SimpleSql[Row] = SQL"delete from countries where id = ${id.value.toString}"
 
-  override protected def updateQ(country: Country): SimpleSql[Row] = {
+  override protected def updateQ(country: Country): SimpleSql[Row] =
     SQL"""
     update countries
     set version = ${country.version.value},
@@ -44,9 +43,8 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
        update_date = ${country.lastUpdate.get.asTimeStamp}
     where id = ${country.id.value.toString}
     """
-  }
 
-  override protected val itemParser:RowParser[Country] =
+  override protected val itemParser: RowParser[Country] =
     getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation ~ getCreateDate ~ getUpdateDate map {
       case id ~ v ~ cn ~ ca ~ cd ~ up =>
         Country(
@@ -61,13 +59,12 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
 
 }
 
-
 object CountryDaoImpl {
 
   //
   // queries specific to CountryDao
   //
-  
+
   //
   // parsers
   // parsers for fields that are not unique to Country are in the package object
