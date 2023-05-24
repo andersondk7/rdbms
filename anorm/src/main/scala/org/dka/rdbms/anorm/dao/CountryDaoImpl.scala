@@ -52,6 +52,8 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
     }
   }
 
+
+
   override def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[Country]]] = Future {
     withConnection { implicit connection: Connection =>
       Try {
@@ -64,9 +66,8 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
           Left(ItemNotFoundException(id))
         },
         result => Right(result)
-      )
-    }
-  }(dbEx)
+      )}
+  }
 
   override def delete(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[ID]]] = Future {
     withConnection { implicit connection: Connection =>
@@ -85,48 +86,62 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
     }
   }(dbEx)
 
-  override def update(item: Country)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Country]] =
-    withConnection { implicit connection: Connection =>
-      connection.setAutoCommit(false)
-      for {
-        targetVersion <- readVersion(item)
-        _ = validateVersion(targetVersion, item)
-        result <- doUpdate(item)
-      } yield {
-        connection.commit()
-        result
+  override def update(item: Country)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Country]] = {
+    implicit val connection: Connection = dataSource.getConnection
+    connection.setAutoCommit(false)
+    // these type of transaction boundary does not block until the row is released, it blows up
+    // only these levels work:
+    // Transaction_Repeatable_Read
+    // Transaction_Serializable
+    connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ)
+    for {
+      targetVersion <- checkVersion(item)
+      result <- targetVersion match {
+        case Left(ex) => Future.successful(Left(ex))
+        case Right(_) => doUpdate(item)
       }
+    } yield {
+      connection.commit()
+      connection.close()
+      result
     }
-
-  private def readVersion(item: Country)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Version]] = read(item.id)
-    .map(errorsOr =>
-      errorsOr.flatMap {
-        case None => Left(ItemNotFoundException(item.id))
-        case Some(country) => Right(country.version)
-      })
-
-  private def validateVersion(errors: DaoErrorsOr[Version], item: Country): DaoErrorsOr[Version] = errors match {
-    case Right(version) => if (version == item.version) Right(version) else Left(InvalidVersionException(item.version))
-    case Left(error) => Left(error)
   }
 
-  private def doUpdate(
-    item: Country
-  )(implicit ec: ExecutionContext,
-    connection: Connection
-  ): Future[DaoErrorsOr[Country]] = Future {
+  private def checkVersion(item: Country)(implicit connection:Connection, ec: ExecutionContext): Future[DaoErrorsOr[Country]] = Future {
     Try {
-      val q = updateQ(item)
-      q.executeUpdate()
+      val q: SimpleSql[Row] = byIdQ(item.id)
+      val result: Option[Country] = q.as(countryParser.singleOpt)
+      result
     }.fold(
-      ex => Left(UpdateException(item.id, Some(ex))),
-      count =>
-        if (count == 1) Right(item)
-        else Left(UpdateException(item.id))
+      ex => {
+        logger.warn(s"count not read ${item.id} because $ex")
+        Left(ItemNotFoundException(item.id))
+      },
+      {
+        case None => Left(ItemNotFoundException(item.id))
+        case Some(existing) => if (existing.version == item.version) Right(item)
+        else Left(InvalidVersionException(existing.version, Some(item.version)))
+      }
     )
   }
 
+  private def doUpdate(item: Country)(implicit ec: ExecutionContext, connection: Connection): Future[DaoErrorsOr[Country]] = Future {
+    val updated = item.update
+    Try {
+      val q = updateQ(updated)
+      q.executeUpdate()
+    }.fold(
+      ex => {
+        Left(UpdateException(updated.id, Some(ex)))
+      },
+      count => {
+        if (count == 1) Right(updated)
+        else Left(UpdateException(updated.id))
+      }
+    )
+  }
 }
+
 
 object CountryDaoImpl {
 
@@ -149,15 +164,13 @@ object CountryDaoImpl {
   private val deleteQ: ID => SimpleSql[Row] = id => SQL"delete from countries where id = ${id.value.toString}"
 
   private val updateQ: Country => SimpleSql[Row] = country =>
-    val update = country.update
     SQL"""
       update countries
-      set version =
-        ${update.version.value},
-         country_name = ${update.countryName.value},
-         country_abbreviation = ${update.countryAbbreviation.value},
-         last_update = ${update.lastUpdate.get.asTimeStamp}
-      where id = '${update.id.value.toString}
+      set version = ${country.version.value},
+         country_name = ${country.countryName.value},
+         country_abbreviation = ${country.countryAbbreviation.value},
+         update_date = ${country.lastUpdate.get.asTimeStamp}
+      where id = ${country.id.value.toString}
       """
   //
   // parsers
