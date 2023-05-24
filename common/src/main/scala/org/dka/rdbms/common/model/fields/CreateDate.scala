@@ -16,7 +16,7 @@ final case class CreateDate private (override val value: LocalDateTime) extends 
 }
 
 object CreateDate extends LocalDateTimeValidation[CreateDate] {
-  override val fieldName: String = "createDate"
+  override val fieldName: String = "create_date"
 
   override def build(tn: LocalDateTime): CreateDate = new CreateDate(tn.truncatedTo(ChronoUnit.MILLIS))
   def build(ts: Timestamp): CreateDate = new CreateDate(ts.toLocalDateTime)

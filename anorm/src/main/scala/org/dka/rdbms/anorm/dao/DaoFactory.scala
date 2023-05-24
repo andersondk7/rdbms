@@ -6,14 +6,15 @@ import com.zaxxer.hikari.util.UtilityElf.DefaultThreadFactory
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.dka.rdbms.common.config.DBConfig
 import org.dka.rdbms.common.config.DBConfig.ConfigErrorsOr
-import org.dka.rdbms.common.dao.CountryDao
+import org.dka.rdbms.common.dao.{CountryDao, LocationDao}
 
 import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, Executors, ThreadPoolExecutor, TimeUnit}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.*
 
 class DaoFactory(val dataSource: HikariDataSource, dbEx: ExecutionContext) {
-  val countryDao: CountryDao = new CountryDaoImpl(dataSource, dbEx)
+  val countryDao: CountryDao = new CountryDaoImpl(dataSource)
+  val locationDao: LocationDao = new LocationDaoImpl(dataSource)
 }
 
 object DaoFactory {

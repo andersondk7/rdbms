@@ -15,7 +15,7 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Country] with CountryDao {
+class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl[Country] with CountryDao {
 
   import CountryDaoImpl.*
 
@@ -47,9 +47,16 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
   }
 
   override protected val itemParser:RowParser[Country] =
-    getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation map {
-      case id ~ version ~ countryName ~ countryAbbreviation =>
-        Country(id, version, countryName, countryAbbreviation)
+    getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation ~ getCreateDate ~ getUpdateDate map {
+      case id ~ v ~ cn ~ ca ~ cd ~ up =>
+        Country(
+          id = id,
+          version = v,
+          countryName = cn,
+          countryAbbreviation = ca,
+          createDate = cd,
+          lastUpdate = up
+        )
     }
 
 }

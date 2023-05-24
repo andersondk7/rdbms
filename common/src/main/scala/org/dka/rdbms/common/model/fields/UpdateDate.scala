@@ -16,10 +16,11 @@ final case class UpdateDate private (override val value: LocalDateTime) extends 
 }
 
 object UpdateDate extends LocalDateTimeValidation[UpdateDate] {
-  override val fieldName: String = "updateDate"
+  override val fieldName: String = "update_date"
 
   override def build(tn: LocalDateTime): UpdateDate = new UpdateDate(tn.truncatedTo(ChronoUnit.MILLIS))
   def build(ts: Timestamp): UpdateDate = new UpdateDate(ts.toLocalDateTime)
+  def fromOption(o: Option[LocalDateTime]): Option[UpdateDate] = o.map(ld => new UpdateDate(ld))
 
   def now: Option[UpdateDate] = Some(UpdateDate.build(LocalDateTime.now))
 }

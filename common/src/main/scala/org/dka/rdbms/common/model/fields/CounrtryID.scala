@@ -12,4 +12,5 @@ object CountryID extends UUIDValidation[CountryID] {
   override def build(id: UUID): CountryID = new CountryID(id)
 
   def build: CountryID = new CountryID(UUID.randomUUID())
+  def build(uuid: String) = new CountryID(UUID.fromString(uuid))
 }
