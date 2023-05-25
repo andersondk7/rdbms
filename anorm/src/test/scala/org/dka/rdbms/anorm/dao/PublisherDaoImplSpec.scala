@@ -63,7 +63,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.tearDownResult.failure shouldBe None
       result.testResult.evaluate
     }
-    it("should find a specific country") {
+    it("should find a specific publisher") {
       val result = withDB(
         setup = factory => loadPublisher(rh)(factory, ec),
         test = factory =>

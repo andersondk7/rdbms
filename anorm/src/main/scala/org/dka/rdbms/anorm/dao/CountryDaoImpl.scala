@@ -35,7 +35,8 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
   override protected def updateQ(country: Country): SimpleSql[Row] =
     SQL"""
     update countries
-    set version = ${country.version.value},
+    set
+       version = ${country.version.value},
        country_name = ${country.countryName.value},
        country_abbreviation = ${country.countryAbbreviation.value},
        update_date = ${country.lastUpdate.get.asTimeStamp}

@@ -16,6 +16,7 @@ class DaoFactory(val dataSource: HikariDataSource, dbEx: ExecutionContext) {
   val countryDao: CountryDao = new CountryDaoImpl(dataSource)
   val locationDao: LocationDao = new LocationDaoImpl(dataSource)
   val publisherDao: PublisherDao = new PublisherDaoImpl(dataSource)
+  val authorDao: AuthorDao = new AuthorDaoImpl(dataSource)
 }
 
 object DaoFactory {

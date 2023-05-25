@@ -39,11 +39,12 @@ class PublisherDaoImpl(override val dataSource: HikariDataSource) extends CrudDa
 
     SQL"""
           update publishers
-           set version = ${publisher.version.value},
-           publisher_name = ${publisher.publisherName.value},
-           location_id = ${locationId},
-           website = ${website},
-           update_date = ${publisher.lastUpdate.get.asTimeStamp}
+           set 
+             version = ${publisher.version.value},
+             publisher_name = ${publisher.publisherName.value},
+             location_id = ${locationId},
+             website = ${website},
+             update_date = ${publisher.lastUpdate.get.asTimeStamp}
           where id = ${publisher.id.value.toString}
    """
   }
@@ -76,7 +77,5 @@ object PublisherDaoImpl {
   //
 
   private def getPublisherName: RowParser[PublisherName] = get[String](PublisherName.fieldName).map(PublisherName.build)
-  private def getLocationId: RowParser[Option[LocationID]] =
-    get[Option[String]](LocationID.fieldName).map(LocationID.fromOpt)
   private def getWebsite: RowParser[Option[WebSite]] = get[Option[String]](WebSite.fieldName).map(WebSite.fromOpt)
 }

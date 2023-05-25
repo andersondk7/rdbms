@@ -12,7 +12,8 @@ final case class FirstName private (override val value: String) extends Field[St
 object FirstName extends StringLengthValidation[FirstName] {
   override val maxLength = 20
   override val minLength = 1
-  override val fieldName: String = "firstName"
+  override val fieldName: String = "first_name"
 
   override def build(fn: String): FirstName = new FirstName(fn)
+  def fromOpt(o: Option[String]): Option[FirstName] = o.map(build)
 }

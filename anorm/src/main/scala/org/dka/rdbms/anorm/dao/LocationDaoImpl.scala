@@ -34,13 +34,14 @@ class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDao
 
   override protected def updateQ(location: Location): SimpleSql[Row] =
     SQL"""
-  update locations
-  set version = ${location.version.value},
-     location_name = ${location.locationName.value},
-     location_abbreviation = ${location.locationAbbreviation.value},
-     country_id = ${location.countryID.value.toString},
-     update_date = ${location.lastUpdate.get.asTimeStamp}
-  where id = ${location.id.value.toString}
+      update locations
+      set 
+        version = ${location.version.value},
+        location_name = ${location.locationName.value},
+        location_abbreviation = ${location.locationAbbreviation.value},
+        country_id = ${location.countryID.value.toString},
+        update_date = ${location.lastUpdate.get.asTimeStamp}
+      where id = ${location.id.value.toString}
   """
 
   override protected def itemParser: RowParser[Location] =

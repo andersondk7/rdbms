@@ -2,7 +2,7 @@ package org.dka.rdbms.anorm.dao
 
 import anorm.*
 import anorm.SqlParser.*
-import org.dka.rdbms.common.model.fields.{CreateDate, ID, UpdateDate, Version}
+import org.dka.rdbms.common.model.fields.{CreateDate, ID, LocationID, UpdateDate, Version}
 
 import java.time.LocalDateTime
 
@@ -14,3 +14,5 @@ def getCreateDate: RowParser[CreateDate] = get[LocalDateTime](CreateDate.fieldNa
 
 def getUpdateDate: RowParser[Option[UpdateDate]] =
   get[Option[LocalDateTime]](UpdateDate.fieldName).map(UpdateDate.build)
+
+def getLocationId: RowParser[Option[LocationID]] = get[Option[String]](LocationID.fieldName).map(LocationID.fromOpt)
