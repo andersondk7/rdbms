@@ -4,7 +4,7 @@ import anorm.*
 import anorm.SqlParser.*
 import com.typesafe.scalalogging.Logger
 import com.zaxxer.hikari.HikariDataSource
-import org.dka.rdbms.common.dao.{CountryDao, CrudDao, DeleteException, InsertException, InvalidVersionException, ItemNotFoundException, UpdateException}
+import org.dka.rdbms.common.dao.*
 import org.dka.rdbms.common.dao.Validation.DaoErrorsOr
 import org.dka.rdbms.common.model.fields.{CountryAbbreviation, CountryName, ID, Version}
 import org.dka.rdbms.common.model.item.Country

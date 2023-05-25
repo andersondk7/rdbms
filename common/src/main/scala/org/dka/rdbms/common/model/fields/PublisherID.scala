@@ -12,4 +12,6 @@ object PublisherID extends UUIDValidation[PublisherID] {
   override def build(id: UUID): PublisherID = new PublisherID(id)
 
   def build: PublisherID = new PublisherID(UUID.randomUUID())
+  def build(s: String): PublisherID = new PublisherID(UUID.fromString(s))
+  def fromOpt(o: Option[String]): Option[PublisherID] = o.map(build)
 }
