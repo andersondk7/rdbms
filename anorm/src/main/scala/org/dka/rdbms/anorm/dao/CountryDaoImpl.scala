@@ -19,7 +19,7 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
 
   import CountryDaoImpl.*
 
-  override protected def byIdQ(id: ID): SimpleSql[Row] = SQL"select * from countries where id = ${id.value.toString}"
+  override val tableName: String = "countries"
 
   override protected def insertQ(country: Country): SimpleSql[Row] =
     SQL(
@@ -31,8 +31,6 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
         "create_date" -> country.createDate.asTimestamp,
         "version" -> country.version.value
       )
-
-  override protected def deleteQ(id: ID): SimpleSql[Row] = SQL"delete from countries where id = ${id.value.toString}"
 
   override protected def updateQ(country: Country): SimpleSql[Row] =
     SQL"""

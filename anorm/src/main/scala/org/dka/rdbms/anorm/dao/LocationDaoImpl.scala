@@ -19,6 +19,7 @@ class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDao
 
   import LocationDaoImpl.*
 
+  override val tableName = "locations"
   override protected def insertQ(location: Location): SimpleSql[Row] =
     SQL(
       "insert into locations(id, version, location_name, location_abbreviation, country_id, create_date) values ({id}, {version}, {location_name}, {location_abbreviation}, {country_id}, {create_date})"
@@ -30,10 +31,6 @@ class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDao
       "country_id" -> location.countryID.value.toString,
       "create_date" -> location.createDate.asTimestamp
     )
-
-  override protected def byIdQ(id: ID): SimpleSql[Row] = SQL"select * from locations where id = ${id.value.toString}"
-
-  override protected def deleteQ(id: ID): SimpleSql[Row] = SQL"delete from locations where id = ${id.value.toString}"
 
   override protected def updateQ(location: Location): SimpleSql[Row] =
     SQL"""

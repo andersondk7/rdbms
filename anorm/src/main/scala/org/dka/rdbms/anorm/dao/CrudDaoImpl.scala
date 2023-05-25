@@ -101,9 +101,19 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
     }
   }
 
+  def tableName: String
   protected def insertQ(t: T): SimpleSql[Row]
-  protected def byIdQ(id: ID): SimpleSql[Row]
-  protected def deleteQ(id: ID): SimpleSql[Row]
+
+  private def byIdQ(id: ID): SimpleSql[Row] = {
+    val phrase = "select * from tableName where id = {id}".replace("tableName", tableName)
+    SQL(phrase).on("id" -> id.value.toString)
+  }
+
+  def deleteQ(id: ID): SimpleSql[Row] = {
+    val phrase = "delete from tableName where id = {id}".replace("tableName", tableName)
+    SQL(phrase).on("id" -> id.value.toString)
+
+  }
   protected def updateQ(item: T): SimpleSql[Row]
   protected def itemParser: RowParser[T]
 
@@ -141,3 +151,5 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
       )
     }
 }
+
+object CrudDaoImpl {}
