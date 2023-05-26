@@ -6,7 +6,7 @@ lazy val scala322 = "3.2.2"
 lazy val supportedScalaVersions = List(scala213, scala322)
 
 ThisBuild / organization := "org.dka.rdbms"
-ThisBuild / version := "0.4.9"
+ThisBuild / version := "0.4.10"
 ThisBuild / scalaVersion := scala322
 
 lazy val flywaySettings: Seq[Def.Setting[_]] = Seq(
@@ -44,7 +44,7 @@ lazy val anorm = (projectMatrix in file("anorm"))
     libraryDependencies ++= anormDependencies,
     Defaults.itSettings
   )
-  .dependsOn(common)
+  .dependsOn(common, db)
   .jvmPlatform(scalaVersions = Seq(scala322))
 
 lazy val db = (projectMatrix in file("db"))

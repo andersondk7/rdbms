@@ -15,9 +15,12 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
+
   private val logger = Logger(getClass.getName)
+
   val delay: FiniteDuration = 10.seconds
 
   describe("conversion to/from db") {
@@ -108,7 +111,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             Await.result(factory.publisherDao.read(ad.id), delay) match {
-              case Left(e) => fail(e)
+              case Left(e)    => fail(e)
               case Right(opt) => opt.fold(fail(s"did not find $ad"))(publisher => publisher shouldBe ad)
             }
           },
@@ -154,13 +157,13 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the first one to make an update (publisher name) succeeds
       - the second one to make an update (web site) fails
        */
-      val updatedName = "Riley"
+      val updatedName    = "Riley"
       val updatedWebSite = Some("http://riley.com")
       val result = withDB(
         setup = factory => loadPublisher(hb)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = hb.copy(publisherName = PublisherName.build(updatedName))
+            val firstChange  = hb.copy(publisherName = PublisherName.build(updatedName))
             val secondChange = hb.copy(webSite = WebSite.build(updatedWebSite))
 
             Await.result(factory.publisherDao.update(firstChange)(ec), delay) match {
@@ -199,13 +202,13 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - since this is async, it is indeterminate which will succeed and which will fail
       -  but there will be one of each
        */
-      val updatedName = "Riley"
+      val updatedName    = "Riley"
       val updatedWebSite = Some("http://riley.com")
       val result = withDB(
         setup = factory => loadPublisher(hb)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = hb.copy(publisherName = PublisherName.build(updatedName))
+            val firstChange  = hb.copy(publisherName = PublisherName.build(updatedName))
             val secondChange = hb.copy(webSite = WebSite.build(updatedWebSite))
             // launch async
             val attempt1 = factory.publisherDao.update(firstChange)(ec)
@@ -232,7 +235,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   private def loadPublisher(publisher: Publisher)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.publisherDao.create(publisher), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -252,6 +255,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object PublisherDaoImplSpec {
@@ -263,6 +267,7 @@ object PublisherDaoImplSpec {
     None,
     Some(WebSite.build("www.random.com"))
   )
+
   val hb: Publisher = item.Publisher(
     ID.build,
     Version.defaultVersion,
@@ -270,6 +275,7 @@ object PublisherDaoImplSpec {
     None,
     None
   )
+
   val hc: Publisher = item.Publisher(
     ID.build,
     Version.defaultVersion,
@@ -277,6 +283,7 @@ object PublisherDaoImplSpec {
     None,
     Some(WebSite.build("www.harperCollins.com"))
   )
+
   val ad: Publisher = item.Publisher(
     ID.build,
     Version.defaultVersion,
@@ -286,5 +293,7 @@ object PublisherDaoImplSpec {
   )
 
   val multiplePublishers: Seq[Publisher] = Seq(hb, hc, ad)
+
   val publisherIds: Seq[ID] = PublisherDaoImplSpec.multiplePublishers.map(_.id)
+
 }

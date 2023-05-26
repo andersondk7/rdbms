@@ -19,23 +19,29 @@ import scala.concurrent.{ExecutionContext, Future}
  *   domain object stored
  */
 trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
+
   def db: Database
+
   private val logger = Logger(getClass.getName)
 
   //
   // crud IO operations
   //
   protected def singleCreateIO: D => DBIO[Int]
+
   protected def multipleCreateIO: Seq[D] => DBIO[Option[Int]]
+
   protected def getIO: (ID, ExecutionContext) => DBIO[Option[D]]
+
   protected def deletedIO: ID => DBIO[Int]
+
   protected val updateAction: (D, ExecutionContext) => DBIO[D]
 
   override def create(item: D)(implicit ec: ExecutionContext): Future[DaoErrorsOr[D]] =
     db.run(singleCreateIO(item))
       .map { c: Int =>
         if (c == 1) Right(item)
-        else throw InsertException(s"${item.getClass.getName}: could not insert $item")
+        else Left(InsertException(s"${item.getClass.getName}: could not insert $item"))
       }
 
   override def create(items: Seq[D])(implicit ec: ExecutionContext): Future[DaoErrorsOr[Int]] =
@@ -82,7 +88,7 @@ trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
     db.run(combo)
       .map {
         case (Left(e), _) => Left(e)
-        case (_, item) => Right(item)
+        case (_, item)    => Right(item)
       }
       .recover { case e: PSQLException =>
         // plsql exception gives no useful information
@@ -90,4 +96,5 @@ trait CrudDaoImpl[D <: Updatable[D]] extends CrudDao[D] {
         Left(InvalidVersionException(item.version))
       }
   }
+
 }

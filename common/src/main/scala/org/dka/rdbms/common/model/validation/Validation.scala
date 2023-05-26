@@ -17,6 +17,7 @@ import scala.language.implicitConversions
  *   item from source type
  */
 trait Validation[I, S, T <: Field[S]] {
+
   val fieldName: String
 
   /**
@@ -30,6 +31,7 @@ trait Validation[I, S, T <: Field[S]] {
   def build(o: Option[S]): Option[T] = o.map(build)
 
   def apply(s: I): ValidationErrorsOr[T] = validate(s)
+
   def apply(o: Option[I]): ValidationErrorsOr[Option[T]] = validateOption(o)
 
   /**
@@ -48,19 +50,25 @@ trait Validation[I, S, T <: Field[S]] {
    * write the Item as json
    */
   def toJson(item: T): (String, Json)
+
   def toJson(item: Option[T]): Option[(String, Json)] = item.map(toJson)
 
   /**
    * read the item from json
    */
   def fromJson(c: HCursor): ValidationErrorsOr[T]
+
   def fromOptionalJson(c: HCursor): ValidationErrorsOr[Option[T]]
+
 }
 
 object Validation {
+
   type ValidationErrorsOr[T] = ValidatedNec[ValidationException, T]
 
   private def asList(errors: NonEmptyChain[ValidationException]): List[String] =
     errors.tail.foldLeft(List(errors.head.reason))((acc, ve) => ve.reason :: acc)
+
   implicit def asString(errors: NonEmptyChain[ValidationException]): String = asList(errors).mkString(" : ")
+
 }

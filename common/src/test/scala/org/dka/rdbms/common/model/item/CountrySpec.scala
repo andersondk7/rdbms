@@ -8,6 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class CountrySpec extends AnyFunSpec with Matchers {
+
   private val logger = Logger(getClass.getName)
 
   describe("read and write from json") {
@@ -23,9 +24,10 @@ class CountrySpec extends AnyFunSpec with Matchers {
       val json = country.asJson.noSpaces
       logger.debug(s"with all args: json: $json")
       decode[Country](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe country
       }
     }
   }
+
 }

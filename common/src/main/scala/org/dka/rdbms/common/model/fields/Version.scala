@@ -11,11 +11,15 @@ import org.dka.rdbms.common.model.validation.{JsonParseException, PositiveIntege
  *   - must be positive
  */
 final case class Version private (override val value: Int) extends Field[Int] {
+
   def next: Version = this.copy(value = this.value + 1)
+
 }
 
 object Version extends PositiveIntegerValidation[Version] {
+
   override val fieldName: String = "version"
+
   val defaultVersion: Version = new Version(1)
 
   override def build(value: Int): Version = new Version(value)
@@ -31,4 +35,5 @@ object Version extends PositiveIntegerValidation[Version] {
       input => validate(input) // convert string to Item, converting ValidationException to DecodingFailure
     )
   }
+
 }

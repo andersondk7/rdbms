@@ -15,7 +15,9 @@ final case class Publisher(
   createDate: CreateDate = CreateDate.now,
   override val lastUpdate: Option[UpdateDate] = None)
   extends Updatable[Publisher] {
+
   override def update: Publisher = this.copy(version = version.next, lastUpdate = UpdateDate.now)
+
 }
 
 object Publisher {
@@ -43,7 +45,8 @@ object Publisher {
       CreateDate.fromJson(c),
       UpdateDate.fromOptionalJson(c)
     ).mapN(Publisher.apply) match {
-      case Invalid(errors) => Left(DecodingFailure(errors, Nil))
+      case Invalid(errors)  => Left(DecodingFailure(errors, Nil))
       case Valid(publisher) => Right(publisher)
     }
+
 }

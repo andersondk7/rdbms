@@ -14,6 +14,7 @@ import org.dka.rdbms.common.model.validation.{BigDecimalValidation, JsonParseExc
 final case class Price private (override val value: BigDecimal) extends Field[BigDecimal]
 
 object Price extends BigDecimalValidation[Price] {
+
   override val fieldName: String = "price"
 
   override def build(amount: BigDecimal): Price = new Price(amount)
@@ -43,4 +44,5 @@ object Price extends BigDecimalValidation[Price] {
       input => validate(input) // convert string to Item, converting ValidationException to DecodingFailure
     )
   }
+
 }

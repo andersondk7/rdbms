@@ -11,16 +11,19 @@ import scala.util.{Failure, Success, Try}
 // example of a spec test with fixture of type String
 
 class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
+
   private val logger = Logger(getClass.getName)
 
   //
   // setup stuff
   //
   private val setupException = new Exception("expected in setup")
+
   private val setupFails: String => Try[Unit] = s => {
     logger.info(s"setup failed in $s")
     Failure(setupException)
   }
+
   private val setupSucceeds: String => Try[Unit] = s => {
     logger.info(s"setup succeeded in $s")
     Success()
@@ -30,15 +33,19 @@ class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
   // test stuff
   //
   private val testFailure: Try[Assertion] = Try(1 + 1 shouldBe 3)
+
   private val testRunException = new IllegalStateException("test was run when should not have been")
+
   private val testNotRun: String => Try[Assertion] = s => {
     logger.error(s"test not run in  $s")
     Failure(testRunException)
   }
+
   private val testFails: String => Try[Assertion] = s => {
     logger.info(s"test run and failed in $s")
     testFailure
   }
+
   private val testSucceeds: String => Try[Assertion] = s => {
     logger.info(s"test run and succeeded in $s")
     Success(succeed)
@@ -48,11 +55,13 @@ class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
   // tearDown stuff
   //
   private val tearDownException = new Exception("expected in tearDown")
+
   private val tearDownFails: String => Try[Unit] = s =>
     Try {
       logger.info(s"tearDown fails in $s")
       throw tearDownException
     }
+
   private val tearDownSucceeds: String => Try[Unit] = s => {
     logger.info(s"tearDown succeeds in $s")
     Success()
@@ -167,4 +176,5 @@ class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
       runResult.tearDownResult.failure shouldBe None
     }
   }
+
 }

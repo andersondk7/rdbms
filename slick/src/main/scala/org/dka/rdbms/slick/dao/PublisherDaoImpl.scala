@@ -12,15 +12,19 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher] with PublisherDao {
+
   import PublisherDaoImpl._
 
   //
   // crud IO operations
   //
   override protected val singleCreateIO: Publisher => DBIO[Int] = publisher => tableQuery += publisher
+
   override protected val multipleCreateIO: Seq[Publisher] => DBIO[Option[Int]] = publishers => tableQuery ++= publishers
+
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Publisher]] = (id, ec) =>
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
+
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   override protected val updateAction: (Publisher, ExecutionContext) => DBIO[Publisher] = (item, ec) => {
@@ -57,6 +61,7 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher]
 }
 
 object PublisherDaoImpl {
+
   val tableQuery = TableQuery[PublisherTable]
 
   class PublisherTable(tag: Tag)
@@ -64,15 +69,23 @@ object PublisherDaoImpl {
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "publishers") {
+
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
+
     val version = column[Int]("version")
+
     val publisherName = column[String]("publisher_name")
+
     val locationId = column[Option[String]]("location_id")
+
     val website = column[Option[String]]("website")
+
     val createDate = column[Timestamp]("create_date")
+
     val updateDate = column[Option[Timestamp]]("update_date")
 
     override def * = (id, version, publisherName, locationId, website, createDate, updateDate) <> (fromDB, toDB)
+
   }
 
   //
@@ -81,12 +94,12 @@ object PublisherDaoImpl {
   // the db is assumed valid because the data only come from the model
   //
   private type PublisherTuple = (
-    String, // id
-    Int, // version
-    String, // publisherName
-    Option[String], // locationId
-    Option[String], // website
-    Timestamp, // createDate
+    String,           // id
+    Int,              // version
+    String,           // publisherName
+    Option[String],   // locationId
+    Option[String],   // website
+    Timestamp,        // createDate
     Option[Timestamp] // updateDate
   )
 
@@ -112,4 +125,5 @@ object PublisherDaoImpl {
     publisher.createDate.asTimestamp,
     publisher.lastUpdate.map(_.asTimeStamp)
   )
+
 }

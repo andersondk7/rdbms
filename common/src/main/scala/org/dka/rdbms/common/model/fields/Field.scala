@@ -5,6 +5,7 @@ package org.dka.rdbms.common.model.fields
  * @tparam T
  */
 trait Field[T] {
+
   def value: T
 
 }

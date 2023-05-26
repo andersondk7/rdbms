@@ -10,6 +10,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class PublisherSpec extends AnyFunSpec with Matchers {
+
   private val logger = Logger(getClass.getName)
 
   describe("read and write from json") {
@@ -26,7 +27,7 @@ class PublisherSpec extends AnyFunSpec with Matchers {
       val json = publisher.asJson.noSpaces
       logger.debug(s"with all args: json: $json")
       decode[Publisher](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe publisher
       }
     }
@@ -41,9 +42,10 @@ class PublisherSpec extends AnyFunSpec with Matchers {
       val json = publisher.asJson.noSpaces
       logger.debug(s"with missing args: json: $json")
       decode[Publisher](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe publisher
       }
     }
   }
+
 }

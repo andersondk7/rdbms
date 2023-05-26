@@ -26,7 +26,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         val id: ID = ids.head
         val now = System.currentTimeMillis()
         // make a call for each book (all 2000 of them)
-        Await.result(factory.bookDao.getAuthorsForBook(id), delay).getOrElse(throw new Exception("error"))
+        Await.result(factory.bookDao.getBookAuthorSummary(id), delay).getOrElse(throw new Exception("error"))
         val time = System.currentTimeMillis() - now
         logger.info(s"slick: first single query, time: $time")
       }
@@ -41,7 +41,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         val queries: Future[Seq[BookAuthorSummary]] = Future
           .sequence(ids.map { id =>
             factory.bookDao
-              .getAuthorsForBook(id)
+              .getBookAuthorSummary(id)
               .map(_.getOrElse(throw new Exception(s"failed reading bookDao for $id")))
           })
           .map(_.flatten)
@@ -59,7 +59,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         // sequential queries
         val query: (ID, BookDao) => Seq[BookAuthorSummary] = (id, dao) =>
           Await
-            .result(dao.getAuthorsForBook(id), delay)
+            .result(dao.getBookAuthorSummary(id), delay)
             .getOrElse(throw new Exception(s"could not get summary for $id"))
         val summaries: Seq[BookAuthorSummary] = ids.flatMap(query(_, factory.bookDao))
         val time = System.currentTimeMillis() - now
@@ -74,7 +74,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
         val id: ID = ids.head
         val now = System.currentTimeMillis()
         // make a call for each book (all 2000 of them)
-        Await.result(factory.bookDao.getAuthorsForBook(id), delay).getOrElse(throw new Exception("error"))
+        Await.result(factory.bookDao.getBookAuthorSummary(id), delay).getOrElse(throw new Exception("error"))
         val time = System.currentTimeMillis() - now
         logger.info(s"slick: last single query, time: $time")
       }

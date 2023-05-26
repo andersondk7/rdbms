@@ -3,7 +3,7 @@ package org.dka.rdbms.common.config
 import cats.data.Validated._
 import cats.implicits.{catsSyntaxTuple11Semigroupal, catsSyntaxValidatedIdBinCompat0}
 import cats.data.ValidatedNec
-import com.typesafe.config.{Config, ConfigFactory, ConfigException => TSException}
+import com.typesafe.config.{Config, ConfigException => TSException, ConfigFactory}
 
 import scala.language.implicitConversions
 
@@ -61,10 +61,13 @@ final case class DBConfig(
 
   val url: String =
     s"jdbc:postgresql://${properties.host}:${properties.port}/${properties.database}?user=${properties.user}&password=${properties.password}&currentSchema=${properties.schema}"
+
 }
 
 object DBConfig {
+
   type ConfigErrorsOr[T] = ValidatedNec[ConfigException, T]
+
   def apply(
     cp: String,
     dsc: String,
@@ -77,7 +80,7 @@ object DBConfig {
     nt: Int,
     mc: Int,
     qs: Int
-           ): DBConfig = new DBConfig(
+  ): DBConfig = new DBConfig(
     connectionPool = cp,
     dataSourceClass = dsc,
     properties = Properties(host, port, database, schema, user, password),
@@ -87,7 +90,7 @@ object DBConfig {
   )
 
   def load: ConfigErrorsOr[DBConfig] = {
-    implicit val config: Config =  ConfigFactory.load().getConfig("DBConfig") // just want this piece of the config file
+    implicit val config: Config = ConfigFactory.load().getConfig("DBConfig") // just want this piece of the config file
     println(s"${config.entrySet()}")
 
     (
@@ -105,25 +108,21 @@ object DBConfig {
     ).mapN(DBConfig.apply)
   }
 
-  private def readString(fieldName: String)(implicit config: Config): ConfigErrorsOr[String] = try {
+  private def readString(fieldName: String)(implicit config: Config): ConfigErrorsOr[String] = try
     Valid(config.getString(fieldName))
-  } catch
-  {
-    case _: TSException.Missing => MissingFieldException(fieldName).invalidNec
+  catch {
+    case _: TSException.Missing   => MissingFieldException(fieldName).invalidNec
     case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
   }
 
-
-  private def readInt(fieldName: String)(implicit config: Config): ConfigErrorsOr[Int] = try {
+  private def readInt(fieldName: String)(implicit config: Config): ConfigErrorsOr[Int] = try
     Valid(config.getInt(fieldName))
-  } catch
-    {
-      case _: TSException.Missing => MissingFieldException(fieldName).invalidNec
-      case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
-    }
+  catch {
+    case _: TSException.Missing   => MissingFieldException(fieldName).invalidNec
+    case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
+  }
 
 }
-
 
 final case class Properties(
   host: String,

@@ -13,10 +13,14 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   import BookDaoImplSpec._
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
+
   private val logger = Logger(getClass.getName)
+
   val delay: FiniteDuration = 10.seconds
 
   describe("conversion to/from db") {
@@ -75,7 +79,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             Await.result(factory.bookDao.read(pridePrejudice.id), delay) match {
-              case Left(e) => fail(e)
+              case Left(e)    => fail(e)
               case Right(opt) => opt.fold(fail(s"did not find $pridePrejudice"))(book => book shouldBe pridePrejudice)
             }
           },
@@ -89,13 +93,13 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   describe("queries") {
     it("should find authors for a given book") {
-      val bookId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
+      val bookId    = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
       val titleName = "Grimms Fairy Tales"
       val result = withDB(
         noSetup,
         test = factory =>
           Try {
-            val response = Await.result(factory.bookDao.getAuthorsForBook(ID.build(bookId)), delay)
+            val response = Await.result(factory.bookDao.getBookAuthorSummary(ID.build(bookId)), delay)
             response match {
               case Left(e) =>
                 fail(e)
@@ -104,7 +108,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
                 summaries.length shouldBe 2 // jacob and wilhelm
                 val wilhelm = summaries.head
-                val jacob = summaries.tail.head
+                val jacob   = summaries.tail.head
                 wilhelm.titleName.value shouldBe titleName
                 wilhelm.authorOrder shouldBe 2
                 jacob.titleName.value shouldBe titleName
@@ -123,7 +127,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.testResult.evaluate
     }
     it("should find authors for a given book via sql") {
-      val bookId = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
+      val bookId    = "e1de1c95-19e5-4df6-aa49-7c1f7b1d1868"
       val titleName = "Grimms Fairy Tales"
       val result = withDB(
         noSetup,
@@ -138,7 +142,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
                 summaries.length shouldBe 2 // jacob and wilhelm
                 val wilhelm = summaries.head
-                val jacob = summaries.tail.head
+                val jacob   = summaries.tail.head
                 wilhelm.titleName.value shouldBe titleName
                 wilhelm.authorOrder shouldBe 2
                 jacob.titleName.value shouldBe titleName
@@ -155,12 +159,6 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.setupGood shouldBe true
       result.tearDownGood shouldBe true
       result.testResult.evaluate
-    }
-  }
-  private def loadBook(book: Book)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
-    Await.result(factory.bookDao.create(book), delay) match {
-      case Left(e) => fail(e)
-      case Right(_) => ()
     }
   }
 
@@ -204,7 +202,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         setup = factory => loadBook(pridePrejudice)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = pridePrejudice.copy(title = Title.build(updatedTitle))
+            val firstChange  = pridePrejudice.copy(title = Title.build(updatedTitle))
             val secondChange = pridePrejudice.copy(price = Price.build(updatedPrice))
 
             logger.debug(s"firstChange: $firstChange")
@@ -218,7 +216,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
                 updated.lastUpdate should not be firstChange.lastUpdate
             }
             Await.result(factory.bookDao.update(secondChange)(ec), delay) match {
-              case Left(e) => e shouldBe a[InvalidVersionException]
+              case Left(e)  => e shouldBe a[InvalidVersionException]
               case Right(_) => fail(s"second change ($secondChange) with old version succeeded")
             }
           },
@@ -244,7 +242,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         setup = factory => loadBook(pridePrejudice)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = pridePrejudice.copy(title = Title.build(updatedTitle))
+            val firstChange  = pridePrejudice.copy(title = Title.build(updatedTitle))
             val secondChange = pridePrejudice.copy(price = Price.build(updatedPrice))
             // launch async
             val attempt1 = factory.bookDao.update(firstChange)(ec)
@@ -269,6 +267,14 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.testResult.evaluate
     }
   }
+
+  private def loadBook(book: Book)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
+    Await.result(factory.bookDao.create(book), delay) match {
+      case Left(e)  => fail(e)
+      case Right(_) => ()
+    }
+  }
+
   private def deleteBook(id: ID)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     logger.info(s"deleteBook: $id")
     logger.info(s"factory: $factory")
@@ -284,6 +290,7 @@ class BookDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object BookDaoImplSpec {
@@ -298,4 +305,5 @@ object BookDaoImplSpec {
     CreateDate.now,
     UpdateDate.now
   )
+
 }

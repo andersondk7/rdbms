@@ -9,6 +9,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class AuthorSpec extends AnyFunSpec with Matchers {
+
   describe("read and write from json") {
     it("with all fields") {
       val author = Author(
@@ -22,7 +23,7 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       )
       val json = author.asJson.noSpaces
       decode[Author](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe author
       }
     }
@@ -36,18 +37,19 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       )
       val json = author.asJson.noSpaces
       decode[Author](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe author
       }
     }
   }
+
   describe("with valid json. but holding invalid model") {
     it("should fail when too short") {
       // first name is too short
       val json = s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","lastName":"Doe","firstName":""} """
       decode[Author](json) match {
         case Left(error) => error.getMessage contains "firstName must be at least 1"
-        case Right(_) => fail(s"should not have parsed")
+        case Right(_)    => fail(s"should not have parsed")
       }
     }
     it("should fail when too long") {
@@ -56,7 +58,7 @@ class AuthorSpec extends AnyFunSpec with Matchers {
         s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","lastName":"Doe","firstName":"123456789 123456789 12345"} """
       decode[Author](json) match {
         case Left(error) => error.getMessage contains "firstName can't be longer than 20"
-        case Right(_) => fail(s"should not have parsed")
+        case Right(_)    => fail(s"should not have parsed")
       }
     }
     it("should fail when multiple domain errors") {
@@ -89,9 +91,10 @@ class AuthorSpec extends AnyFunSpec with Matchers {
       val json =
         s""" {"ID":"f2591bcf-41d6-4b35-a3ff-00916e7d48ea","firstName":"123456789 123456789 12345", "last_name: ""} """
       decode[Author](json) match {
-        case Left(_) => succeed
+        case Left(_)  => succeed
         case Right(_) => fail(s"should not have parsed")
       }
     }
   }
+
 }

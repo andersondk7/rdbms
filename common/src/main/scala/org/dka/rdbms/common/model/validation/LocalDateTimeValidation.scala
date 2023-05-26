@@ -10,12 +10,13 @@ import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
 trait LocalDateTimeValidation[T <: Field[LocalDateTime]] extends Validation[String, LocalDateTime, T] {
+
   import Validation._
   import LocalDateTimeValidation._
 
   def validate(string: String): ValidationErrorsOr[T] =
     Try(LocalDateTime.parse(string)) match {
-      case Failure(t) => InvalidDateException(fieldName, t).invalidNec
+      case Failure(t)    => InvalidDateException(fieldName, t).invalidNec
       case Success(date) => Valid(build(date))
     }
 
@@ -44,14 +45,17 @@ trait LocalDateTimeValidation[T <: Field[LocalDateTime]] extends Validation[Stri
         case None => Valid(None)
         case Some(value) =>
           validate(value) match {
-            case Invalid(ve) => Invalid(ve)
+            case Invalid(ve)    => Invalid(ve)
             case Valid(decoded) => Valid(Some(decoded))
           }
       }
     )
   }
+
 }
 
 object LocalDateTimeValidation {
+
   val formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
+
 }

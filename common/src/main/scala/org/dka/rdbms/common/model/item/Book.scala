@@ -16,11 +16,13 @@ final case class Book(
   createDate: CreateDate = CreateDate.now,
   override val lastUpdate: Option[UpdateDate] = None)
   extends Updatable[Book] {
+
   override def update: Book = this.copy(version = version.next, lastUpdate = UpdateDate.now)
 
 }
 
 object Book {
+
   implicit val encodeTitle: Encoder[Book] = (b: Book) => {
     val objects = List(
       Some(ID.toJson(b.id)),
@@ -54,4 +56,5 @@ object Book {
       case Valid(title) => Right(title)
     }
   }
+
 }
