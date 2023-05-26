@@ -11,6 +11,7 @@ final case class BookAuthorSummary(
   authorOrder: Int)
 
 object BookAuthorSummary {
+
   def apply(relationship: AuthorBookRelationship, book: Book, author: Author): BookAuthorSummary =
     new BookAuthorSummary(book.title, author.lastName, author.firstName, relationship.authorOrder)
 
@@ -25,4 +26,5 @@ object BookAuthorSummary {
     ).flatten // filter out the None, i.e. only needed lines
     Json.obj(objects: _*)
   }
+
 }

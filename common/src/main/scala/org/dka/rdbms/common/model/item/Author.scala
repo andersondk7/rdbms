@@ -15,10 +15,13 @@ final case class Author(
   createDate: CreateDate = CreateDate.now,
   override val lastUpdate: Option[UpdateDate] = None)
   extends Updatable[Author] {
+
   override def update: Author = this.copy(version = version.next, lastUpdate = UpdateDate.now)
+
 }
 
 object Author {
+
   implicit val encodeAuthor: Encoder[Author] = (a: Author) => {
     val objects = List(
       Some(ID.toJson(a.id)),
@@ -49,4 +52,5 @@ object Author {
       case Valid(author) => Right(author)
     }
   }
+
 }

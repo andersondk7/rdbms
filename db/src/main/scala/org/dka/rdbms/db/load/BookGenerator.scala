@@ -27,19 +27,26 @@ class BookGenerator(
     )
     bulkLoadBook.insertLine(book)
   }
+
   private val publisherSize = publisherIds.size
+
   private def randomPublisherID: UUID = publisherIds(util.Random.nextInt(publisherSize))
+
 }
 
 object BookGenerator {
+
   private val bulkLoadBook: BulkLoad[Book] = new BulkLoad[Book] {
+
     override def header: String = "insert into books(id, title, price, publisher_id, publish_date)\n  values\n"
 
     override def insertLine(b: Book): String = {
-      val publisherId = b.publisherID.fold("'null'")(id => s"${id.value.toString}")
+      val publisherId   = b.publisherID.fold("'null'")(id => s"${id.value.toString}")
       val publisherDate = b.publishDate.fold("'null'")(date => s"${date.value.toString}")
 
       s"('${b.id.value.toString}', '${b.title.value}', '${b.price.value.toString}', '$publisherId', '$publisherDate'),"
     }
+
   }
+
 }

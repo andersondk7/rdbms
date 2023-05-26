@@ -9,7 +9,6 @@ object Dependencies {
   private val hikaricp_version = "2.8.0"
   private val logback_version = "1.4.6"
   private val postgres_driver_version = "42.6.0"
-  private val pureConfig_version = "0.17.4"
   private val scalalogging_version = "3.9.5"
   private val scalactic_version = "3.2.15"
   private val scalatest_version = "3.2.15"
@@ -26,12 +25,13 @@ object Dependencies {
 
   // java libs
   private val config = "com.typesafe" % "config" % config_version
+//  private val hikaricp = "com.zaxxer" % "HikariCP" % hikaricp_version
+  private val hikaricp = "com.zaxxer" % "HikariCP" % "5.0.1"
   private val postgresDriver = "org.postgresql" % "postgresql" % postgres_driver_version
   private val logBack = "ch.qos.logback" % "logback-classic" % logback_version
 
   // slick libs
   private val connectionPool = "com.typesafe.slick" % "slick-hikaricp_2.13" % slick_version
-  private val pureConfig = "com.github.pureconfig" % "pureconfig_2.13" % pureConfig_version
   private val slick = "com.typesafe.slick" % "slick_2.13" % slick_version
 
   val anormDependencies: Seq[ModuleID] = Seq(
@@ -41,6 +41,7 @@ object Dependencies {
     circeGeneric,
     circeParser,
     config,
+    hikaricp,
     logBack,
     logging,
     postgresDriver,
@@ -75,7 +76,6 @@ object Dependencies {
     logBack,
     logging,
     postgresDriver,
-    pureConfig,
     scalatic,
     scalaTest,
     slick

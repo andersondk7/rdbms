@@ -14,10 +14,13 @@ final case class Country(
   createDate: CreateDate = CreateDate.now,
   override val lastUpdate: Option[UpdateDate] = None)
   extends Updatable[Country] {
+
   override def update: Country = this.copy(version = version.next, lastUpdate = UpdateDate.now)
+
 }
 
 object Country {
+
   implicit val encodeAuthor: Encoder[Country] = (c: Country) => {
     val objects = List(
       Some(ID.toJson(c.id)),
@@ -46,4 +49,5 @@ object Country {
       case Valid(country) => Right(country)
     }
   }
+
 }

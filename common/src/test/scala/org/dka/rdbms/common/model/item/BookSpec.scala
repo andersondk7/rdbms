@@ -11,6 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class BookSpec extends AnyFunSpec with Matchers {
+
   private val logger = Logger(getClass.getName)
 
   describe("read and write from json") {
@@ -29,7 +30,7 @@ class BookSpec extends AnyFunSpec with Matchers {
       logger.debug(s"title: $title")
       logger.debug(s"with all fields json: $json")
       decode[Book](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe title
       }
     }
@@ -44,11 +45,12 @@ class BookSpec extends AnyFunSpec with Matchers {
       )
       val json = title.asJson.noSpaces
       decode[Book](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe title
       }
     }
   }
+
   describe("with valid json. but holding invalid model") {
     it("should fail when model errors") {
       // title name is too short
@@ -80,4 +82,5 @@ class BookSpec extends AnyFunSpec with Matchers {
       }
     }
   }
+
 }

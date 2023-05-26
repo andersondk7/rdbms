@@ -11,9 +11,13 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
 final case class PublisherName private (override val value: String) extends Field[String]
 
 object PublisherName extends StringLengthValidation[PublisherName] {
+
   override val minLength: Int = 1
+
   override val maxLength: Int = 40
-  override val fieldName: String = "companyName"
+
+  override val fieldName: String = "publisher_name"
 
   override def build(cn: String): PublisherName = new PublisherName(cn)
+
 }

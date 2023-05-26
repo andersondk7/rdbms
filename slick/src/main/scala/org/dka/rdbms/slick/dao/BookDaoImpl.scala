@@ -18,13 +18,17 @@ import scala.language.implicitConversions
 class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with BookDao {
 
   import BookDaoImpl._
+
   //
   // crud IO operations
   //
   override protected val singleCreateIO: Book => DBIO[Int] = title => tableQuery += title
+
   override protected val multipleCreateIO: Seq[Book] => DBIO[Option[Int]] = titles => tableQuery ++= titles
+
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Book]] = (id, ec) =>
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
+
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   override protected val updateAction: (Book, ExecutionContext) => DBIO[Book] = (item, ec) => {
@@ -80,8 +84,8 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
       .map(seq =>
         seq.map { result =>
           val relationship: AuthorBookRelationship = result._1._1
-          val book = result._1._2 // from bookTable
-          val author = result._2 // from authorTable
+          val book                                 = result._1._2 // from bookTable
+          val author                               = result._2    // from authorTable
           BookAuthorSummary(relationship, book, author)
         })(ec)
   }
@@ -94,7 +98,7 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
     db.run(getAllIdsIO(ec))
       .map(r => Right(r))
 
-  override def getAuthorsForBook(
+  override def getBookAuthorSummary(
     bookId: ID
   )(implicit ec: ExecutionContext
   ): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
@@ -112,6 +116,7 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
 }
 
 object BookDaoImpl {
+
   val tableQuery = TableQuery[BooksTable]
 
   class BooksTable(tag: Tag)
@@ -119,17 +124,26 @@ object BookDaoImpl {
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "books") {
+
     val id = column[String]("id", O.PrimaryKey) // This is the primary key column
+
     val version = column[Int]("version")
+
     val title = column[String]("title")
+
     val price = column[BigDecimal]("price")
+
     val publisherId = column[Option[String]]("publisher_id")
+
     val publishDate = column[Option[LocalDate]]("publish_date")
+
     val createDate = column[Timestamp]("create_date")
+
     val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, version, title, price, publisherId, publishDate, createDate, updateDate) <> (fromDB, toDB)
+
   }
 
   //
@@ -139,14 +153,14 @@ object BookDaoImpl {
   //
 
   private type BookTuple = (
-    String, // id
-    Int, // version
-    String, // title
-    BigDecimal, // price
-    Option[String], // publisherId
+    String,            // id
+    Int,               // version
+    String,            // title
+    BigDecimal,        // price
+    Option[String],    // publisherId
     Option[LocalDate], // published date
-    Timestamp, // create date
-    Option[Timestamp] // lastUpdate
+    Timestamp,         // create date
+    Option[Timestamp]  // lastUpdate
   )
 
   def fromDB(tuple: BookTuple): Book = {

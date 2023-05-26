@@ -7,6 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class LocationSpec extends AnyFunSpec with Matchers {
+
   describe("read and write from json") {
     it("with all fields") {
       val location = Location(
@@ -20,9 +21,10 @@ class LocationSpec extends AnyFunSpec with Matchers {
       )
       val json = location.asJson.noSpaces
       decode[Location](json) match {
-        case Left(error) => fail(error)
+        case Left(error)    => fail(error)
         case Right(decoded) => decoded shouldBe location
       }
     }
   }
+
 }

@@ -9,9 +9,13 @@ import org.dka.rdbms.common.model.validation.StringLengthValidation
 final case class CountryName private (override val value: String) extends Field[String]
 
 object CountryName extends StringLengthValidation[CountryName] {
+
   override val maxLength = 40
+
   override val minLength = 1
+
   override val fieldName: String = "country_name"
 
   override def build(c: String): CountryName = new CountryName(c)
+
 }
