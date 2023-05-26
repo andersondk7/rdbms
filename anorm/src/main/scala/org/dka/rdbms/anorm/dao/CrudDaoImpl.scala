@@ -38,8 +38,8 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
       )
     }
 
-  def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[T]]] =
-    withConnection(dbEx) { implicit connection: Connection =>
+  def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[T]]] = {
+    val results = withConnection(dbEx) { implicit connection: Connection =>
       Try {
         byIdQ(id).as(itemParser.singleOpt)
       }.fold(
@@ -47,6 +47,9 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
         result => Right(result)
       )
     }
+    // further processing should be done using the implicit execution context
+    results
+  }
 
   def delete(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[ID]]] =
     withConnection(dbEx) { implicit connection: Connection =>
@@ -69,10 +72,10 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
     // Transaction_Serializable
     connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ)
     for {
-      targetVersion <- checkVersion(item)
+      targetVersion <- checkVersion(item)(connection, dbEx) // since this reads from the db
       result <- targetVersion match {
         case Left(ex) => Future.successful(Left(ex))
-        case Right(_) => doUpdate(item)
+        case Right(_) => doUpdate(item)(connection, dbEx) // since this reads from the db
       }
     } yield {
       connection.commit()
@@ -128,7 +131,7 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
       )
     }
 
-  private def doUpdate(item: T)(implicit ec: ExecutionContext, connection: Connection): Future[DaoErrorsOr[T]] =
+  private def doUpdate(item: T)(implicit connection: Connection, ec: ExecutionContext): Future[DaoErrorsOr[T]] =
     Future {
       val updated = item.update
       Try {
