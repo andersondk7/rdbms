@@ -15,10 +15,13 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger(getClass.getName)
-  val delay: FiniteDuration = 10.seconds
+
+  private val logger                        = Logger(getClass.getName)
+
+  val delay: FiniteDuration                 = 10.seconds
 
   describe("conversion to/from db") {
     it("should convert from domain to db") {
@@ -94,7 +97,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.setupResult.failure shouldBe None
       result.tearDownResult.failure match {
         case Some(t) => t.printStackTrace()
-        case None => logger.debug(s"no failures here")
+        case None    => logger.debug(s"no failures here")
       }
       result.tearDownResult.failure shouldBe None
       result.testResult.evaluate
@@ -105,7 +108,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             Await.result(factory.authorDao.read(eh.id), delay) match {
-              case Left(e) => fail(e)
+              case Left(e)    => fail(e)
               case Right(opt) => opt.fold(fail(s"did not find $eh"))(author => author shouldBe eh)
             }
           },
@@ -155,17 +158,17 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the second one to make an update (last Name) fails
        */
       val updatedFirstName = "Nanette"
-      val updatedLastName = "Drewmore"
+      val updatedLastName  = "Drewmore"
       val result = withDB(
         setup = factory => loadAuthor(nd)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = nd.copy(firstName = FirstName.build(Some(updatedFirstName)), lastUpdate = UpdateDate.now)
+            val firstChange  = nd.copy(firstName = FirstName.build(Some(updatedFirstName)), lastUpdate = UpdateDate.now)
             val secondChange = nd.copy(lastName = LastName.build(updatedLastName), lastUpdate = UpdateDate.now)
 
             logger.debug(s"firstChange: $firstChange")
             Await.result(factory.authorDao.update(firstChange)(ec), delay) match {
-              case Left(e) => fail(s"firstChange failed with", e)
+              case Left(e)        => fail(s"firstChange failed with", e)
               case Right(updated) =>
                 // everything but updateDate, since the exact time of the update is somewhat indeterminate
                 updated.id shouldBe firstChange.id
@@ -202,12 +205,12 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       -  but there will be one of each
        */
       val updatedFirstName = "Nanette"
-      val updatedLastName = "Drewmore"
+      val updatedLastName  = "Drewmore"
       val result = withDB(
         setup = factory => loadAuthor(nd)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = nd.copy(firstName = FirstName.build(Some(updatedFirstName)))
+            val firstChange  = nd.copy(firstName = FirstName.build(Some(updatedFirstName)))
             val secondChange = nd.copy(lastName = LastName.build(updatedLastName))
             // launch async
             val attempt1 = factory.authorDao.update(firstChange)(ec)
@@ -235,7 +238,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorDao.create(author), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -255,6 +258,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object AuthorDaoImplSpec {
@@ -266,6 +270,7 @@ object AuthorDaoImplSpec {
     Some(FirstName.build("John")),
     None // locationId
   )
+
   val ja: Author = Author(
     ID.build,
     Version.defaultVersion,
@@ -273,6 +278,7 @@ object AuthorDaoImplSpec {
     Some(FirstName.build("Jane")),
     None
   )
+
   val nd: Author = Author(
     ID.build,
     Version.defaultVersion,
@@ -280,6 +286,7 @@ object AuthorDaoImplSpec {
     Some(FirstName.build("Nancy")),
     None
   )
+
   val mt: Author = Author(
     ID.build,
     Version.defaultVersion,
@@ -287,6 +294,7 @@ object AuthorDaoImplSpec {
     Some(FirstName.build("Mark")),
     None
   )
+
   val eh: Author = Author(
     ID.build,
     Version.defaultVersion,
@@ -296,5 +304,7 @@ object AuthorDaoImplSpec {
   )
 
   val multipleAuthors: Seq[Author] = Seq(ja, jm, nd, mt)
-  val authorIds: Seq[ID] = AuthorDaoImplSpec.multipleAuthors.map(_.id)
+
+  val authorIds: Seq[ID]           = AuthorDaoImplSpec.multipleAuthors.map(_.id)
+
 }

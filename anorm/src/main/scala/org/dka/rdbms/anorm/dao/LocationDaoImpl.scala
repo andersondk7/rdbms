@@ -15,35 +15,56 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl[Location] with LocationDao {
+class LocationDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext)
+  extends CrudDaoImpl[Location]
+    with LocationDao {
 
   import LocationDaoImpl.*
 
   override val tableName = "locations"
+
+  //
+  // queries
+  //
   override protected def insertQ(location: Location): SimpleSql[Row] =
     SQL(
-      "insert into locations(id, version, location_name, location_abbreviation, country_id, create_date) values ({id}, {version}, {location_name}, {location_abbreviation}, {country_id}, {create_date})"
+      """
+      insert into locations(id, version, location_name, location_abbreviation, country_id, create_date)
+      values ({id}, {version}, {locationName}, {locationAbbreviation}, {countryId}, {createDate})
+      """
     ).on(
-      "id" -> location.id.value.toString,
-      "version" -> location.version.value,
-      "location_name" -> location.locationName.value,
-      "location_abbreviation" -> location.locationAbbreviation.value,
-      "country_id" -> location.countryID.value.toString,
-      "create_date" -> location.createDate.asTimestamp
+      "id"                    -> location.id.value.toString,
+      "version"               -> location.version.value,
+      "locationName"         -> location.locationName.value,
+      "locationAbbreviation" -> location.locationAbbreviation.value,
+      "countryId"            -> location.countryID.value.toString,
+      "createDate"           -> location.createDate.asTimestamp
     )
 
   override protected def updateQ(location: Location): SimpleSql[Row] =
-    SQL"""
+    SQL("""
       update locations
       set 
-        version = ${location.version.value},
-        location_name = ${location.locationName.value},
-        location_abbreviation = ${location.locationAbbreviation.value},
-        country_id = ${location.countryID.value.toString},
-        update_date = ${location.lastUpdate.get.asTimeStamp}
-      where id = ${location.id.value.toString}
-  """
+        version = {version},
+        location_name = {locationName},
+        location_abbreviation = {locationAbbreviation},
+        country_id = {countryId},
+        update_date = {lastUpdate}
+      where id = {id}
+  """)
+      .on(
+        "version" -> location.version.value,
+        "locationName" -> location.locationName.value,
+        "locationAbbreviation" -> location.locationAbbreviation.value,
+        "countryId" -> location.countryID.value.toString,
+        "lastUpdate" -> location.lastUpdate.map(_.value).orNull,
+        "id" -> location.id.value.toString
 
+      )
+
+  //
+  // parsers
+  ///
   override protected def itemParser: RowParser[Location] =
     getID ~ getVersion ~ getLocationName ~ getLocationAbbreviation ~ getCountryId ~ getCreateDate ~ getUpdateDate map {
       case id ~ v ~ ln ~ la ~ ci ~ cd ~ ud =>
@@ -57,11 +78,16 @@ class LocationDaoImpl(override val dataSource: HikariDataSource) extends CrudDao
           lastUpdate = ud
         )
     }
+
 }
 
 object LocationDaoImpl {
-  private def getLocationName: RowParser[LocationName] = get[String](LocationName.fieldName).map(LocationName.build)
-  private def getLocationAbbreviation: RowParser[LocationAbbreviation] =
+
+  def getLocationName: RowParser[LocationName] = get[String](LocationName.fieldName).map(LocationName.build)
+
+  def getLocationAbbreviation: RowParser[LocationAbbreviation] =
     get[String](LocationAbbreviation.fieldName).map(LocationAbbreviation.build)
-  private def getCountryId: RowParser[CountryID] = get[String](CountryID.fieldName).map(CountryID.build)
+
+  def getCountryId: RowParser[CountryID] = get[String](CountryID.fieldName).map(CountryID.build)
+
 }

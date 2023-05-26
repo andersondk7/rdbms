@@ -14,11 +14,15 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   import AuthorDaoImplSpec._
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger(getClass.getName)
-  val delay: FiniteDuration = 10.seconds
+
+  private val logger                        = Logger(getClass.getName)
+
+  val delay: FiniteDuration                 = 10.seconds
 
   describe("populating") {
     it("should add an author") {
@@ -91,7 +95,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   private def loadAuthor(author: Author)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.authorDao.create(author), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -109,6 +113,7 @@ class AuthorDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object AuthorDaoImplSpec {
@@ -120,4 +125,5 @@ object AuthorDaoImplSpec {
     Some(FirstName.build("John")),
     None // locationId
   )
+
 }

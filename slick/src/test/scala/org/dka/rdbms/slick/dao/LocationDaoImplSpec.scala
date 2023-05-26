@@ -15,10 +15,13 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger(getClass.getName)
-  val delay: FiniteDuration = 10.seconds
+
+  private val logger                        = Logger(getClass.getName)
+
+  val delay: FiniteDuration                 = 10.seconds
 
   describe("conversion to/from db") {
     it("should convert from domain to db") {
@@ -77,7 +80,7 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         test = factory =>
           Try {
             Await.result(factory.locationDao.read(bamberg.id), delay) match {
-              case Left(e) => fail(e)
+              case Left(e)    => fail(e)
               case Right(opt) => opt.fold(fail(s"did not find $bamberg"))(country => country shouldBe bamberg)
             }
           },
@@ -124,7 +127,7 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the first one to make an update (locationName) succeeds
       - the second one to make an update (locationAbbreviation) fails
        */
-      val updatedLocationName = "BammyBrg"
+      val updatedLocationName         = "BammyBrg"
       val updatedLocationAbbreviation = "BMMG"
       val result = withDB(
         setup = factory => loadLocation(bamberg)(factory, ec),
@@ -168,7 +171,7 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
           - since this is async, it is indeterminate which will succeed and which will fail
           -  but there will be one of each
        */
-      val updatedLocationName = "BammyBrg"
+      val updatedLocationName         = "BammyBrg"
       val updatedLocationAbbreviation = "BMMG"
       val result = withDB(
         setup = factory => loadLocation(bamberg)(factory, ec),
@@ -198,9 +201,10 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       result.testResult.evaluate
     }
   }
+
   private def loadLocation(location: Location)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.locationDao.create(location), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -218,9 +222,11 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object LocationDaoImplSpec {
+
   val bamberg: Location = Location(
     ID.build,
     Version.defaultVersion,
@@ -228,4 +234,5 @@ object LocationDaoImplSpec {
     LocationAbbreviation.build("BA"),
     CountryID.build(UUID.fromString("b6dee7ce-663e-4dd4-bdd3-4ed55a014467"))
   )
+
 }

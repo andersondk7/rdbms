@@ -8,14 +8,16 @@ import org.dka.rdbms.common.model._
 import org.dka.rdbms.common.model.fields.Field
 
 trait StringLengthValidation[T <: Field[String]] extends Validation[String, String, T] {
+
   val maxLength: Int
+
   val minLength: Int
 
   def validate(string: String): ValidationErrorsOr[T] =
     string match {
       case _ if string.length < minLength => TooShortException(fieldName, minLength).invalidNec
       case _ if string.length > maxLength => TooLongException(fieldName, maxLength).invalidNec
-      case s => Valid(build(s))
+      case s                              => Valid(build(s))
     }
 
   def toJson(item: T): (String, Json) = (fieldName, Json.fromString(item.value))
@@ -42,10 +44,11 @@ trait StringLengthValidation[T <: Field[String]] extends Validation[String, Stri
         case None => Valid(None)
         case Some(value) =>
           validate(value) match {
-            case Invalid(ve) => Invalid(ve)
+            case Invalid(ve)    => Invalid(ve)
             case Valid(decoded) => Valid(Some(decoded))
           }
       }
     )
   }
+
 }

@@ -9,11 +9,12 @@ import java.util.UUID
 import scala.util.{Failure, Success, Try}
 
 trait UUIDValidation[T <: Field[UUID]] extends Validation[String, UUID, T] {
+
   import Validation._
 
   def validate(string: String): ValidationErrorsOr[T] =
     Try(UUID.fromString(string)) match {
-      case Failure(t) => InvalidIDException(fieldName, string, t).invalidNec
+      case Failure(t)    => InvalidIDException(fieldName, string, t).invalidNec
       case Success(uuid) => Valid(build(uuid))
     }
 
@@ -41,10 +42,11 @@ trait UUIDValidation[T <: Field[UUID]] extends Validation[String, UUID, T] {
         case None => Valid(None)
         case Some(value) =>
           validate(value) match {
-            case Invalid(ve) => Invalid(ve)
+            case Invalid(ve)    => Invalid(ve)
             case Valid(decoded) => Valid(Some(decoded))
           }
       }
     )
   }
+
 }

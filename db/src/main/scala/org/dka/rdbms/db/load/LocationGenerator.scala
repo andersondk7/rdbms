@@ -28,17 +28,25 @@ class LocationGenerator(
     )
     bulkLoadLocation.insertLine(location)
   }
-  private val countrySize = countryIds.size
+
+  private val countrySize           = countryIds.size
+
   private def randomCountryId: UUID = countryIds(random.nextInt(countrySize))
+
 }
 
 object LocationGenerator {
+
   private val random = new Random
+
   private val bulkLoadLocation: BulkLoad[Location] = new BulkLoad[Location] {
+
     override def header: String =
       "insert into locations (id, location_name, location_abbreviation, country_id)\n  values\n"
 
     override def insertLine(l: Location): String =
       s"('${l.id.value.toString}', '${l.locationName.value}', '${l.locationAbbreviation.value}', '${l.countryID.value.toString}'),"
+
   }
+
 }

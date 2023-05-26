@@ -8,6 +8,7 @@ import org.dka.rdbms.common.model.fields.Field
 import scala.util.{Failure, Success, Try}
 
 trait PositiveIntegerValidation[T <: Field[Int]] extends Validation[Int, Int, T] {
+
   import Validation._
 
   def validate(i: Int): ValidationErrorsOr[T] =
@@ -28,10 +29,11 @@ trait PositiveIntegerValidation[T <: Field[Int]] extends Validation[Int, Int, T]
         case None => Valid(None)
         case Some(value) =>
           validate(value) match {
-            case Invalid(ve) => Invalid(ve)
+            case Invalid(ve)    => Invalid(ve)
             case Valid(decoded) => Valid(Some(decoded))
           }
       }
     )
   }
+
 }

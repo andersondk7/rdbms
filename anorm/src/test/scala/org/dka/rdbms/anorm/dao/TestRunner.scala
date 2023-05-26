@@ -8,6 +8,7 @@ import org.scalatest.Assertions.{fail, succeed}
 import scala.util.{Failure, Success, Try}
 
 sealed trait RunnerStepResult[R] {
+
   def result: Option[Try[R]]
 
   def wasRun: Boolean = result.isDefined
@@ -22,7 +23,9 @@ sealed trait RunnerStepResult[R] {
 final case class SetupResult(override val result: Option[Try[Unit]]) extends RunnerStepResult[Unit] {}
 
 object SetupResult {
+
   def apply(tried: Try[Unit]): SetupResult = new SetupResult(Some(tried))
+
 }
 
 final case class SetupException(message: String, cause: Option[Throwable] = None)
@@ -32,21 +35,25 @@ final case class SetupException(message: String, cause: Option[Throwable] = None
 // test
 //
 final case class TestResult(result: Option[Try[Assertion]]) extends RunnerStepResult[Assertion] {
+
   def evaluate: Assertion = result match {
     case None => succeed
     case Some(t) =>
       t match {
         case Failure(ex) => fail(ex)
-        case Success(a) => a
+        case Success(a)  => a
       }
   }
+
 }
 
 object TestResult {
+
   def apply(tested: Try[Assertion]): TestResult = {
     val yes: Option[Try[Assertion]] = Some(tested)
     new TestResult(yes)
   }
+
 }
 
 //
@@ -55,8 +62,11 @@ object TestResult {
 final case class TearDownResult(override val result: Option[Try[Unit]]) extends RunnerStepResult[Unit] {}
 
 object TearDownResult {
+
   def apply(tried: Try[Unit]): TearDownResult = new TearDownResult(Some(tried))
+
 }
+
 final case class TearDownException(message: String, cause: Option[Throwable] = None)
   extends Throwable(message, cause.orNull) {}
 
@@ -64,9 +74,12 @@ final case class TestRunnerResult(
   setupResult: SetupResult,
   testResult: TestResult,
   tearDownResult: TearDownResult) {
-  val setupGood: Boolean = setupResult.result.fold(false)(_.isSuccess)
+
+  val setupGood: Boolean    = setupResult.result.fold(false)(_.isSuccess)
+
   val tearDownGood: Boolean = tearDownResult.result.fold(false)(_.isSuccess)
-  val shouldCheck: Boolean = setupGood && tearDownGood
+
+  val shouldCheck: Boolean  = setupGood && tearDownGood
 
   def +(setup: SetupResult): TestRunnerResult =
     this.copy(setupResult = setup)
@@ -76,14 +89,17 @@ final case class TestRunnerResult(
 
   def +(tearDown: TearDownResult): TestRunnerResult =
     this.copy(tearDownResult = tearDown)
+
 }
 
 object TestRunnerResult {
+
   val initial: TestRunnerResult = TestRunnerResult(
     SetupResult(None),
     TestResult(None),
     TearDownResult(None)
   )
+
 }
 
 trait TestRunner[F] {
@@ -136,10 +152,11 @@ trait TestRunner[F] {
       ))
 
     val steps = for {
-      _ <- runSetup
-      _ <- runTest
+      _      <- runSetup
+      _      <- runTest
       result <- runTearDown
     } yield result
     steps.runS(TestRunnerResult.initial).value
   }
+
 }

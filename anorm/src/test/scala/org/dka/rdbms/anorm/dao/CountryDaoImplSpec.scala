@@ -14,11 +14,15 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   import CountryDaoImplSpec._
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger(getClass.getName)
-  val delay: FiniteDuration = 10.seconds
+
+  private val logger                        = Logger(getClass.getName)
+
+  val delay: FiniteDuration                 = 10.seconds
 
   describe("populating") {
     it("should add a country") {
@@ -154,13 +158,13 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the first one to make an update (countryName) succeeds
       - the second one to make an update (countryAbbreviation) fails
        */
-      val updatedCountryName = "FrostyLand"
+      val updatedCountryName         = "FrostyLand"
       val updatedCountryAbbreviation = "FTLD"
       val result = withDB(
         setup = factory => loadCountry(iceland)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = iceland.copy(countryName = CountryName.build(updatedCountryName))
+            val firstChange  = iceland.copy(countryName = CountryName.build(updatedCountryName))
             val secondChange = iceland.copy(countryAbbreviation = CountryAbbreviation.build(updatedCountryAbbreviation))
             Await.result(factory.countryDao.update(firstChange)(ec), delay) match {
               case Left(e) => fail(s"firstChange failed with", e)
@@ -196,13 +200,13 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the first one to make an update (countryName) succeeds
       - the second one to make an update (countryAbbreviation) fails
        */
-      val updatedCountryName = "FrostyLand"
+      val updatedCountryName         = "FrostyLand"
       val updatedCountryAbbreviation = "FTLD"
       val result = withDB(
         setup = factory => loadCountry(iceland)(factory, ec),
         test = factory =>
           Try {
-            val firstChange = iceland.copy(countryName = CountryName.build(updatedCountryName))
+            val firstChange  = iceland.copy(countryName = CountryName.build(updatedCountryName))
             val secondChange = iceland.copy(countryAbbreviation = CountryAbbreviation.build(updatedCountryAbbreviation))
             // launch async
             val attempt1 = factory.countryDao.update(firstChange)(ec)
@@ -228,7 +232,7 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   private def loadCountry(country: Country)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.countryDao.create(country), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -246,10 +250,13 @@ class CountryDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object CountryDaoImplSpec {
+
   val irelandId: ID = ID.build("52e8b846-a068-4847-8223-b156c356a70a")
+
   val iceland: Country = Country(
     ID.build,
     Version.defaultVersion,
@@ -258,4 +265,5 @@ object CountryDaoImplSpec {
     CreateDate.now,
     UpdateDate.now
   )
+
 }

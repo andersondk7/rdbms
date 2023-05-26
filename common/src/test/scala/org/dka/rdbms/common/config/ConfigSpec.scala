@@ -6,6 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class ConfigSpec extends AnyFunSpec with Matchers {
+
   describe("reading config") {
     it("should read from dev by default") {
       DBConfig.load match {
@@ -29,4 +30,5 @@ class ConfigSpec extends AnyFunSpec with Matchers {
 //      }
     }
   }
+
 }

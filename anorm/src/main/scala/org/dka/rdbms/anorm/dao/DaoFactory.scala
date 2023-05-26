@@ -13,15 +13,23 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.*
 
 class DaoFactory(val dataSource: HikariDataSource, dbEx: ExecutionContext) {
-  val countryDao: CountryDao = new CountryDaoImpl(dataSource)
-  val locationDao: LocationDao = new LocationDaoImpl(dataSource)
-  val publisherDao: PublisherDao = new PublisherDaoImpl(dataSource)
-  val authorDao: AuthorDao = new AuthorDaoImpl(dataSource)
-  val bookDao: BookDao = new BookDaoImpl(dataSource)
+
+  val countryDao: CountryDao     = new CountryDaoImpl(dataSource, dbEx)
+
+  val locationDao: LocationDao   = new LocationDaoImpl(dataSource, dbEx)
+
+  val publisherDao: PublisherDao = new PublisherDaoImpl(dataSource, dbEx)
+
+  val authorDao: AuthorDao       = new AuthorDaoImpl(dataSource, dbEx)
+
+  val bookDao: BookDao           = new BookDaoImpl(dataSource, dbEx)
+
 }
 
 object DaoFactory {
+
   private val logger = Logger(getClass.getName)
+
   lazy val configure: ConfigErrorsOr[DaoFactory] = {
     logger.info(s"loading configure")
 //    Class.forName("org.postgresql.ds.PGSimpleDataSource")
@@ -40,10 +48,11 @@ object DaoFactory {
           new ThreadPoolExecutor(config.numThreads, config.numThreads, 0L, TimeUnit.MILLISECONDS, workingQueue)
         )
         val dataSource: HikariDataSource = new HikariDataSource(poolConfig)
-        val factory = new DaoFactory(dataSource, dbEx)
+        val factory                      = new DaoFactory(dataSource, dbEx)
         logger.info(s"got factory")
         factory
       }
 
   }
+
 }

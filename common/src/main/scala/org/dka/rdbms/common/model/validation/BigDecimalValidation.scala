@@ -8,11 +8,12 @@ import org.dka.rdbms.common.model.fields.Field
 import scala.util.{Failure, Success, Try}
 
 trait BigDecimalValidation[T <: Field[BigDecimal]] extends Validation[String, BigDecimal, T] {
+
   import Validation._
 
   def validate(string: String): ValidationErrorsOr[T] =
     Try(BigDecimal(string)) match {
-      case Failure(t) => InvalidNumberException(fieldName, string, t).invalidNec
+      case Failure(t)    => InvalidNumberException(fieldName, string, t).invalidNec
       case Success(date) => Valid(build(date))
     }
 
@@ -28,10 +29,11 @@ trait BigDecimalValidation[T <: Field[BigDecimal]] extends Validation[String, Bi
         case None => Valid(None)
         case Some(value) =>
           validate(value) match {
-            case Invalid(ve) => Invalid(ve)
+            case Invalid(ve)    => Invalid(ve)
             case Valid(decoded) => Valid(Some(decoded))
           }
       }
     )
   }
+
 }

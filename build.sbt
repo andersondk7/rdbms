@@ -44,7 +44,7 @@ lazy val anorm = (projectMatrix in file("anorm"))
     libraryDependencies ++= anormDependencies,
     Defaults.itSettings
   )
-  .dependsOn(common)
+  .dependsOn(common, db)
   .jvmPlatform(scalaVersions = Seq(scala322))
 
 lazy val db = (projectMatrix in file("db"))

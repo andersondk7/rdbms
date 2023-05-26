@@ -14,11 +14,15 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   import LocationDaoImplSpec._
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger(getClass.getName)
-  val delay: FiniteDuration = 10.seconds
+
+  private val logger                        = Logger(getClass.getName)
+
+  val delay: FiniteDuration                 = 10.seconds
 
   describe("populating") {
     it("should add a location") {
@@ -97,7 +101,7 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the first one to make an update (locationName) succeeds
       - the second one to make an update (locationAbbreviation) fails
        */
-      val updatedLocationName = "BammyBerg"
+      val updatedLocationName         = "BammyBerg"
       val updatedLocationAbbreviation = "BMBRG"
       val result = withDB(
         setup = factory => loadLocation(bamberg)(factory, ec),
@@ -140,7 +144,7 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
       - the first one to make an update (locationName) succeeds
       - the second one to make an update (locationAbbreviation) fails
        */
-      val updatedLocationName = "BammyBerg"
+      val updatedLocationName         = "BammyBerg"
       val updatedLocationAbbreviation = "BMBRG"
       val result = withDB(
         setup = factory => loadLocation(bamberg)(factory, ec),
@@ -173,7 +177,7 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   private def loadLocation(location: Location)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.locationDao.create(location), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -191,9 +195,11 @@ class LocationDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object LocationDaoImplSpec {
+
   val bamberg: Location = Location(
     ID.build,
     Version.defaultVersion,
@@ -202,5 +208,7 @@ object LocationDaoImplSpec {
     CountryID.build(UUID.fromString("b6dee7ce-663e-4dd4-bdd3-4ed55a014467")),
     CreateDate.now
   )
+
   val bambergId: ID = ID.build("52e8b846-a068-4847-8223-b156c356a70a")
+
 }

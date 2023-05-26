@@ -14,11 +14,17 @@ final case class Params(
   book: Int)
 
 object Params {
-  private val country = "country"
-  private val location = "location"
+
+  private val country   = "country"
+
+  private val location  = "location"
+
   private val publisher = "publisher"
-  private val author = "author"
-  private val book = "book"
+
+  private val author    = "author"
+
+  private val book      = "book"
+
   private val usage =
     s"Usage: generator: [--$country c], [--$location l], [--$publisher p], [--$author a], [--$book t]"
 
@@ -30,6 +36,7 @@ object Params {
       map.getOrElse(author, 100),
       map.getOrElse(book, 200)
     )
+
   def apply(args: Array[String]): Either[String, Params] = Right(Params(5, 5, 5, 5, 5))
 //  def apply(args: Array[String]): Either[String, Params] = if (args.isEmpty) Left(usage)
 //  else {
@@ -58,6 +65,7 @@ object Params {
 }
 
 object GeneratorApp extends App {
+
   Params.apply(args) match {
     case Left(errorMessage) => println(errorMessage)
     case Right(params) =>
@@ -86,4 +94,5 @@ object GeneratorApp extends App {
         case Success(_) => println("success!")
       }
   }
+
 }

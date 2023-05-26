@@ -11,6 +11,7 @@ class PublisherGenerator(
   val locationIds: Seq[UUID],
   override val fileName: String = "publisherInsert.sql")
   extends ItemGenerator {
+
   import PublisherGenerator._
 
   override val headerLine: String = bulkLoadPublisher.header
@@ -25,19 +26,26 @@ class PublisherGenerator(
     )
     bulkLoadPublisher.insertLine(publisher)
   }
-  private val locationSize = locationIds.size
+
+  private val locationSize           = locationIds.size
+
   private def randomLocationId: UUID = locationIds(util.Random.nextInt(locationSize))
+
 }
 
 object PublisherGenerator {
+
   private val bulkLoadPublisher: BulkLoad[Publisher] = new BulkLoad[Publisher] {
+
     override def header: String = "insert into publishers(id, publisher_name, location_id, website)\n  values\n"
 
     override def insertLine(p: Publisher): String = {
       val locationId = p.locationId.fold("'null'")(id => s"${id.value.toString}")
-      val webSite = p.webSite.fold("'null'")(site => s"${site.value}")
+      val webSite    = p.webSite.fold("'null'")(site => s"${site.value}")
 
       s"('${p.id.value.toString}', '${p.publisherName.value}', '$locationId', '$webSite'),"
     }
+
   }
+
 }

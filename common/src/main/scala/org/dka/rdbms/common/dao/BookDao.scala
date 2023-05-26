@@ -22,6 +22,7 @@ trait BookDao extends CrudDao[Book] {
   /**
    * for a given book, return all the authors, and order
    */
-  def getAuthorsForBook(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]]
+  def getBookAuthorSummary(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]]
 //  def getAuthorsForBookSql(bookId: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[BookAuthorSummary]]]
+
 }

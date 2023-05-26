@@ -14,11 +14,15 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
+
   import PublisherDaoImplSpec._
+
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  private val logger = Logger(getClass.getName)
-  val delay: FiniteDuration = 10.seconds
+
+  private val logger                        = Logger(getClass.getName)
+
+  val delay: FiniteDuration                 = 10.seconds
 
   describe("populating") {
     it("should add a publisher w/o website") {
@@ -113,7 +117,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
 
   private def loadPublisher(publisher: Publisher)(implicit factory: DaoFactory, ec: ExecutionContext): Try[Unit] = Try {
     Await.result(factory.publisherDao.create(publisher), delay) match {
-      case Left(e) => fail(e)
+      case Left(e)  => fail(e)
       case Right(_) => ()
     }
   }
@@ -131,6 +135,7 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
         }
     }
   }
+
 }
 
 object PublisherDaoImplSpec {
@@ -142,6 +147,7 @@ object PublisherDaoImplSpec {
     None,
     Some(WebSite.build("www.random.com"))
   )
+
   val hb: Publisher = Publisher(
     ID.build,
     Version.defaultVersion,
@@ -149,4 +155,5 @@ object PublisherDaoImplSpec {
     None,
     None
   )
+
 }

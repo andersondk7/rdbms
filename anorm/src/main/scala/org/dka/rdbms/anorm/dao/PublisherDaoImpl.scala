@@ -15,40 +15,56 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class PublisherDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl[Publisher] with PublisherDao {
+class PublisherDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Publisher] with PublisherDao {
 
   import PublisherDaoImpl.*
 
   override val tableName = "publishers"
 
+  //
+  // queries
+  //
   override protected def insertQ(publisher: Publisher): SimpleSql[Row] =
     SQL(
-      " insert into publishers (id, version, publisher_name, location_id, website, create_date) values ({id}, {version}, {publisher_name}, {location_id}, {website}, {create_date})")
+      """
+      insert into publishers (id, version, publisher_name, location_id, website, create_date)
+      values ({id}, {version}, {publisherName}, {locationId}, {website}, {createDate})
+      """)
       .on(
-        "id" -> publisher.id.value.toString,
-        "version" -> publisher.version.value,
-        "publisher_name" -> publisher.publisherName.value,
-        "location_id" -> publisher.locationId.map(_.value.toString).orNull,
-        "website" -> publisher.webSite.map(_.value).orNull,
-        "create_date" -> publisher.createDate.asTimestamp
+        "id"             -> publisher.id.value.toString,
+        "version"        -> publisher.version.value,
+        "publisherName" -> publisher.publisherName.value,
+        "locationId"    -> publisher.locationId.map(_.value.toString).orNull,
+        "website"        -> publisher.webSite.map(_.value).orNull,
+        "createDate"    -> publisher.createDate.asTimestamp
       )
 
   override protected def updateQ(publisher: Publisher): SimpleSql[Row] = {
-    val locationId = publisher.locationId.map(_.value.toString).orNull
-    val website = publisher.webSite.map(_.value).orNull
 
-    SQL"""
+    SQL("""
           update publishers
            set 
-             version = ${publisher.version.value},
-             publisher_name = ${publisher.publisherName.value},
-             location_id = ${locationId},
-             website = ${website},
-             update_date = ${publisher.lastUpdate.get.asTimeStamp}
-          where id = ${publisher.id.value.toString}
-   """
+             version = {version},
+             publisher_name = {publisherName},
+             location_id = {locationId},
+             website = {website},
+             update_date = {lastUpdate}
+          where id = {id}
+   """)
+      .on(
+        "version" -> publisher.version.value,
+        "publisherName" -> publisher.publisherName.value,
+        "locationId" -> publisher.locationId.map(_.value.toString).orNull,
+        "website" -> publisher.webSite.map(_.value).orNull,
+        "lastUpdate" -> publisher.lastUpdate.map(_.value).orNull,
+        "id" -> publisher.id.value.toString
+
+      )
   }
 
+  //
+  // parsers
+  //
   override protected val itemParser: RowParser[Publisher] =
     getID ~ getVersion ~ getPublisherName ~ getLocationId ~ getWebsite ~ getCreateDate ~ getUpdateDate map {
       case id ~ v ~ pn ~ pl ~ pw ~ cd ~ up =>
@@ -62,6 +78,11 @@ class PublisherDaoImpl(override val dataSource: HikariDataSource) extends CrudDa
           lastUpdate = up
         )
     }
+
+  //
+  // PublisherDao methods
+  //
+
 }
 
 object PublisherDaoImpl {
@@ -76,6 +97,8 @@ object PublisherDaoImpl {
   // if there needs to be parsers for a sub-set of publisher fields, it would also go here
   //
 
-  private def getPublisherName: RowParser[PublisherName] = get[String](PublisherName.fieldName).map(PublisherName.build)
-  private def getWebsite: RowParser[Option[WebSite]] = get[Option[String]](WebSite.fieldName).map(WebSite.fromOpt)
+  def getPublisherName: RowParser[PublisherName] = get[String](PublisherName.fieldName).map(PublisherName.build)
+
+  def getWebsite: RowParser[Option[WebSite]]     = get[Option[String]](WebSite.fieldName).map(WebSite.fromOpt)
+
 }

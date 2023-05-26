@@ -14,6 +14,7 @@ class AuthorsBooksDao(val db: Database) {
 }
 
 object AuthorsBooksDao {
+
   val tableQuery = TableQuery[AuthorsBooksTable]
 
   class AuthorsBooksTable(tag: Tag)
@@ -21,12 +22,16 @@ object AuthorsBooksDao {
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors_books") {
-    val authorId = column[String]("author_id")
-    val bookId = column[String]("book_id")
+
+    val authorId    = column[String]("author_id")
+
+    val bookId      = column[String]("book_id")
+
     val authorOrder = column[Int]("author_order")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (authorId, bookId, authorOrder) <> (fromDB, toDB)
+
   }
 
   //
@@ -38,7 +43,7 @@ object AuthorsBooksDao {
   private type AuthorTitleTuple = (
     String, // authorID
     String, // bookId
-    Int // authorOrder
+    Int     // authorOrder
   )
 
   def fromDB(tuple: AuthorTitleTuple): AuthorBookRelationship = {

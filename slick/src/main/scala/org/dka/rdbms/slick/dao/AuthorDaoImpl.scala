@@ -19,10 +19,13 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Author => DBIO[Int] = author => tableQuery += author
+  override protected val singleCreateIO: Author => DBIO[Int]                = author => tableQuery += author
+
   override protected val multipleCreateIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
+
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Author]] = (id, ec) =>
     tableQuery.filter(x => x.id === id.value.toString).result.map(x => x.headOption)(ec)
+
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   override protected val updateAction: (Author, ExecutionContext) => DBIO[Author] = (item, ec) => {
@@ -63,6 +66,7 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
 }
 
 object AuthorDaoImpl {
+
   val tableQuery = TableQuery[AuthorTable]
 
   class AuthorTable(tag: Tag)
@@ -70,12 +74,19 @@ object AuthorDaoImpl {
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors") {
-    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
-    val version = column[Int]("version")
-    val lastName = column[String]("last_name")
-    val firstName = column[Option[String]]("first_name")
+
+    val id         = column[String]("id", O.PrimaryKey) // This is the primary key column
+
+    val version    = column[Int]("version")
+
+    val lastName   = column[String]("last_name")
+
+    val firstName  = column[Option[String]]("first_name")
+
     val locationId = column[Option[String]]("location_id")
+
     val createDate = column[Timestamp]("create_date")
+
     val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
@@ -90,12 +101,12 @@ object AuthorDaoImpl {
   //
 
   private type AuthorTuple = (
-    String, // id
-    Int, // version
-    String, // last name
-    Option[String], // first name
-    Option[String], // location id
-    Timestamp, // createDate
+    String,           // id
+    Int,              // version
+    String,           // last name
+    Option[String],   // first name
+    Option[String],   // location id
+    Timestamp,        // createDate
     Option[Timestamp] // lastUpdate
   )
 

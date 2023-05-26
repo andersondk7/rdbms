@@ -15,10 +15,13 @@ final case class Location(
   createDate: CreateDate = CreateDate.now,
   override val lastUpdate: Option[UpdateDate] = None)
   extends Updatable[Location] {
+
   override def update: Location = this.copy(version = version.next, lastUpdate = UpdateDate.now)
+
 }
 
 object Location {
+
   implicit val encodeLocation: Encoder[Location] = (l: Location) => {
     val objects = List(
       Some(ID.toJson(l.id)),
@@ -49,4 +52,5 @@ object Location {
       case Valid(location) => Right(location)
     }
   }
+
 }

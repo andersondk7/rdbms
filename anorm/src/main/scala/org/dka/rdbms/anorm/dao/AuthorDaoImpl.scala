@@ -15,40 +15,52 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthorDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl[Author] with AuthorDao {
+class AuthorDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Author] with AuthorDao {
 
   import AuthorDaoImpl.*
 
   override val tableName = "authors"
 
+  //
+  // queries
+  //
   override protected def insertQ(author: Author): SimpleSql[Row] =
     SQL(
-      " insert into authors (id, version, last_name, first_name, location_id, create_date) values ({id}, {version}, {last_name}, {first_name}, {location_id}, {create_date})")
+      """ insert into authors (id, version, last_name, first_name, location_id, create_date)
+          values ({id}, {version}, {lastName}, {firstName}, {locationId}, {createDate})"""
+    )
       .on(
-        "id" -> author.id.value.toString,
-        "version" -> author.version.value,
-        "last_name" -> author.lastName.value,
-        "first_name" -> author.firstName.map(_.value).orNull,
-        "location_id" -> author.locationId.map(_.value.toString).orNull,
-        "create_date" -> author.createDate.asTimestamp
+        "id"          -> author.id.value.toString,
+        "version"     -> author.version.value,
+        "lastName"   -> author.lastName.value,
+        "firstName"  -> author.firstName.map(_.value).orNull,
+        "locationId" -> author.locationId.map(_.value.toString).orNull,
+        "createDate" -> author.createDate.asTimestamp
       )
 
-  override protected def updateQ(author: Author): SimpleSql[Row] = {
-    val firstName = author.firstName.map(_.value).orNull
-    val locationId = author.locationId.map(_.value.toString).orNull
-
-    SQL"""
+  override protected def updateQ(author: Author): SimpleSql[Row] =
+    SQL("""
           update authors
            set
-             version = ${author.version.value},
-             last_name = ${author.lastName.value},
-             first_name = ${firstName},
-             location_id = ${locationId},
-             update_date = ${author.lastUpdate.get.asTimeStamp}
-          where id = ${author.id.value.toString}
-   """
-  }
+             version = {version},
+             last_name = {lastName},
+             first_name = {firstName},
+             location_id = {locationId},
+             update_date = {lastUpdate}
+          where id = {id}
+   """)
+      .on(
+        "version"    -> author.version.value,
+        "lastName"   -> author.lastName.value,
+        "firstName"  -> author.firstName.map(_.value).orNull,
+        "locationId" -> author.locationId.map(_.value.toString).orNull,
+        "lastUpdate" -> author.lastUpdate.map(_.asTimeStamp).orNull,
+        "id"         -> author.id.value.toString
+      )
 
+  //
+  // parsers
+  //
   override protected val itemParser: RowParser[Author] =
     getID ~ getVersion ~ getLastName ~ getFirstName ~ getLocationId ~ getCreateDate ~ getUpdateDate map {
       case id ~ v ~ ln ~ fn ~ lid ~ cd ~ up =>
@@ -62,6 +74,7 @@ class AuthorDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoIm
           lastUpdate = up
         )
     }
+
 }
 
 object AuthorDaoImpl {
@@ -76,8 +89,9 @@ object AuthorDaoImpl {
   // if there needs to be parsers for a sub-set of Author fields, it would also go here
   //
 
-  private def getLastName: RowParser[LastName] = get[String](LastName.fieldName).map(LastName.build)
-  private def getFirstName: RowParser[Option[FirstName]] =
+  def getLastName: RowParser[LastName] = get[String](LastName.fieldName).map(LastName.build)
+
+  def getFirstName: RowParser[Option[FirstName]] =
     get[Option[String]](FirstName.fieldName).map(FirstName.fromOpt)
 
 }

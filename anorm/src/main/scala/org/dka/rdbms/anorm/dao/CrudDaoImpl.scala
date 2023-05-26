@@ -13,19 +13,16 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
+
   private val logger = Logger(getClass.getName)
 
   def create(item: T)(implicit ec: ExecutionContext): Future[DaoErrorsOr[T]] =
     Future {
       withConnection { implicit connection: Connection =>
         Try {
-          val q = insertQ(item)
-          q.execute()
+          insertQ(item).execute()
         }.fold(
-          ex => {
-            logger.warn(s"could not insert $item, because $ex")
-            Left(InsertException(s"could not insert $item", Some(ex)))
-          },
+          ex => Left(InsertException(s"could not insert $item", Some(ex))),
           _ => Right(item)
         )
       }
@@ -36,10 +33,7 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
       Try {
         items.map(create)
       }.fold(
-        ex => {
-          logger.warn(s"could not insert ${items.size}, because $ex")
-          Left(InsertException(s"could not insert ${items.size}", Some(ex)))
-        },
+        ex => Left(InsertException(s"could not insert ${items.size}", Some(ex))),
         booleans =>
           if (booleans.contains(false)) Left(InsertException(s"could not insert all ${items.size}"))
           else Right(items.size)
@@ -50,14 +44,9 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
   def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[T]]] = Future {
     withConnection { implicit connection: Connection =>
       Try {
-        val q: SimpleSql[Row] = byIdQ(id)
-        val result: Option[T] = q.as(itemParser.singleOpt)
-        result
+        byIdQ(id).as(itemParser.singleOpt)
       }.fold(
-        ex => {
-          logger.warn(s"count not read $id because $ex")
-          Left(ItemNotFoundException(id))
-        },
+        ex => Left(ItemNotFoundException(id, Some(ex))),
         result => Right(result)
       )
     }
@@ -66,13 +55,9 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
   def delete(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[ID]]] = Future {
     withConnection { implicit connection: Connection =>
       Try {
-        val q = deleteQ(id)
-        q.executeUpdate()
+        deleteQ(id).executeUpdate()
       }.fold(
-        ex => {
-          logger.warn(s"could not delete $id, because $ex")
-          Left(DeleteException(s"could not delete $id", Some(ex)))
-        },
+        ex => Left(DeleteException(s"could not delete $id", Some(ex))),
         rowCount =>
           if (rowCount == 1) Right(Some(id))
           else Right(None)
@@ -101,28 +86,37 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
     }
   }
 
+  //
+  // overrides needed:
+  //
   def tableName: String
+
   protected def insertQ(t: T): SimpleSql[Row]
 
+  protected def updateQ(item: T): SimpleSql[Row]
+
+  protected def itemParser: RowParser[T]
+
+  //
+  // queries
+  //
   private def byIdQ(id: ID): SimpleSql[Row] = {
     val phrase = "select * from tableName where id = {id}".replace("tableName", tableName)
     SQL(phrase).on("id" -> id.value.toString)
   }
 
-  def deleteQ(id: ID): SimpleSql[Row] = {
+  private def deleteQ(id: ID): SimpleSql[Row] = {
     val phrase = "delete from tableName where id = {id}".replace("tableName", tableName)
     SQL(phrase).on("id" -> id.value.toString)
-
   }
-  protected def updateQ(item: T): SimpleSql[Row]
-  protected def itemParser: RowParser[T]
 
+  //
+  // helper methods
+  //
   private def checkVersion(item: T)(implicit connection: Connection, ec: ExecutionContext): Future[DaoErrorsOr[T]] =
     Future {
       Try {
-        val q: SimpleSql[Row] = byIdQ(item.id)
-        val result: Option[T] = q.as(itemParser.singleOpt)
-        result
+        byIdQ(item.id).as(itemParser.singleOpt)
       }.fold(
         ex => {
           logger.warn(s"count not read ${item.id} because $ex")
@@ -141,8 +135,7 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
     Future {
       val updated = item.update
       Try {
-        val q = updateQ(updated)
-        q.executeUpdate()
+        updateQ(updated).executeUpdate()
       }.fold(
         ex => Left(UpdateException(updated.id, Some(ex))),
         count =>
@@ -150,6 +143,7 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
           else Left(UpdateException(updated.id))
       )
     }
+
 }
 
 object CrudDaoImpl {}

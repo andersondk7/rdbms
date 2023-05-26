@@ -13,15 +13,19 @@ import scala.concurrent.ExecutionContext
 import scala.language.implicitConversions
 
 class LocationDaoImpl(override val db: Database) extends CrudDaoImpl[Location] with LocationDao {
+
   import LocationDaoImpl._
 
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Location => DBIO[Int] = location => tableQuery += location
+  override protected val singleCreateIO: Location => DBIO[Int]                = location => tableQuery += location
+
   override protected val multipleCreateIO: Seq[Location] => DBIO[Option[Int]] = locations => tableQuery ++= locations
+
   override protected val getIO: (ID, ExecutionContext) => DBIO[Option[Location]] = (id, ec) =>
     tableQuery.filter(_.id === id.value.toString).result.map(_.headOption)(ec)
+
   override protected val deletedIO: ID => DBIO[Int] = id => tableQuery.filter(_.id === id.value.toString).delete
 
   override protected val updateAction: (Location, ExecutionContext) => DBIO[Location] = (item, ec) => {
@@ -56,6 +60,7 @@ class LocationDaoImpl(override val db: Database) extends CrudDaoImpl[Location] w
 }
 
 object LocationDaoImpl {
+
   val tableQuery = TableQuery[LocationTable]
 
   class LocationTable(tag: Tag)
@@ -63,17 +68,25 @@ object LocationDaoImpl {
       tag,
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "locations") {
-    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
-    val version = column[Int]("version")
-    val locationName = column[String]("location_name")
+
+    val id                   = column[String]("id", O.PrimaryKey) // This is the primary key column
+
+    val version              = column[Int]("version")
+
+    val locationName         = column[String]("location_name")
+
     val locationAbbreviation = column[String]("location_abbreviation")
-    val countryID = column[String]("country_id")
-    val createDate = column[Timestamp]("create_date")
-    val updateDate = column[Option[Timestamp]]("update_date")
+
+    val countryID            = column[String]("country_id")
+
+    val createDate           = column[Timestamp]("create_date")
+
+    val updateDate           = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * =
       (id, version, locationName, locationAbbreviation, countryID, createDate, updateDate) <> (fromDB, toDB)
+
   }
 
   //
@@ -83,12 +96,12 @@ object LocationDaoImpl {
   //
 
   private type LocationTuple = (
-    String, // id
-    Int, // version
-    String, // location_name
-    String, // location_abbreviation
-    String, // country_id
-    Timestamp, // create date
+    String,           // id
+    Int,              // version
+    String,           // location_name
+    String,           // location_abbreviation
+    String,           // country_id
+    Timestamp,        // create date
     Option[Timestamp] // update date
   )
 

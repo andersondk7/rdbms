@@ -61,10 +61,13 @@ final case class DBConfig(
 
   val url: String =
     s"jdbc:postgresql://${properties.host}:${properties.port}/${properties.database}?user=${properties.user}&password=${properties.password}&currentSchema=${properties.schema}"
+
 }
 
 object DBConfig {
+
   type ConfigErrorsOr[T] = ValidatedNec[ConfigException, T]
+
   def apply(
     cp: String,
     dsc: String,
@@ -108,14 +111,14 @@ object DBConfig {
   private def readString(fieldName: String)(implicit config: Config): ConfigErrorsOr[String] = try
     Valid(config.getString(fieldName))
   catch {
-    case _: TSException.Missing => MissingFieldException(fieldName).invalidNec
+    case _: TSException.Missing   => MissingFieldException(fieldName).invalidNec
     case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
   }
 
   private def readInt(fieldName: String)(implicit config: Config): ConfigErrorsOr[Int] = try
     Valid(config.getInt(fieldName))
   catch {
-    case _: TSException.Missing => MissingFieldException(fieldName).invalidNec
+    case _: TSException.Missing   => MissingFieldException(fieldName).invalidNec
     case _: TSException.WrongType => InvalidFieldException(fieldName).invalidNec
   }
 

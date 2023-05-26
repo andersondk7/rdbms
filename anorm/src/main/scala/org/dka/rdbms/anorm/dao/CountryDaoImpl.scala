@@ -15,34 +15,51 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoImpl[Country] with CountryDao {
+class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Country] with CountryDao {
 
   import CountryDaoImpl.*
 
   override val tableName: String = "countries"
 
+  //
+  // queries
+  //
   override protected def insertQ(country: Country): SimpleSql[Row] =
     SQL(
-      "insert into countries (id, country_name, country_abbreviation, create_date, version) values ({id}, {country_name}, {country_abbreviation}, {create_date}, {version})")
+      """
+      insert into countries (id, country_name, country_abbreviation, create_date, version)
+      values ({id}, {countryName}, {countryAbbreviation}, {createDate}, {version})
+     """)
       .on(
-        "id" -> country.id.value.toString,
-        "country_name" -> country.countryName.value,
-        "country_abbreviation" -> country.countryAbbreviation.value,
-        "create_date" -> country.createDate.asTimestamp,
-        "version" -> country.version.value
+        "id"                   -> country.id.value.toString,
+        "countryName"         -> country.countryName.value,
+        "countryAbbreviation" -> country.countryAbbreviation.value,
+        "createDate"          -> country.createDate.asTimestamp,
+        "version"              -> country.version.value
       )
 
   override protected def updateQ(country: Country): SimpleSql[Row] =
-    SQL"""
+    SQL("""
     update countries
     set
-       version = ${country.version.value},
-       country_name = ${country.countryName.value},
-       country_abbreviation = ${country.countryAbbreviation.value},
-       update_date = ${country.lastUpdate.get.asTimeStamp}
-    where id = ${country.id.value.toString}
-    """
+       version = {version},
+       country_name = {countryName},
+       country_abbreviation = {countryAbbreviation},
+       update_date = {lastUpdate}
+    where id = {id}
+    """)
+      .on(
+        "version" -> country.version.value,
+        "countryName" -> country.countryName.value,
+        "countryAbbreviation" -> country.countryAbbreviation.value,
+        "lastUpdate" -> country.lastUpdate.map(_.value).orNull,
+        "id" -> country.id.value.toString
+      )
 
+
+  //
+  // parsers
+  //
   override protected val itemParser: RowParser[Country] =
     getID ~ getVersion ~ getCountyName ~ getCountryAbbreviation ~ getCreateDate ~ getUpdateDate map {
       case id ~ v ~ cn ~ ca ~ cd ~ up =>
@@ -56,8 +73,11 @@ class CountryDaoImpl(override val dataSource: HikariDataSource) extends CrudDaoI
         )
     }
 
-}
+  //
+  // CountryDao methods
+  //
 
+}
 object CountryDaoImpl {
 
   //
@@ -70,7 +90,9 @@ object CountryDaoImpl {
   // if there needs to be parsers for a sub-set of country fields, it would also go here
   //
 
-  private def getCountyName: RowParser[CountryName] = get[String](CountryName.fieldName).map(CountryName.build)
-  private def getCountryAbbreviation: RowParser[CountryAbbreviation] =
+  def getCountyName: RowParser[CountryName] = get[String](CountryName.fieldName).map(CountryName.build)
+
+  def getCountryAbbreviation: RowParser[CountryAbbreviation] =
     get[String](CountryAbbreviation.fieldName).map(CountryAbbreviation.build)
+
 }

@@ -4,6 +4,7 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.util.Random
 
 object Generator {
+
   def genString(length: Int, replace: String = " "): String = {
     val sb = new StringBuilder
     for (i <- 1 to length) {
@@ -15,14 +16,14 @@ object Generator {
 
   def genPrice: BigDecimal = {
     val dollars = BigDecimal(random.nextInt(98) + 1)
-    val cents = BigDecimal(random.nextInt(99)) / 100
+    val cents   = BigDecimal(random.nextInt(99)) / 100
     dollars + cents
   }
 
   def genWebSite(length: Int): String = {
     val prefix = "https://"
     val domain = ".com"
-    val base = genString(length - prefix.length - domain.length, "/")
+    val base   = genString(length - prefix.length - domain.length, "/")
     prefix + base + domain
   }
 
@@ -37,7 +38,9 @@ object Generator {
   }
 
   private val allowedCharacters: Seq[Char] = ('a' to 'z') ++ ('A' to 'Z') ++ Seq.fill(10)('_')
-  private val allowedCharactersSize = allowedCharacters.size
-  private val random = new Random(42)
+
+  private val allowedCharactersSize        = allowedCharacters.size
+
+  private val random                       = new Random(42)
 
 }
