@@ -16,7 +16,9 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Book] with BookDao {
+class BookDaoImpl(override val dataSource: HikariDataSource, override val dbEx: ExecutionContext)
+  extends CrudDaoImpl[Book]
+    with BookDao {
 
   import BookDaoImpl.*
 
@@ -26,8 +28,7 @@ class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCont
   // queries
   //
   override protected def insertQ(book: Book): SimpleSql[Row] =
-    SQL(
-      """
+    SQL("""
       insert into books (id, version, title, price, publisher_id, publish_date, create_date)
       values ({id}, {version}, {title}, {price}, {publisher_id}, {publish_date}, {create_date})
      """)
@@ -41,7 +42,7 @@ class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCont
         "create_date"  -> book.createDate.asTimestamp
       )
 
-  override protected def updateQ(book: Book): SimpleSql[Row] = {
+  override protected def updateQ(book: Book): SimpleSql[Row] =
     SQL("""
           update books
            set
@@ -54,15 +55,14 @@ class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCont
           where id = {id}
    """)
       .on(
-        "version" -> book.version.value,
-        "title"-> book.title.value,
-        "price" -> book.price.value,
+        "version"     -> book.version.value,
+        "title"       -> book.title.value,
+        "price"       -> book.price.value,
         "publisherId" -> book.publisherID.map(_.value.toString).orNull,
         "publishDate" -> book.publishDate.map(_.value).orNull,
-        "lastUpdate" -> book.lastUpdate.map(_.value).orNull,
-        "id" -> book.id.value.toString
+        "lastUpdate"  -> book.lastUpdate.map(_.value).orNull,
+        "id"          -> book.id.value.toString
       )
-  }
 
   //
   // parsers
@@ -85,8 +85,8 @@ class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCont
   //
   // BookDao methods
   //
-  override def getAllIds(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[ID]]] = Future {
-    withConnection { implicit connection: Connection =>
+  override def getAllIds(implicit ec: ExecutionContext): Future[DaoErrorsOr[Seq[ID]]] =
+    withConnection(dbEx) { implicit connection: Connection =>
       Try {
         allIdsQ.as(getID.*)
       }.fold(
@@ -94,13 +94,12 @@ class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCont
         records => Right(records)
       )
     }
-  }
 
   override def getBookAuthorSummary(
     bookId: ID
   )(implicit ec: ExecutionContext
-  ): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] = Future {
-    withConnection { implicit connection: Connection =>
+  ): Future[DaoErrorsOr[Seq[BookAuthorSummary]]] =
+    withConnection(dbEx) { implicit connection: Connection =>
       Try {
         bookAuthorSummaryQ(bookId).as(authorBookSummaryParser.*)
       }.fold(
@@ -108,7 +107,6 @@ class BookDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCont
         summaries => Right(summaries)
       )
     }
-  }
 
 }
 

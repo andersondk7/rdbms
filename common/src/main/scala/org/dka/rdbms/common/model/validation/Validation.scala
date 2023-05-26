@@ -30,7 +30,7 @@ trait Validation[I, S, T <: Field[S]] {
 
   def build(o: Option[S]): Option[T] = o.map(build)
 
-  def apply(s: I): ValidationErrorsOr[T]                 = validate(s)
+  def apply(s: I): ValidationErrorsOr[T] = validate(s)
 
   def apply(o: Option[I]): ValidationErrorsOr[Option[T]] = validateOption(o)
 

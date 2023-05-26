@@ -27,7 +27,7 @@ class PublisherGenerator(
     bulkLoadPublisher.insertLine(publisher)
   }
 
-  private val locationSize           = locationIds.size
+  private val locationSize = locationIds.size
 
   private def randomLocationId: UUID = locationIds(util.Random.nextInt(locationSize))
 

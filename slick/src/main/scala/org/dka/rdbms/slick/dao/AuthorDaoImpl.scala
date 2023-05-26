@@ -19,7 +19,7 @@ class AuthorDaoImpl(override val db: Database) extends CrudDaoImpl[Author] with 
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Author => DBIO[Int]                = author => tableQuery += author
+  override protected val singleCreateIO: Author => DBIO[Int] = author => tableQuery += author
 
   override protected val multipleCreateIO: Seq[Author] => DBIO[Option[Int]] = authors => tableQuery ++= authors
 
@@ -75,13 +75,13 @@ object AuthorDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors") {
 
-    val id         = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
 
-    val version    = column[Int]("version")
+    val version = column[Int]("version")
 
-    val lastName   = column[String]("last_name")
+    val lastName = column[String]("last_name")
 
-    val firstName  = column[Option[String]]("first_name")
+    val firstName = column[Option[String]]("first_name")
 
     val locationId = column[Option[String]]("location_id")
 

@@ -14,15 +14,15 @@ import scala.concurrent.duration.*
 
 class DaoFactory(val dataSource: HikariDataSource, dbEx: ExecutionContext) {
 
-  val countryDao: CountryDao     = new CountryDaoImpl(dataSource, dbEx)
+  val countryDao: CountryDao = new CountryDaoImpl(dataSource, dbEx)
 
-  val locationDao: LocationDao   = new LocationDaoImpl(dataSource, dbEx)
+  val locationDao: LocationDao = new LocationDaoImpl(dataSource, dbEx)
 
   val publisherDao: PublisherDao = new PublisherDaoImpl(dataSource, dbEx)
 
-  val authorDao: AuthorDao       = new AuthorDaoImpl(dataSource, dbEx)
+  val authorDao: AuthorDao = new AuthorDaoImpl(dataSource, dbEx)
 
-  val bookDao: BookDao           = new BookDaoImpl(dataSource, dbEx)
+  val bookDao: BookDao = new BookDaoImpl(dataSource, dbEx)
 
 }
 

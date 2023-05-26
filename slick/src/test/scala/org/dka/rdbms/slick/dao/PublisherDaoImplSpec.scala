@@ -19,9 +19,9 @@ class PublisherDaoImplSpec extends AnyFunSpec with DBTestRunner with Matchers {
   // for a test, this is fine ...
   implicit private val ec: ExecutionContext = ExecutionContext.global
 
-  private val logger                        = Logger(getClass.getName)
+  private val logger = Logger(getClass.getName)
 
-  val delay: FiniteDuration                 = 10.seconds
+  val delay: FiniteDuration = 10.seconds
 
   describe("conversion to/from db") {
     it("should convert from domain to db") {
@@ -294,6 +294,6 @@ object PublisherDaoImplSpec {
 
   val multiplePublishers: Seq[Publisher] = Seq(hb, hc, ad)
 
-  val publisherIds: Seq[ID]              = PublisherDaoImplSpec.multiplePublishers.map(_.id)
+  val publisherIds: Seq[ID] = PublisherDaoImplSpec.multiplePublishers.map(_.id)
 
 }

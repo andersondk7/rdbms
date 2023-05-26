@@ -27,7 +27,7 @@ object BulkLoadSyntax {
 
   implicit class BulkLoadOps[I](value: I) {
 
-    def header(implicit instance: BulkLoad[I]): String     = instance.header
+    def header(implicit instance: BulkLoad[I]): String = instance.header
 
     def insertLine(implicit instance: BulkLoad[I]): String = instance.insertLine(value)
 

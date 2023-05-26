@@ -17,19 +17,17 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
   private val logger = Logger(getClass.getName)
 
   def create(item: T)(implicit ec: ExecutionContext): Future[DaoErrorsOr[T]] =
-    Future {
-      withConnection { implicit connection: Connection =>
-        Try {
-          insertQ(item).execute()
-        }.fold(
-          ex => Left(InsertException(s"could not insert $item", Some(ex))),
-          _ => Right(item)
-        )
-      }
+    withConnection(dbEx) { implicit connection: Connection =>
+      Try {
+        insertQ(item).execute()
+      }.fold(
+        ex => Left(InsertException(s"could not insert $item", Some(ex))),
+        _ => Right(item)
+      )
     }
 
-  def create(items: Seq[T])(implicit ec: ExecutionContext): Future[DaoErrorsOr[Int]] = Future {
-    withConnection { _ =>
+  def create(items: Seq[T])(implicit ec: ExecutionContext): Future[DaoErrorsOr[Int]] =
+    withConnection(dbEx) { _ =>
       Try {
         items.map(create)
       }.fold(
@@ -39,10 +37,9 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
           else Right(items.size)
       )
     }
-  }
 
-  def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[T]]] = Future {
-    withConnection { implicit connection: Connection =>
+  def read(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[T]]] =
+    withConnection(dbEx) { implicit connection: Connection =>
       Try {
         byIdQ(id).as(itemParser.singleOpt)
       }.fold(
@@ -50,10 +47,9 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
         result => Right(result)
       )
     }
-  }
 
-  def delete(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[ID]]] = Future {
-    withConnection { implicit connection: Connection =>
+  def delete(id: ID)(implicit ec: ExecutionContext): Future[DaoErrorsOr[Option[ID]]] =
+    withConnection(dbEx) { implicit connection: Connection =>
       Try {
         deleteQ(id).executeUpdate()
       }.fold(
@@ -63,7 +59,6 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
           else Right(None)
       )
     }
-  }
 
   def update(item: T)(implicit ec: ExecutionContext): Future[DaoErrorsOr[T]] = {
     implicit val connection: Connection = dataSource.getConnection
@@ -89,6 +84,8 @@ trait CrudDaoImpl[T <: Updatable[T]] extends CrudDao[T] with DB {
   //
   // overrides needed:
   //
+  def dbEx: ExecutionContext
+
   def tableName: String
 
   protected def insertQ(t: T): SimpleSql[Row]

@@ -19,7 +19,7 @@ class CountryDaoImpl(override val db: Database) extends CrudDaoImpl[Country] wit
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Country => DBIO[Int]                = country => tableQuery += country
+  override protected val singleCreateIO: Country => DBIO[Int] = country => tableQuery += country
 
   override protected val multipleCreateIO: Seq[Country] => DBIO[Option[Int]] = countries => tableQuery ++= countries
 
@@ -69,17 +69,17 @@ object CountryDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "countries") {
 
-    val id                  = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
 
-    val version             = column[Int]("version")
+    val version = column[Int]("version")
 
-    val countryName         = column[String]("country_name")
+    val countryName = column[String]("country_name")
 
     val countryAbbreviation = column[String]("country_abbreviation")
 
-    val createDate          = column[Timestamp]("create_date")
+    val createDate = column[Timestamp]("create_date")
 
-    val updateDate          = column[Option[Timestamp]]("update_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, version, countryName, countryAbbreviation, createDate, updateDate) <> (fromDB, toDB)

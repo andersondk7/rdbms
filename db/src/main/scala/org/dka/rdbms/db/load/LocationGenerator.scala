@@ -29,7 +29,7 @@ class LocationGenerator(
     bulkLoadLocation.insertLine(location)
   }
 
-  private val countrySize           = countryIds.size
+  private val countrySize = countryIds.size
 
   private def randomCountryId: UUID = countryIds(random.nextInt(countrySize))
 

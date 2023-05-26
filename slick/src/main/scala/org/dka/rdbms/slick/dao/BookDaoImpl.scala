@@ -22,7 +22,7 @@ class BookDaoImpl(override val db: Database) extends CrudDaoImpl[Book] with Book
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Book => DBIO[Int]                = title => tableQuery += title
+  override protected val singleCreateIO: Book => DBIO[Int] = title => tableQuery += title
 
   override protected val multipleCreateIO: Seq[Book] => DBIO[Option[Int]] = titles => tableQuery ++= titles
 
@@ -125,21 +125,21 @@ object BookDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "books") {
 
-    val id          = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
 
-    val version     = column[Int]("version")
+    val version = column[Int]("version")
 
-    val title       = column[String]("title")
+    val title = column[String]("title")
 
-    val price       = column[BigDecimal]("price")
+    val price = column[BigDecimal]("price")
 
     val publisherId = column[Option[String]]("publisher_id")
 
     val publishDate = column[Option[LocalDate]]("publish_date")
 
-    val createDate  = column[Timestamp]("create_date")
+    val createDate = column[Timestamp]("create_date")
 
-    val updateDate  = column[Option[Timestamp]]("update_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * = (id, version, title, price, publisherId, publishDate, createDate, updateDate) <> (fromDB, toDB)

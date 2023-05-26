@@ -1,19 +1,27 @@
 package org.dka.rdbms.anorm.dao
 
 import com.zaxxer.hikari.HikariDataSource
+
 import java.sql.Connection
+import scala.concurrent.{ExecutionContext, Future}
 
 trait DB {
 
   def dataSource: HikariDataSource
 
-  def withConnection[A](block: Connection => A): A = {
+  def withConnection[A](dbEx: ExecutionContext)(block: Connection => A): Future[A] = Future {
     val connection = dataSource.getConnection
     val result: A  = block(connection)
     connection.close()
     result
-  }
+  }(dbEx)
 
+  //
+  // work in progress
+  // this does not work!!
+  // needs more investigation
+  // please see CrudDaoImpl:update, which does work in a transaction
+  //
   def withTransaction[A](block: Connection => A): A = {
     val connection = dataSource.getConnection
     connection.setAutoCommit(false)

@@ -75,11 +75,11 @@ final case class TestRunnerResult(
   testResult: TestResult,
   tearDownResult: TearDownResult) {
 
-  val setupGood: Boolean    = setupResult.result.fold(false)(_.isSuccess)
+  val setupGood: Boolean = setupResult.result.fold(false)(_.isSuccess)
 
   val tearDownGood: Boolean = tearDownResult.result.fold(false)(_.isSuccess)
 
-  val shouldCheck: Boolean  = setupGood && tearDownGood
+  val shouldCheck: Boolean = setupGood && tearDownGood
 
   def +(setup: SetupResult): TestRunnerResult =
     this.copy(setupResult = setup)

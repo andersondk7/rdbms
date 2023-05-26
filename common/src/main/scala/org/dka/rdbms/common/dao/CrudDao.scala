@@ -10,9 +10,8 @@ import scala.concurrent.{ExecutionContext, Future}
  * this interface is db agnostic and allows for easy unit testing since an database is not required
  *
  * the implicit ExecutionContext is the context used for '''only for''':
- *  - processing of results into domain objects
- *  it is ''' not ''' used for database interaction (calling the driver)
- *  
+ *   - processing of results into domain objects it is ''' not ''' used for database interaction (calling the driver)
+ *
  * @tparam D
  *   domain object stored
  */

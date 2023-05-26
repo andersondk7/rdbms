@@ -23,7 +23,7 @@ object CreateDate extends LocalDateTimeValidation[CreateDate] {
 
   override def build(tn: LocalDateTime): CreateDate = new CreateDate(tn.truncatedTo(ChronoUnit.MILLIS))
 
-  def build(ts: Timestamp): CreateDate              = new CreateDate(ts.toLocalDateTime)
+  def build(ts: Timestamp): CreateDate = new CreateDate(ts.toLocalDateTime)
 
   def now: CreateDate = CreateDate.build(LocalDateTime.now)
 

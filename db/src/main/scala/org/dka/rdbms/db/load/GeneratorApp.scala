@@ -15,15 +15,15 @@ final case class Params(
 
 object Params {
 
-  private val country   = "country"
+  private val country = "country"
 
-  private val location  = "location"
+  private val location = "location"
 
   private val publisher = "publisher"
 
-  private val author    = "author"
+  private val author = "author"
 
-  private val book      = "book"
+  private val book = "book"
 
   private val usage =
     s"Usage: generator: [--$country c], [--$location l], [--$publisher p], [--$author a], [--$book t]"

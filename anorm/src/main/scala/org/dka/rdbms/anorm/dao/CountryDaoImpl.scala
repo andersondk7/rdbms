@@ -15,7 +15,9 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Country] with CountryDao {
+class CountryDaoImpl(override val dataSource: HikariDataSource, override val dbEx: ExecutionContext)
+  extends CrudDaoImpl[Country]
+    with CountryDao {
 
   import CountryDaoImpl.*
 
@@ -25,17 +27,16 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
   // queries
   //
   override protected def insertQ(country: Country): SimpleSql[Row] =
-    SQL(
-      """
+    SQL("""
       insert into countries (id, country_name, country_abbreviation, create_date, version)
       values ({id}, {countryName}, {countryAbbreviation}, {createDate}, {version})
      """)
       .on(
-        "id"                   -> country.id.value.toString,
+        "id"                  -> country.id.value.toString,
         "countryName"         -> country.countryName.value,
         "countryAbbreviation" -> country.countryAbbreviation.value,
         "createDate"          -> country.createDate.asTimestamp,
-        "version"              -> country.version.value
+        "version"             -> country.version.value
       )
 
   override protected def updateQ(country: Country): SimpleSql[Row] =
@@ -49,13 +50,12 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
     where id = {id}
     """)
       .on(
-        "version" -> country.version.value,
-        "countryName" -> country.countryName.value,
+        "version"             -> country.version.value,
+        "countryName"         -> country.countryName.value,
         "countryAbbreviation" -> country.countryAbbreviation.value,
-        "lastUpdate" -> country.lastUpdate.map(_.value).orNull,
-        "id" -> country.id.value.toString
+        "lastUpdate"          -> country.lastUpdate.map(_.value).orNull,
+        "id"                  -> country.id.value.toString
       )
-
 
   //
   // parsers
@@ -78,6 +78,7 @@ class CountryDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionC
   //
 
 }
+
 object CountryDaoImpl {
 
   //

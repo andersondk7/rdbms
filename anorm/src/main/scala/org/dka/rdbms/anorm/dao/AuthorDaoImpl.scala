@@ -15,7 +15,9 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthorDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Author] with AuthorDao {
+class AuthorDaoImpl(override val dataSource: HikariDataSource, override val dbEx: ExecutionContext)
+  extends CrudDaoImpl[Author]
+    with AuthorDao {
 
   import AuthorDaoImpl.*
 
@@ -30,8 +32,8 @@ class AuthorDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionCo
           values ({id}, {version}, {lastName}, {firstName}, {locationId}, {createDate})"""
     )
       .on(
-        "id"          -> author.id.value.toString,
-        "version"     -> author.version.value,
+        "id"         -> author.id.value.toString,
+        "version"    -> author.version.value,
         "lastName"   -> author.lastName.value,
         "firstName"  -> author.firstName.map(_.value).orNull,
         "locationId" -> author.locationId.map(_.value.toString).orNull,

@@ -18,7 +18,7 @@ class PublisherDaoImpl(override val db: Database) extends CrudDaoImpl[Publisher]
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Publisher => DBIO[Int]                = publisher => tableQuery += publisher
+  override protected val singleCreateIO: Publisher => DBIO[Int] = publisher => tableQuery += publisher
 
   override protected val multipleCreateIO: Seq[Publisher] => DBIO[Option[Int]] = publishers => tableQuery ++= publishers
 
@@ -70,19 +70,19 @@ object PublisherDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "publishers") {
 
-    val id            = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
 
-    val version       = column[Int]("version")
+    val version = column[Int]("version")
 
     val publisherName = column[String]("publisher_name")
 
-    val locationId    = column[Option[String]]("location_id")
+    val locationId = column[Option[String]]("location_id")
 
-    val website       = column[Option[String]]("website")
+    val website = column[Option[String]]("website")
 
-    val createDate    = column[Timestamp]("create_date")
+    val createDate = column[Timestamp]("create_date")
 
-    val updateDate    = column[Option[Timestamp]]("update_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     override def * = (id, version, publisherName, locationId, website, createDate, updateDate) <> (fromDB, toDB)
 

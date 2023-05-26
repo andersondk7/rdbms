@@ -20,7 +20,7 @@ object Version extends PositiveIntegerValidation[Version] {
 
   override val fieldName: String = "version"
 
-  val defaultVersion: Version    = new Version(1)
+  val defaultVersion: Version = new Version(1)
 
   override def build(value: Int): Version = new Version(value)
 

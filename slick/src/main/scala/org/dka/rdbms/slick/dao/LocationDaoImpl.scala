@@ -19,7 +19,7 @@ class LocationDaoImpl(override val db: Database) extends CrudDaoImpl[Location] w
   //
   // crud IO operations
   //
-  override protected val singleCreateIO: Location => DBIO[Int]                = location => tableQuery += location
+  override protected val singleCreateIO: Location => DBIO[Int] = location => tableQuery += location
 
   override protected val multipleCreateIO: Seq[Location] => DBIO[Option[Int]] = locations => tableQuery ++= locations
 
@@ -69,19 +69,19 @@ object LocationDaoImpl {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "locations") {
 
-    val id                   = column[String]("id", O.PrimaryKey) // This is the primary key column
+    val id = column[String]("id", O.PrimaryKey) // This is the primary key column
 
-    val version              = column[Int]("version")
+    val version = column[Int]("version")
 
-    val locationName         = column[String]("location_name")
+    val locationName = column[String]("location_name")
 
     val locationAbbreviation = column[String]("location_abbreviation")
 
-    val countryID            = column[String]("country_id")
+    val countryID = column[String]("country_id")
 
-    val createDate           = column[Timestamp]("create_date")
+    val createDate = column[Timestamp]("create_date")
 
-    val updateDate           = column[Option[Timestamp]]("update_date")
+    val updateDate = column[Option[Timestamp]]("update_date")
 
     // Every table needs a * projection with the same type as the table's type parameter
     override def * =

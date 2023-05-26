@@ -34,7 +34,7 @@ class TestRunnerSpec extends AnyFunSpec with TestRunner[String] with Matchers {
   //
   private val testFailure: Try[Assertion] = Try(1 + 1 shouldBe 3)
 
-  private val testRunException            = new IllegalStateException("test was run when should not have been")
+  private val testRunException = new IllegalStateException("test was run when should not have been")
 
   private val testNotRun: String => Try[Assertion] = s => {
     logger.error(s"test not run in  $s")

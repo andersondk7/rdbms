@@ -39,8 +39,8 @@ object Generator {
 
   private val allowedCharacters: Seq[Char] = ('a' to 'z') ++ ('A' to 'Z') ++ Seq.fill(10)('_')
 
-  private val allowedCharactersSize        = allowedCharacters.size
+  private val allowedCharactersSize = allowedCharacters.size
 
-  private val random                       = new Random(42)
+  private val random = new Random(42)
 
 }

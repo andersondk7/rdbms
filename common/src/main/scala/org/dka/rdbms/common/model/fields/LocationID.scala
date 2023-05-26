@@ -14,6 +14,6 @@ object LocationID extends UUIDValidation[LocationID] {
 
   def fromOpt(opt: Option[String]): Option[LocationID] = opt.map(s => build(UUID.fromString(s)))
 
-  def build: LocationID                                = new LocationID(UUID.randomUUID())
+  def build: LocationID = new LocationID(UUID.randomUUID())
 
 }

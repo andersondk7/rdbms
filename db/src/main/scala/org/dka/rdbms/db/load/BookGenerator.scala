@@ -28,7 +28,7 @@ class BookGenerator(
     bulkLoadBook.insertLine(book)
   }
 
-  private val publisherSize           = publisherIds.size
+  private val publisherSize = publisherIds.size
 
   private def randomPublisherID: UUID = publisherIds(util.Random.nextInt(publisherSize))
 

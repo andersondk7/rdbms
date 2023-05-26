@@ -23,9 +23,9 @@ object AuthorsBooksDao {
       None, // schema is set at connection time rather than a compile time, see DBConfig notes
       "authors_books") {
 
-    val authorId    = column[String]("author_id")
+    val authorId = column[String]("author_id")
 
-    val bookId      = column[String]("book_id")
+    val bookId = column[String]("book_id")
 
     val authorOrder = column[Int]("author_order")
 

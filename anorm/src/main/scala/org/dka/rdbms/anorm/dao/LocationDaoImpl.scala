@@ -15,7 +15,7 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class LocationDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext)
+class LocationDaoImpl(override val dataSource: HikariDataSource, override val dbEx: ExecutionContext)
   extends CrudDaoImpl[Location]
     with LocationDao {
 
@@ -33,8 +33,8 @@ class LocationDaoImpl(override val dataSource: HikariDataSource, dbEx: Execution
       values ({id}, {version}, {locationName}, {locationAbbreviation}, {countryId}, {createDate})
       """
     ).on(
-      "id"                    -> location.id.value.toString,
-      "version"               -> location.version.value,
+      "id"                   -> location.id.value.toString,
+      "version"              -> location.version.value,
       "locationName"         -> location.locationName.value,
       "locationAbbreviation" -> location.locationAbbreviation.value,
       "countryId"            -> location.countryID.value.toString,
@@ -53,18 +53,17 @@ class LocationDaoImpl(override val dataSource: HikariDataSource, dbEx: Execution
       where id = {id}
   """)
       .on(
-        "version" -> location.version.value,
-        "locationName" -> location.locationName.value,
+        "version"              -> location.version.value,
+        "locationName"         -> location.locationName.value,
         "locationAbbreviation" -> location.locationAbbreviation.value,
-        "countryId" -> location.countryID.value.toString,
-        "lastUpdate" -> location.lastUpdate.map(_.value).orNull,
-        "id" -> location.id.value.toString
-
+        "countryId"            -> location.countryID.value.toString,
+        "lastUpdate"           -> location.lastUpdate.map(_.value).orNull,
+        "id"                   -> location.id.value.toString
       )
 
   //
   // parsers
-  ///
+  // /
   override protected def itemParser: RowParser[Location] =
     getID ~ getVersion ~ getLocationName ~ getLocationAbbreviation ~ getCountryId ~ getCreateDate ~ getUpdateDate map {
       case id ~ v ~ ln ~ la ~ ci ~ cd ~ ud =>

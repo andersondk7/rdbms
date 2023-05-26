@@ -15,7 +15,9 @@ import java.util.UUID
 import scala.util.Try
 import scala.concurrent.{ExecutionContext, Future}
 
-class PublisherDaoImpl(override val dataSource: HikariDataSource, dbEx: ExecutionContext) extends CrudDaoImpl[Publisher] with PublisherDao {
+class PublisherDaoImpl(override val dataSource: HikariDataSource, override val dbEx: ExecutionContext)
+  extends CrudDaoImpl[Publisher]
+    with PublisherDao {
 
   import PublisherDaoImpl.*
 
@@ -25,22 +27,20 @@ class PublisherDaoImpl(override val dataSource: HikariDataSource, dbEx: Executio
   // queries
   //
   override protected def insertQ(publisher: Publisher): SimpleSql[Row] =
-    SQL(
-      """
+    SQL("""
       insert into publishers (id, version, publisher_name, location_id, website, create_date)
       values ({id}, {version}, {publisherName}, {locationId}, {website}, {createDate})
       """)
       .on(
-        "id"             -> publisher.id.value.toString,
-        "version"        -> publisher.version.value,
+        "id"            -> publisher.id.value.toString,
+        "version"       -> publisher.version.value,
         "publisherName" -> publisher.publisherName.value,
         "locationId"    -> publisher.locationId.map(_.value.toString).orNull,
-        "website"        -> publisher.webSite.map(_.value).orNull,
+        "website"       -> publisher.webSite.map(_.value).orNull,
         "createDate"    -> publisher.createDate.asTimestamp
       )
 
-  override protected def updateQ(publisher: Publisher): SimpleSql[Row] = {
-
+  override protected def updateQ(publisher: Publisher): SimpleSql[Row] =
     SQL("""
           update publishers
            set 
@@ -52,15 +52,13 @@ class PublisherDaoImpl(override val dataSource: HikariDataSource, dbEx: Executio
           where id = {id}
    """)
       .on(
-        "version" -> publisher.version.value,
+        "version"       -> publisher.version.value,
         "publisherName" -> publisher.publisherName.value,
-        "locationId" -> publisher.locationId.map(_.value.toString).orNull,
-        "website" -> publisher.webSite.map(_.value).orNull,
-        "lastUpdate" -> publisher.lastUpdate.map(_.value).orNull,
-        "id" -> publisher.id.value.toString
-
+        "locationId"    -> publisher.locationId.map(_.value.toString).orNull,
+        "website"       -> publisher.webSite.map(_.value).orNull,
+        "lastUpdate"    -> publisher.lastUpdate.map(_.value).orNull,
+        "id"            -> publisher.id.value.toString
       )
-  }
 
   //
   // parsers
@@ -99,6 +97,6 @@ object PublisherDaoImpl {
 
   def getPublisherName: RowParser[PublisherName] = get[String](PublisherName.fieldName).map(PublisherName.build)
 
-  def getWebsite: RowParser[Option[WebSite]]     = get[Option[String]](WebSite.fieldName).map(WebSite.fromOpt)
+  def getWebsite: RowParser[Option[WebSite]] = get[Option[String]](WebSite.fieldName).map(WebSite.fromOpt)
 
 }

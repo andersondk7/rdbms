@@ -37,7 +37,7 @@ final case class TooLongException(itemName: String, maxLength: Int) extends Vali
 
 final case class InvalidIDException(itemName: String, input: String, cause: Throwable) extends ValidationException {
 
-  override val reason              = s"$itemName was $input, which is not a valid UUID because $cause"
+  override val reason = s"$itemName was $input, which is not a valid UUID because $cause"
 
   override def getCause: Throwable = cause
 
@@ -45,7 +45,7 @@ final case class InvalidIDException(itemName: String, input: String, cause: Thro
 
 final case class InvalidDateException(itemName: String, cause: Throwable) extends ValidationException {
 
-  override val reason              = s"$itemName was not in format YYYY-MM-DD"
+  override val reason = s"$itemName was not in format YYYY-MM-DD"
 
   override def getCause: Throwable = cause
 
@@ -53,7 +53,7 @@ final case class InvalidDateException(itemName: String, cause: Throwable) extend
 
 final case class InvalidNumberException(itemName: String, input: String, cause: Throwable) extends ValidationException {
 
-  override val reason              = s"$itemName was $input which is not a valid number"
+  override val reason = s"$itemName was $input which is not a valid number"
 
   override def getCause: Throwable = cause
 

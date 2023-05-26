@@ -16,15 +16,15 @@ import scala.util.{Failure, Try} // must be kept even though intellij thinks it 
  */
 class DaoFactory(val database: Database) {
 
-  val countryDao: CountryDaoImpl        = new CountryDaoImpl(database)
+  val countryDao: CountryDaoImpl = new CountryDaoImpl(database)
 
-  val locationDao: LocationDaoImpl      = new LocationDaoImpl(database)
+  val locationDao: LocationDaoImpl = new LocationDaoImpl(database)
 
-  val authorDao: AuthorDaoImpl          = new AuthorDaoImpl(database)
+  val authorDao: AuthorDaoImpl = new AuthorDaoImpl(database)
 
-  val publisherDao: PublisherDaoImpl    = new PublisherDaoImpl(database)
+  val publisherDao: PublisherDaoImpl = new PublisherDaoImpl(database)
 
-  val bookDao: BookDaoImpl              = new BookDaoImpl(database)
+  val bookDao: BookDaoImpl = new BookDaoImpl(database)
 
   val authorsTitlesDao: AuthorsBooksDao = new AuthorsBooksDao(database)
 

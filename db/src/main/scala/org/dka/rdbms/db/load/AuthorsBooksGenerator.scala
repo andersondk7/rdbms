@@ -33,7 +33,7 @@ class AuthorsBooksGenerator(
     .inclusive(1, 4)
     .map(i => AuthorBookRelationship(ID.build(randomAuthorId), ID.build(bookId), i))
 
-  private val authorIdsSize        = authorIds.size
+  private val authorIdsSize = authorIds.size
 
   private def randomAuthorId: UUID = authorIds(util.Random.nextInt(authorIdsSize))
 
