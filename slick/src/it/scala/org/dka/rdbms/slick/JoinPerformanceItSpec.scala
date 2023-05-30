@@ -6,7 +6,7 @@ import org.dka.rdbms.common.config._
 import org.dka.rdbms.common.dao.BookDao
 import org.dka.rdbms.common.model.fields.ID
 import org.dka.rdbms.common.model.query.BookAuthorSummary
-import org.dka.rdbms.slick.dao.{BookDaoImpl, DaoFactory, DaoFactoryBuilder}
+import org.dka.rdbms.slick.dao.{BookDaoImpl, DaoFactory, DaoFactory}
 import org.scalatest.{Outcome, ScalaTestVersion}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -145,7 +145,7 @@ class JoinPerformanceItSpec extends AnyFunSpec with Matchers {
     }
   }
 
-  private val factoryBuilder = DaoFactoryBuilder.configure
+  private val factoryBuilder = DaoFactory.configure
 
   private def withFactory(testCode: DaoFactory => Any): Unit =
     factoryBuilder match {

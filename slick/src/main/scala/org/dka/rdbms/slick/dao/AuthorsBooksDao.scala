@@ -8,10 +8,7 @@ import slick.lifted.TableQuery
 import java.util.UUID
 import scala.language.implicitConversions
 
-class AuthorsBooksDao(val db: Database) {
-//  import AuthorsTitlesDao._
-
-}
+class AuthorsBooksDao(val db: Database) {}
 
 object AuthorsBooksDao {
 

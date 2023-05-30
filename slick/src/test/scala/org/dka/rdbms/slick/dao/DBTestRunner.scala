@@ -11,7 +11,7 @@ import scala.util.{Success, Try}
 
 trait DBTestRunner extends TestRunner[DaoFactory] {
 
-  private val factoryBuilder: ConfigErrorsOr[DaoFactory] = DaoFactoryBuilder.configure
+  private val factoryBuilder: ConfigErrorsOr[DaoFactory] = DaoFactory.configure
 
   val noSetup: DaoFactory => Try[Unit] = _ => Success()
 
