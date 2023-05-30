@@ -37,8 +37,7 @@ class DaoFactory(val database: Database) {
  *
  * This builder is expected to be called by the client of the library (which could be tests or an application)
  */
-//        .map(errors => ConfigurationException(errors.toList.map(f => f.toString)))
-object DaoFactoryBuilder {
+object DaoFactory {
 
   private val logger = Logger(getClass.getName)
 
