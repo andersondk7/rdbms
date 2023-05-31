@@ -1,4 +1,4 @@
-import Dependencies.*
+import Dependencies._
 import commandmatrix._
 
 lazy val scala213 = "2.13.10"
@@ -36,7 +36,6 @@ lazy val common = (projectMatrix in file("common"))
   )
   .jvmPlatform(scalaVersions = supportedScalaVersions)
 
-
 lazy val anorm = (projectMatrix in file("anorm"))
   .configs(IntegrationTest)
   .settings(
@@ -68,10 +67,28 @@ lazy val slick = (projectMatrix in file("slick"))
   .dependsOn(common)
   .jvmPlatform(scalaVersions = Seq(scala213))
 
+lazy val zio = (projectMatrix in file("zio"))
+  .configs(IntegrationTest)
+  .enablePlugins(JavaAppPackaging)
+//  .settings(BuildHelper.stdSettings)
+  .settings(
+    name := "zio",
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
+    libraryDependencies ++= zioDependencies,
+    Defaults.itSettings
+  )
+  .dependsOn(common, db)
+  .jvmPlatform(scalaVersions = Seq(scala322))
+
 lazy val rdbms = project
   .in(file("."))
   .configs(IntegrationTest)
-  .aggregate(common.projectRefs ++ anorm.projectRefs ++ db.projectRefs ++ slick.projectRefs: _*)
+  .aggregate(
+    common.projectRefs ++
+      anorm.projectRefs ++
+      db.projectRefs ++
+      zio.projectRefs ++
+      slick.projectRefs: _*)
   .settings(
     Defaults.itSettings
   )
