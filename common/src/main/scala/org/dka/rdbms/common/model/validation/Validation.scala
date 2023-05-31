@@ -9,14 +9,14 @@ import org.dka.rdbms.common.model.validation.Validation._
 import scala.language.implicitConversions
 
 /**
- * @tparam I
- *   source type of data
  * @tparam S
- *   type of data held in the item
+ *   source type of data
+ * @tparam D
+ *   type of data held in the type 'T'
  * @tparam T
- *   item from source type
+ *   valid type created from 'S'
  */
-trait Validation[I, S, T <: Field[S]] {
+trait Validation[S, D, T <: Field[D]] {
 
   val fieldName: String
 
@@ -26,20 +26,20 @@ trait Validation[I, S, T <: Field[S]] {
    * @return
    *   Item holding the data
    */
-  def build(data: S): T
+  def build(data: D): T
 
-  def build(o: Option[S]): Option[T] = o.map(build)
+  def build(o: Option[D]): Option[T] = o.map(build)
 
-  def apply(s: I): ValidationErrorsOr[T] = validate(s)
+  def apply(s: S): ValidationErrorsOr[T] = validate(s)
 
-  def apply(o: Option[I]): ValidationErrorsOr[Option[T]] = validateOption(o)
+  def apply(o: Option[S]): ValidationErrorsOr[Option[T]] = validateOption(o)
 
   /**
    * validate the input intended to be overridden to add specific validations
    */
-  def validate(input: I): ValidationErrorsOr[T]
+  def validate(input: S): ValidationErrorsOr[T]
 
-  private def validateOption(o: Option[I]): ValidationErrorsOr[Option[T]] = o match {
+  private def validateOption(o: Option[S]): ValidationErrorsOr[Option[T]] = o match {
     case None => Valid(None)
     case Some(s) =>
       val validated = validate(s)
