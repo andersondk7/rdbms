@@ -85,10 +85,11 @@ lazy val rdbms = project
   .configs(IntegrationTest)
   .aggregate(
     common.projectRefs ++
-      anorm.projectRefs ++
+//      anorm.projectRefs ++
       db.projectRefs ++
-      zio.projectRefs ++
-      slick.projectRefs: _*)
+//      slick.projectRefs ++
+      zio.projectRefs
+: _*)
   .settings(
     Defaults.itSettings
   )
